@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.hero-bg{
+    background-image: linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0.1)), url("https://res.cloudinary.com/dnv7bjvth/image/upload/v1736841888/892ddbe9-a03d-4ff9-9c2a-c2915a2851e6.png");
+}
+
+.approve-bg{
+    background-image: linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0.1)), url("https://alea.tok-md.com/argazkiak/UJE/netflix-image.jpg");
+}
