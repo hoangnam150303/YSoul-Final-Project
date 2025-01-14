@@ -7,8 +7,6 @@ import { ApproveAccount } from './pages/GeneralPages/ApproveAccount'
 
 
 function App() {
-
-
   return (
    <Routes>
     <Route path="/" element={<MovieHomePage />}></Route>
