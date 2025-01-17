@@ -37,7 +37,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
       icon: <HeartOutlined className="text-2xl" />,
       path: `/favouriteMovie`,
     },
-    {
+    { 
       title: "Music",
       icon: <MutedOutlined className="text-2xl" />,
       path: ``,
