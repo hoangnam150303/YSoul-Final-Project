@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:5.0.15
+    container_name: ysoul_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    ports:
+      - "27019:27017"
+    volumes:
+      - ysoul_mongo_data:/data/db
+
+  postgres:
+    image: postgres:15
+    container_name: ysoul_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: ysoul_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ysoul_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  ysoul_mongo_data:
+  ysoul_postgres_data:

@@ -1,15 +1,48 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import userApi from "../../hooks/useUser";
+import { message } from "antd";
+import constants from "../../constants/contants";
 export const SignUpPage = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [username, setUsername] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
-    const handleSignUp = (e) => {
-        e.preventDefault();
+  const onSuccess = async (data) => {
+    try {
+      console.log(data);
+      if (data.success) {
+        message.success("OTP sent to your email.");
+        localStorage.setItem(constants.VERIFY_TOKEN, data.verifyToken);
+        navigate("/approve");
+      } else {
+        message.error("login falied");
+      }
+    } catch (error) {
+      message.error("Lỗi đăng nhập.");
+      console.log(error, "error");
+    }
+  };
+
+  const handleSignUp = async (event) => {
+    event.preventDefault(); // Ngăn chặn hành vi tải lại trang mặc định
+    const value = {
+      email,
+      name,
+      password,
+      confirmPassword,
     };
+
+    try {
+      const response = await userApi.postRegister(value);
+      onSuccess(response.data);
+    } catch (error) {
+      console.error("Error during sign-up:", error);
+    }
+  };
+
   return (
     <div className="h-screen w-full hero-bg">
       <header className="max-w-6x1 max-auto flex items-center justify-between p-4">
@@ -56,8 +89,8 @@ export const SignUpPage = () => {
                 type="text"
                 className="w-full px-3 py-2 mt-1 border border-gray-700 rounded-md bg-transparent text-white focus:outline-none focus:ring"
                 placeholder="johnDoe"
-                id="username"
-                value={username}
+                id="name"
+                value={name}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
@@ -96,13 +129,16 @@ export const SignUpPage = () => {
               />
             </div>
 
-            <button className="w-full py-2 bg-cyan-600 text-white font-semibold rounded-md hover:bg-cyan-800">
-                Sign Up
+            <button className="w-full py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-800">
+              Sign Up
             </button>
           </form>
-            <div className="text-center text-gray-400">
-                Already a member? <Link to="/login" className="text-cyan-600">Login</Link>
-            </div>
+          <div className="text-center text-gray-400">
+            Already a member?{" "}
+            <Link to="/login" className="text-red-600">
+              Login
+            </Link>
+          </div>
         </div>
       </div>
     </div>
