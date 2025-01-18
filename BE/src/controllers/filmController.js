@@ -1,4 +1,6 @@
 const filmService = require("../services/filmService");
+
+// this function is for admin, admin can create new film
 exports.createFilm = async (req, res) => {
   try {
     const {
@@ -64,6 +66,7 @@ exports.createFilm = async (req, res) => {
   }
 };
 
+// this function can use in many situation, search film, sort film, get all film and Front end can use this function many time with many page.
 exports.getAllFilm = async (req, res) => {
   try {
     const { page, limit, typeFilm, category, sort } = req.query;
@@ -86,4 +89,48 @@ exports.getAllFilm = async (req, res) => {
       data: response.data,
     });
   } catch (error) {}
+};
+
+// this function will get film by id, it will use when user click to the film and it will display information of that film
+exports.getFilmById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await filmService.getFilmByIdService(id);
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error get film",
+      });
+    }
+    return res.status(200).json({
+      response,
+      success: true,
+    });
+  } catch (error) {}
+};
+
+// this function is for admin, admin can delete film 
+exports.deleteFilmById = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+};
+
+// this function is for admin, admin can update information of film
+exports.updateFilmById = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    
+  }
+};
+
+// this funtion will update film when user play video or click to the film, get that film into favourite list.
+exports.updateStatusFilmById = async (req, res) => {
+  try {
+    
+  } catch (error) {
+    
+  }
 };

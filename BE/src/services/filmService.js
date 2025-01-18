@@ -66,7 +66,6 @@ exports.createFilmService = async (
 exports.getAllFilmService = async (page, limit, typeFilm, category, sort) => {
   try {
     let films = [];
-    console.log(page, limit, typeFilm, category, sort);
     let sortOption = {};
     switch (sort) {
       case "Trending":
@@ -101,8 +100,15 @@ exports.getAllFilmService = async (page, limit, typeFilm, category, sort) => {
         .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
+    } else {
+      films = await Film.find({
+        genre: category,
+      })
+        .sort(sortOption)
+        .skip((page - 1) * limit)
+        .limit(limit);
     }
-
+    console.log(films);
     const total = await Film.countDocuments({ films });
     return {
       success: true,
@@ -116,3 +122,33 @@ exports.getAllFilmService = async (page, limit, typeFilm, category, sort) => {
     return { success: false, error: error.message };
   }
 };
+
+exports.getFilmByIdService = async (filmId) => {
+  try {
+    const film = await Film.findById(filmId);
+    if (!film) {
+      throw new Error("Film not found");
+    }
+    return { success: true, data: film };
+  } catch (error) {
+    console.error("Error getting film by ID:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+exports.deleteFilmByIdService = async (filmId) => {
+  try {
+    const film = await Film.findByIdAndDelete(filmId);
+    if (!film) {
+      throw new Error("Film not found");
+    }
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting film by ID:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+exports.updateFilmByIdService =  async (filmId, data) => {}
+
+exports.updateStatusFilmByIdSerive = async (filmId, data) => {}

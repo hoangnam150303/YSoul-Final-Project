@@ -65,6 +65,7 @@ const filmSchema = new mongoose.Schema(
     views: {
       type: Number,
     },
+    rangeUser: [{ type: String }],
   },
   {
     timestamps: true,

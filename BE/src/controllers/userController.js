@@ -1,6 +1,8 @@
 const { conectPostgresDb } = require("../configs/database");
 const jwt = require("jsonwebtoken");
 const userService = require("../services/userService");
+
+// this function is  login with google, user can login or register account with google account
 exports.loginGoogle = async (req, res) => {
   try {
     const { user } = req;
@@ -21,6 +23,7 @@ exports.loginGoogle = async (req, res) => {
   }
 };
 
+// this function is register account with email, password and user name.
 exports.register = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
@@ -52,6 +55,7 @@ exports.register = async (req, res) => {
   }
 };
 
+// After register account, user will get an otp number, use that number to verify account and user can use that account to enjoy website
 exports.verify = async (req, res) => {
   try {
     const { verifyToken, otp } = req.body;
@@ -73,6 +77,7 @@ exports.verify = async (req, res) => {
   }
 };
 
+// this function is login account with email and password
 exports.loginLocal = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,7 +96,7 @@ exports.loginLocal = async (req, res) => {
   } catch (error) {}
 };
 
-
+// this function is get user information
 exports.getUser = async (req, res) => {
   try {
     const user = await conectPostgresDb.query(
@@ -107,3 +112,5 @@ exports.getUser = async (req, res) => {
     return res.status(401).json({ message: "Error! Please try again.", error });
   }
 };
+
+exports.forgotPassword = async (req, res) => {};
