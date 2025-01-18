@@ -1,0 +1,76 @@
+const mongoose = require("mongoose");
+
+const filmSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    small_image: {
+      type: String,
+      required: true,
+    },
+    large_image: {
+      type: String,
+      required: true,
+    },
+    trailer: {
+      type: String,
+    },
+    movie: {
+      type: String,
+    },
+    cast: [{ type: String, required: true }],
+    director: {
+      type: String,
+      required: true,
+    },
+    genre: {
+      type: String,
+      required: true,
+    },
+    releaseYear: {
+      type: Date,
+      required: true,
+    },
+    rating: {
+      type: Number,
+    },
+    countRating: {
+      type: Number,
+    },
+    countClick: {
+      type: Number,
+    },
+    episodes: [
+      {
+        numberTitle: {
+          type: Number,
+        },
+        video: {
+          type: String,
+        },
+        ratingEpisode: {
+          type: Number,
+        },
+        numberRating: {
+          type: Number,
+        },
+      },
+    ],
+    views: {
+      type: Number,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Film = mongoose.model("Film", filmSchema);
+
+module.exports = Film;
