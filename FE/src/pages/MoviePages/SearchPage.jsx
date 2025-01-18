@@ -14,8 +14,7 @@ export const SearchPage = () => {
   useEffect(() => {
     handleSearch();
   });
-  const handleSearch = () => {
-  };
+  const handleSearch = () => {};
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -135,7 +134,7 @@ export const SearchPage = () => {
             ))}
         </div>
       </div>
-      <Pagination align="end" defaultCurrent={1} total={50} />;
+      <Pagination align="end" defaultCurrent={1} total={10000} />;
     </div>
   );
 };

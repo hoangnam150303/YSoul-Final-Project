@@ -7,6 +7,7 @@ const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoutes");
+const filmRoute = require("./routes/filmRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -33,6 +34,7 @@ app.use(cors(corsConfig));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", userRoute);
+app.use("/film", filmRoute);
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
