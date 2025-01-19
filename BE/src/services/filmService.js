@@ -16,7 +16,6 @@ exports.createFilmService = async (
 ) => {
   try {
     let film;
-    console.log(small_image, large_image);
     if (numberTitle && video) {
       // Nếu có `numberTitle` và `video`, tạo với episodes
       film = await Film.create({
@@ -29,6 +28,7 @@ exports.createFilmService = async (
         director,
         genre,
         releaseYear,
+        isDeleted: true,
         episodes: [
           {
             numberTitle: Number(numberTitle),
@@ -48,6 +48,7 @@ exports.createFilmService = async (
         cast,
         director,
         genre,
+        isDeleted: true,
         releaseYear,
       });
     }
@@ -63,7 +64,14 @@ exports.createFilmService = async (
   }
 };
 
-exports.getAllFilmService = async (page, limit, typeFilm, category, sort) => {
+exports.getAllFilmService = async (
+  page,
+  limit,
+  type,
+  category,
+  sort,
+  search
+) => {
   try {
     let films = [];
     let sortOption = {};
@@ -84,31 +92,46 @@ exports.getAllFilmService = async (page, limit, typeFilm, category, sort) => {
         sortOption = {};
         break;
     }
-    if (typeFilm === "Movie") {
+
+    if (type === "Movie") {
       films = await Film.find({
         episodes: { $exists: true, $size: 0 },
         genre: category,
+        isDeleted: false,
+        ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
-    } else if (typeFilm === "TV Shows") {
+    } else if (type === "TV Shows") {
       films = await Film.find({
         episodes: { $exists: true, $not: { $size: 0 } },
         genre: category,
+        isDeleted: false,
+        ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
-    } else {
+    } else if (type === "All") {
       films = await Film.find({
         genre: category,
+        isDeleted: false,
+        ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
         .skip((page - 1) * limit)
         .limit(limit);
+    } else if (type === "Person") {
+      films = await Film.find({
+        isDeleted: false,
+        ...(search && { cast: { $regex: search, $options: "i" } }),
+      }).sort(sortOption);
+    } else {
+      films = await Film.find({
+        isDeleted: false,
+      }).sort(sortOption);
     }
-    console.log(films);
     const total = await Film.countDocuments({ films });
     return {
       success: true,
@@ -136,12 +159,16 @@ exports.getFilmByIdService = async (filmId) => {
   }
 };
 
-exports.deleteFilmByIdService = async (filmId) => {
+exports.activeOrDeactiveFilmByIdService = async (filmId) => {
   try {
-    const film = await Film.findByIdAndDelete(filmId);
+    const film = await Film.findById(filmId);
     if (!film) {
       throw new Error("Film not found");
     }
+    await Film.findByIdAndUpdate(filmId, {
+      isDeleted: !film.isDeleted,
+    });
+
     return { success: true };
   } catch (error) {
     console.error("Error deleting film by ID:", error.message);
@@ -149,6 +176,69 @@ exports.deleteFilmByIdService = async (filmId) => {
   }
 };
 
-exports.updateFilmByIdService =  async (filmId, data) => {}
+exports.updateFilmByIdService = async (
+  filmId,
+  name,
+  description,
+  small_image,
+  large_image,
+  trailer,
+  movie,
+  cast,
+  director,
+  genre,
+  releaseYear,
+  numberTitle = null,
+  video = null
+) => {
+  try {
+    const film = await Film.findById(filmId);
+    if (!film) {
+      throw new Error("Film not found");
+    }
+    let filmUpdate = "";
+    if (numberTitle && video) {
+      filmUpdate = await Film.findByIdAndUpdate(
+        filmId,
+        {
+          name,
+          description,
+          small_image,
+          large_image,
+          trailer,
+          cast,
+          director,
+          genre,
+          releaseYear,
+          episodes: [
+            {
+              numberTitle: Number(numberTitle),
+              video,
+            },
+          ],
+        },
+        { new: true }
+      );
+    } else {
+      filmUpdate = await Film.findByIdAndUpdate(
+        filmId,
+        {
+          name,
+          description,
+          small_image,
+          large_image,
+          trailer,
+          movie,
+          cast,
+          director,
+          genre,
+          releaseYear,
+        },
+        { new: true }
+      );
+    }
+    return { success: true };
+  } catch (error) {}
+};
 
-exports.updateStatusFilmByIdSerive = async (filmId, data) => {}
+exports.updateStatusFilmByIdSerive = async (filmId, data) => {};

@@ -107,6 +107,7 @@ exports.getUser = async (req, res) => {
       id: user.rows[0].id,
       name: user.rows[0].name,
       role: user.rows[0].role,
+      vip: user.rows[0].vip,
     });
   } catch (error) {
     return res.status(401).json({ message: "Error! Please try again.", error });

@@ -66,6 +66,10 @@ const filmSchema = new mongoose.Schema(
       type: Number,
     },
     rangeUser: [{ type: String }],
+    isDeleted: { type: Boolean },
+    age: {
+      type: String,
+    },
   },
   {
     timestamps: true,
