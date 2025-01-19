@@ -134,7 +134,7 @@ export const SearchPage = () => {
             ))}
         </div>
       </div>
-      <Pagination align="end" defaultCurrent={1} total={10000} />;
+      <Pagination align="end" defaultCurrent={1} total={100} />;
     </div>
   );
 };

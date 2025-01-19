@@ -1,15 +1,18 @@
-import {
-  LeftOutlined,
-  RightCircleOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { RightCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import filmApi from "../../../hooks/filmApi";
 
 export const MovieSlider = ({ category }) => {
-  const sliderRef = useRef(null);
   const [moviesToShow, setMoviesToShow] = useState(5); // Số phim hiển thị mặc định
+  const [movies, setMovies] = useState([]);
+  const fetchMovie = async () => {
+    const response = await filmApi.getAllFilm({
+      sort: category,
+    });
 
+    setMovies(response.data.data);
+  };
   // Hàm để tính toán số phim dựa trên kích thước màn hình
   const updateMoviesToShow = () => {
     if (window.innerWidth >= 1280) {
@@ -23,10 +26,10 @@ export const MovieSlider = ({ category }) => {
 
   useEffect(() => {
     updateMoviesToShow(); // Cập nhật khi component được render lần đầu
+    fetchMovie();
 
     // Lắng nghe sự thay đổi kích thước màn hình
     window.addEventListener("resize", updateMoviesToShow);
-
     // Xóa sự kiện khi component bị unmount
     return () => {
       window.removeEventListener("resize", updateMoviesToShow);
@@ -42,26 +45,22 @@ export const MovieSlider = ({ category }) => {
         </Link>
       </div>
 
-      <div
-        className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth w-screen"
-        ref={sliderRef}
-      >
-        {Array(moviesToShow)
-          .fill("")
-          .map((_, index) => (
+      <div className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth w-screen">
+        {movies.length > 0 &&
+          movies.slice(0, moviesToShow).map((movie) => (
             <Link
-              key={index}
-              to={`/`}
+              key={movie._id}
+              to={`/watchPage/${movie._id}`}
               className="min-w-[275px] flex-shrink-0 relative group"
             >
               <div className="rounded-lg overflow-hidden">
                 <img
-                  src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736953120/strangerthings_s3_fdp4gm.jpg"
+                  src={movie.small_image}
                   alt="small_image"
                   className="transition-transform duration-300 ease-in-out group-hover:scale-125"
                 />
               </div>
-              <p className="mt-2 text-center">Stranger Things {index + 1}</p>
+              <p className="mt-2 text-center">{movie.name}</p>
             </Link>
           ))}
       </div>

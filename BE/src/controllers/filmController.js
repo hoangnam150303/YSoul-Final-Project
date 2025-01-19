@@ -69,14 +69,14 @@ exports.createFilm = async (req, res) => {
 // this function can use in many situation, search film, sort film, get all film and Front end can use this function many time with many page.
 exports.getAllFilm = async (req, res) => {
   try {
-    const { page, limit, typeFilm, category, sort } = req.query;
-    console.log(page, limit, typeFilm, category, sort);
+    const { page, limit, typeFilm, category, sort, search } = req.query;
     const response = await filmService.getAllFilmService(
       page,
       limit,
       typeFilm,
       category,
-      sort
+      sort,
+      search
     );
     if (!response.success) {
       return res.status(400).json({
@@ -102,35 +102,100 @@ exports.getFilmById = async (req, res) => {
       });
     }
     return res.status(200).json({
+      data: response.data,
+      success: true,
+    });
+  } catch (error) {}
+};
+
+// this function is for admin, admin can delete film
+exports.activeOrDeactiveFilmById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await filmService.activeOrDeactiveFilmByIdService(id);
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error delete film",
+      });
+    }
+    return res.status(200).json({
       response,
       success: true,
     });
   } catch (error) {}
 };
 
-// this function is for admin, admin can delete film 
-exports.deleteFilmById = async (req, res) => {
-  try {
-    
-  } catch (error) {
-    
-  }
-};
-
 // this function is for admin, admin can update information of film
 exports.updateFilmById = async (req, res) => {
   try {
-    
-  } catch (error) {
-    
+    const {
+      name,
+      description,
+      trailer,
+      cast,
+      director,
+      genre,
+      releaseYear,
+      numberTitle,
+      episode,
+    } = req.body;
+    const { id } = req.params;
+
+    const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
+    const largeImage = req.files?.large_image?.[0]?.path;
+    const movieFile = req.files?.movie?.[0]?.path;
+    let response;
+    if (episode) {
+      // Nếu có episode (phim nhiều tập)
+      response = await filmService.updateFilmByIdService(
+        id,
+        name,
+        description,
+        smallImage,
+        largeImage,
+        trailer,
+        null, // Không truyền movie khi tạo episodes
+        cast,
+        director,
+        genre,
+        releaseYear,
+        numberTitle,
+        movieFile // Truyền video (tập)
+      );
+    } else {
+      // Nếu là phim đơn lẻ
+      response = await filmService.updateFilmByIdService(
+        id,
+        name,
+        description,
+        smallImage,
+        largeImage,
+        trailer,
+        movieFile, // Truyền file phim
+        cast,
+        director,
+        genre,
+        releaseYear
+      );
+    }
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error creating film",
+        error: response.error,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Film updated successfully",
+    });
+  } catch (err) {
+    console.error("Error in createFilm controller:", err.message);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 // this funtion will update film when user play video or click to the film, get that film into favourite list.
 exports.updateStatusFilmById = async (req, res) => {
   try {
-    
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 };

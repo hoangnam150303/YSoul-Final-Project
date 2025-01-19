@@ -17,7 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage />}></Route>
         <Route path="/signup" element={<SignUpPage />}></Route>
         <Route path="/approve" element={<ApproveAccount />}></Route>
-        <Route path="/watchPage" element={<WatchPage />}></Route>
+        <Route path="/watchPage/:movieId" element={<WatchPage />}></Route>
         <Route path="/search" element={<SearchPage />}></Route>
         <Route path="/*" element={<NotFoundPage />}></Route>
         <Route path="/favouriteMovie" element={<FavouriteMoviePage />}></Route>

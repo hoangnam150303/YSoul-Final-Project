@@ -34,7 +34,7 @@ const filmSchema = new mongoose.Schema(
       required: true,
     },
     releaseYear: {
-      type: Date,
+      type: String,
       required: true,
     },
     rating: {
@@ -66,6 +66,10 @@ const filmSchema = new mongoose.Schema(
       type: Number,
     },
     rangeUser: [{ type: String }],
+    isDeleted: { type: Boolean },
+    age: {
+      type: String,
+    },
   },
   {
     timestamps: true,

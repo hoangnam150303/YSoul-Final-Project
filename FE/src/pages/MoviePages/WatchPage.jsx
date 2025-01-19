@@ -1,23 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { MovieSideBar } from "../../components/SideBar/MovieSideBar";
 import {
   CaretLeftFilled,
   CommentOutlined,
   HeartFilled,
-  HeartOutlined,
-  LeftOutlined,
-  RightOutlined,
   ShareAltOutlined,
 } from "@ant-design/icons";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
-import { Rate } from "antd";
+import { Pagination, Rate } from "antd";
+import filmApi from "../../hooks/filmApi";
 export const WatchPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const navigate = useNavigate();
-
+  const [film, setFilm] = useState([]);
+  const [isMovie, setIsMovie] = useState(true);
+  const [episodes, setEpisodes] = useState([]);
+  const movieId = useParams().movieId;
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -25,6 +28,22 @@ export const WatchPage = () => {
   const backHome = () => {
     navigate(`/`);
   };
+  const fetchFilm = async (id) => {
+    const respone = await filmApi.getFilmById(id);
+    setFilm(respone.data.data);
+    if (respone.data.data?.episodes.length > 0) {
+      setIsMovie(false);
+      setEpisodes(respone.data.data.episodes);
+      setTotalPage(respone.data.data.episodes.length);
+    }
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setPage(pageNumber);
+  };
+  useEffect(() => {
+    fetchFilm(movieId);
+  }, [movieId]);
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -47,9 +66,7 @@ export const WatchPage = () => {
             width={"100%"}
             height={"70vh"}
             className="mx-auto overflow-hidden rounded-lg"
-            url={
-              "https://res.cloudinary.com/dnv7bjvth/video/upload/v1737041935/Big_Video_1_vawwi8.mp4"
-            }
+            url={film?.movie || episodes[page - 1]?.video}
           />
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled
@@ -64,27 +81,35 @@ export const WatchPage = () => {
               style={{ fontSize: "24px", color: "red" }}
             />
           </div>
+          {!isMovie && (
+            <Pagination
+              align="end"
+              current={page}
+              onChange={handlePageChange}
+              total={totalPage}
+              showSizeChanger={false}
+              pageSize={1}
+            />
+          )}
         </div>
 
         {/* Movie Detail */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-20 max-w-6xl mx-auto">
           <div className="mb-4 md:mb-0">
-            <h2 className="text-5xl font-bold text-balance">Doraemon</h2>
+            <h2 className="text-5xl font-bold text-balance">
+              {!isMovie
+                ? film?.name + " espisode" + episodes[page - 1]?.numberTitle
+                : film?.name}
+            </h2>
 
             <p className="mt-2 text-lg">
-              <span>Jun 11, 2024 | </span>
-              <span className="text-green-600">PG-13</span>
+              <span>{film?.releaseYear}| </span>
+              <span className="text-green-600">{film?.age}</span>
             </p>
-            <p className="mt-4 text-lg">
-              {" "}
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iste
-              vero nihil non minima, ratione nostrum fuga praesentium officia
-              expedita dignissimos. Possimus ducimus eveniet perferendis fugit,
-              explicabo tenetur quod officiis sed.
-            </p>
+            <p className="mt-4 text-lg"> {film?.description}</p>
           </div>
           <img
-            src="https://www.shutterstock.com/image-photo/doraemon-600nw-2426094143.jpg"
+            src={film?.small_image}
             alt="POSTER"
             className="max-h[600px] rounded-md"
           />
