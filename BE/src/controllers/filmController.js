@@ -70,7 +70,6 @@ exports.createFilm = async (req, res) => {
 exports.getAllFilm = async (req, res) => {
   try {
     const { page, limit, typeFilm, category, sort, search } = req.query;
-    const userId = req.user._id;
     const response = await filmService.getAllFilmService(
       page,
       limit,
@@ -103,7 +102,7 @@ exports.getFilmById = async (req, res) => {
       });
     }
     return res.status(200).json({
-      response,
+      data: response.data,
       success: true,
     });
   } catch (error) {}

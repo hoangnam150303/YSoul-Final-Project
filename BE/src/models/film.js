@@ -34,7 +34,7 @@ const filmSchema = new mongoose.Schema(
       required: true,
     },
     releaseYear: {
-      type: Date,
+      type: String,
       required: true,
     },
     rating: {

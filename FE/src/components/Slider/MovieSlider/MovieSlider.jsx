@@ -1,22 +1,17 @@
-import {
-  LeftOutlined,
-  RightCircleOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
+import { RightCircleOutlined } from "@ant-design/icons";
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import filmApi from "../../../hooks/filmApi";
 
 export const MovieSlider = ({ category }) => {
-  const sliderRef = useRef(null);
   const [moviesToShow, setMoviesToShow] = useState(5); // Số phim hiển thị mặc định
   const [movies, setMovies] = useState([]);
   const fetchMovie = async () => {
-    const respone = await filmApi.getAllFilm({
+    const response = await filmApi.getAllFilm({
       sort: category,
     });
 
-    setMovies(respone.data.data);
+    setMovies(response.data.data);
   };
   // Hàm để tính toán số phim dựa trên kích thước màn hình
   const updateMoviesToShow = () => {
@@ -32,6 +27,7 @@ export const MovieSlider = ({ category }) => {
   useEffect(() => {
     updateMoviesToShow(); // Cập nhật khi component được render lần đầu
     fetchMovie();
+
     // Lắng nghe sự thay đổi kích thước màn hình
     window.addEventListener("resize", updateMoviesToShow);
     // Xóa sự kiện khi component bị unmount
@@ -49,15 +45,12 @@ export const MovieSlider = ({ category }) => {
         </Link>
       </div>
 
-      <div
-        className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth w-screen"
-        ref={sliderRef}
-      >
+      <div className="flex space-x-4 overflow-x-auto scrollbar-hide scroll-smooth w-screen">
         {movies.length > 0 &&
           movies.slice(0, moviesToShow).map((movie) => (
             <Link
               key={movie._id}
-              to={`/`}
+              to={`/watchPage/${movie._id}`}
               className="min-w-[275px] flex-shrink-0 relative group"
             >
               <div className="rounded-lg overflow-hidden">

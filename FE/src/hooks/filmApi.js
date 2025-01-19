@@ -13,5 +13,9 @@ const filmApi = {
     const url = `${FILM_API_ENDPOINT}/getAllFilm?${queryParams}`;
     return axiosClient.get(url);
   },
+  getFilmById: (id) => {
+    const url = `${FILM_API_ENDPOINT}/getFilmById/${id}`;
+    return axiosClient.get(url);
+  },
 };
 export default filmApi;
