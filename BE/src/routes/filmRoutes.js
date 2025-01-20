@@ -14,6 +14,7 @@ filmRoute.post(
   ]),
   filmController.createFilm
 );
+
 filmRoute.get("/getAllFilm", filmController.getAllFilm);
 filmRoute.get("/getFilmById/:id", filmController.getFilmById);
 filmRoute.put(
