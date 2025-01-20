@@ -16,6 +16,7 @@ filmRoute.post(
 );
 filmRoute.get("/getAllFilm", filmController.getAllFilm);
 filmRoute.get("/getFilmById/:id", filmController.getFilmById);
+
 filmRoute.put(
   "/updateFilmById/:id",
   auth.isAdmin,
