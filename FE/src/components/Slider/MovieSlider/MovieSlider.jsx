@@ -11,7 +11,7 @@ export const MovieSlider = ({ category }) => {
       sort: category,
     });
 
-    setMovies(response.data.data);
+    setMovies(response.data.data.data);
   };
   // Hàm để tính toán số phim dựa trên kích thước màn hình
   const updateMoviesToShow = () => {

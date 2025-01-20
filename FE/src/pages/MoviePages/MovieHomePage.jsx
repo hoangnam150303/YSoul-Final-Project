@@ -9,10 +9,10 @@ export const MovieHomePage = () => {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   const category = [
-    { id: 1, name: "Trending" },
+    { id: 1, name: "Newest" },
     { id: 2, name: "Top Rated" },
     { id: 3, name: "Popular" },
-    { id: 4, name: "Up Coming" },
+    { id: 4, name: "Trending" },
   ];
 
   const banners = [
