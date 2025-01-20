@@ -86,7 +86,7 @@ exports.getAllFilm = async (req, res) => {
     }
     return res.status(200).json({
       message: "Get all film successfully",
-      data: response.data,
+      data: response,
     });
   } catch (error) {}
 };

@@ -96,7 +96,7 @@ exports.getAllFilmService = async (
     if (type === "Movie") {
       films = await Film.find({
         episodes: { $exists: true, $size: 0 },
-        genre: category,
+        ...(category && { genre: category }),
         isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
@@ -106,7 +106,7 @@ exports.getAllFilmService = async (
     } else if (type === "TV Shows") {
       films = await Film.find({
         episodes: { $exists: true, $not: { $size: 0 } },
-        genre: category,
+        ...(category && { genre: category }),
         isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
@@ -115,7 +115,7 @@ exports.getAllFilmService = async (
         .limit(limit);
     } else if (type === "All") {
       films = await Film.find({
-        genre: category,
+        ...(category && { genre: category }),
         isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
@@ -132,7 +132,9 @@ exports.getAllFilmService = async (
         isDeleted: false,
       }).sort(sortOption);
     }
-    const total = await Film.countDocuments({ films });
+
+    const total = await Film.countDocuments(films);
+
     return {
       success: true,
       data: films,
