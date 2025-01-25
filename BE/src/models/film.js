@@ -48,8 +48,8 @@ const filmSchema = new mongoose.Schema(
     },
     episodes: [
       {
-        numberTitle: {
-          type: Number,
+        title: {
+          type: String,
         },
         video: {
           type: String,

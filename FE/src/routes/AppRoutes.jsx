@@ -8,6 +8,8 @@ import { WatchPage } from "../pages/MoviePages/WatchPage";
 import { SearchPage } from "../pages/MoviePages/SearchPage";
 import { NotFoundPage } from "../pages/GeneralPages/404";
 import { FavouriteMoviePage } from "../pages/MoviePages/FavouriteMoviePage";
+import { AdminHomePage } from "../pages/AdminPages/AdminHomePage";
+import { CRUDFilmPage } from "../pages/AdminPages/CRUDFilmPage";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
         <Route path="/search" element={<SearchPage />}></Route>
         <Route path="/*" element={<NotFoundPage />}></Route>
         <Route path="/favouriteMovie" element={<FavouriteMoviePage />}></Route>
+        <Route path="/homePageAdmin" element={<AdminHomePage />}></Route>
+        <Route path="/movieAdmin" element={<CRUDFilmPage />}></Route>
       </Routes>
       <Footer />
     </>

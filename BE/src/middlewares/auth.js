@@ -84,10 +84,9 @@ exports.isAuth = async (req, res, next) => {
     const decode = jwt.verify(token, process.env.ACCESS_TOKEN);
 
     const userResult = await conectPostgresDb.query(
-      "SELECT * FROM users WHERE id = $1 AND role = $2",
-      [decode.id, "user"]
+      "SELECT * FROM users WHERE id = $1",
+      [decode.id]
     );
-
     if (userResult.rows.length === 0) {
       return res.status(404).json({
         message: "Login first",

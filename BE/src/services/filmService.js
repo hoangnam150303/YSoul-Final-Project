@@ -6,17 +6,36 @@ exports.createFilmService = async (
   small_image,
   large_image,
   trailer,
-  movie,
+  movieFiles,
   cast,
   director,
   genre,
   releaseYear,
-  numberTitle = null,
-  video = null
+  title = null,
+  video = null,
+  rangeUser
 ) => {
   try {
     let film;
-    if (numberTitle && video) {
+    let episodes = [];
+    let videoArr = [];
+    if (title && video) {
+      const videoUrls = video.split(",").map((v) => v.trim()); // Tách chuỗi video thành mảng và loại bỏ khoảng trắng thừa
+      const parsedTitle = JSON.parse(title);
+      videoUrls.forEach((video) => {
+        videoArr.push(video);
+      });
+
+      // Kiểm tra nếu numberTitle và video có cùng số lượng phần tử
+
+      // Duyệt qua từng phần tử của numberTitle và video
+      for (let i = 0; i < parsedTitle.length; i++) {
+        episodes.push({
+          title: parsedTitle[i],
+          video: videoArr[i],
+        });
+      }
+
       // Nếu có `numberTitle` và `video`, tạo với episodes
       film = await Film.create({
         name,
@@ -28,13 +47,9 @@ exports.createFilmService = async (
         director,
         genre,
         releaseYear,
-        isDeleted: true,
-        episodes: [
-          {
-            numberTitle: Number(numberTitle),
-            video,
-          },
-        ],
+        rangeUser: rangeUser,
+        isDeleted: false,
+        episodes: episodes, // Thêm mảng episodes
       });
     } else {
       // Nếu không có `numberTitle`, lưu phim cơ bản
@@ -44,12 +59,13 @@ exports.createFilmService = async (
         small_image,
         large_image,
         trailer,
-        movie, // Lưu trường `movie`
+        movie: movieFiles, // Lưu trường `movie`
         cast,
         director,
         genre,
-        isDeleted: true,
+        isDeleted: false,
         releaseYear,
+        rangeUser: rangeUser,
       });
     }
 

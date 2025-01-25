@@ -18,5 +18,14 @@ const filmApi = {
     const url = `${FILM_API_ENDPOINT}/getFilmById/${id}`;
     return axiosClient.get(url);
   },
+
+  postCreateFilm: (formData) => {
+    const url = `${FILM_API_ENDPOINT}/createFilm`;
+    return axiosClient.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 export default filmApi;

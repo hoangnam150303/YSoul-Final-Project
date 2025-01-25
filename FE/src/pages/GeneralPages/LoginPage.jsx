@@ -33,7 +33,7 @@ export const LoginPage = () => {
       if (role === "user") {
         navigate("/");
       } else {
-        navigate("/admin");
+        navigate("/homePageAdmin");
       }
     }
   }, [role, navigate]);

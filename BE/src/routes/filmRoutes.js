@@ -8,9 +8,9 @@ filmRoute.post(
   "/createFilm",
   auth.isAdmin,
   upload.fields([
+    { name: "movie", maxCount: 10 },
     { name: "small_image", maxCount: 1 },
     { name: "large_image", maxCount: 1 },
-    { name: "movie", maxCount: 1 },
   ]),
   filmController.createFilm
 );
@@ -23,7 +23,7 @@ filmRoute.put(
   upload.fields([
     { name: "small_image", maxCount: 1 },
     { name: "large_image", maxCount: 1 },
-    { name: "movie", maxCount: 1 },
+    { name: "movie", maxCount: 10 },
   ]),
   filmController.updateFilmById
 );

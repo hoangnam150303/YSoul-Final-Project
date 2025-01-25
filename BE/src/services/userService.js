@@ -38,8 +38,8 @@ exports.verifyService = async (verifyToken, otp) => {
     const { name, email, password } = decoded;
     const hashPassword = await passwordHelpers.hashPassword(password, 10);
     await conectPostgresDb.query(
-      "INSERT INTO users (name, email, status, authprovider, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [name, email, true, "local", hashPassword]
+      "INSERT INTO users (name, email, status, authprovider, password,role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [name, email, true, "local", hashPassword, "user"]
     );
     return { success: true };
   } catch (error) {

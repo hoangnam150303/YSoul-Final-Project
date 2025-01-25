@@ -11,15 +11,18 @@ exports.createFilm = async (req, res) => {
       director,
       genre,
       releaseYear,
-      numberTitle,
-      episode,
+      title,
+      isSeries,
+      rangeUser,
     } = req.body;
-    console.log(req.files);
+
+    const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
-    const movieFile = req.files?.movie?.[0]?.path;
+
     let response;
-    if (episode) {
+    if (isSeries === "true") {
+
       // Nếu có episode (phim nhiều tập)
       response = await filmService.createFilmService(
         name,
@@ -32,8 +35,9 @@ exports.createFilm = async (req, res) => {
         director,
         genre,
         releaseYear,
-        numberTitle,
-        movieFile // Truyền video (tập)
+        title,
+        movieFiles,
+        rangeUser // Truyền video (tập)
       );
     } else {
       // Nếu là phim đơn lẻ
@@ -43,11 +47,12 @@ exports.createFilm = async (req, res) => {
         smallImage,
         largeImage,
         trailer,
-        movieFile, // Truyền file phim
+        movieFiles, // Truyền file phim
         cast,
         director,
         genre,
-        releaseYear
+        releaseYear,
+        rangeUser
       );
     }
     if (!response.success) {
@@ -143,7 +148,7 @@ exports.updateFilmById = async (req, res) => {
 
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
-    const movieFile = req.files?.movie?.[0]?.path;
+    const movieFile = req.files?.movie?.path;
     let response;
     if (episode) {
       // Nếu có episode (phim nhiều tập)
