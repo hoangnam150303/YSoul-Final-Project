@@ -72,6 +72,7 @@ export const CRUDFilmPage = () => {
       console.log(respone.data);
     } catch (error) {}
   };
+
   useEffect(() => {
     if (filmType === "Movie") {
       setIsSeries(false);
