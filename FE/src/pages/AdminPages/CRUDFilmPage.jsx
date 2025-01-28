@@ -24,24 +24,29 @@ import * as Yup from "yup";
 export const CRUDFilmPage = () => {
   const [films, setFilms] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalEditVisible, setIsModalEditVisible] = useState(false);
+  const [film, setFilm] = useState({});
   const [filmType, setFilmType] = useState("Movie"); // State để lưu loại film
   const [additionalFields, setAdditionalFields] = useState([]);
   const [isSeries, setIsSeries] = useState(false);
   const [video, setVideo] = useState([""]);
   const [title, setTitle] = useState([""]);
   const [kind, setKind] = useState("All");
+  const { TextArea } = Input;
   const handleTitleChange = (value, index) => {
     const updatedTitles = [...title];
     updatedTitles[index] = value; // Gán giá trị mới cho tiêu đề
 
     setTitle(updatedTitles); // Cập nhật state
   };
+
   const handleVideoChange = (value, index) => {
     const updatedVideos = [...video];
     updatedVideos[index] = value; // Gán giá trị mới cho video
 
     setVideo(updatedVideos); // Cập nhật state
   };
+
   const handleTypeChange = (value) => {
     setFilmType(value); // Cập nhật loại film khi người dùng chọn
   };
@@ -63,7 +68,27 @@ export const CRUDFilmPage = () => {
       { numberTitle: [], movieFiles: [] }, // Thêm trường mới
     ]);
   };
-  const { TextArea } = Input;
+
+  const handleEdit = (id) => {
+    const selectedFilm = films.find((film) => film._id === id);
+
+    if (selectedFilm) {
+      if (!selectedFilm.movie) {
+        setFilmType("TV Shows");
+      } else {
+        setFilmType("Movie");
+      }
+      setFilm(selectedFilm);
+      setIsModalEditVisible(true);
+    } else {
+      message.error("Film not found");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsModalEditVisible(false);
+    setFilm({});
+  };
 
   const fetchFilms = async () => {
     try {
@@ -71,7 +96,6 @@ export const CRUDFilmPage = () => {
         type: kind,
       });
       setFilms(respone.data.data.data);
-      console.log(respone.data.data.data);
     } catch (error) {}
   };
   const handleDelete = async (id) => {
@@ -208,7 +232,7 @@ export const CRUDFilmPage = () => {
         <div className="flex items-center justify-center">
           <button
             className="text-base bg-blue-600 text-white px-3 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-blue-600"
-            onClick={() => console.log("Edit:", record.key)}
+            onClick={() => handleEdit(record.key)}
           >
             <EditOutlined />
           </button>
@@ -716,31 +740,31 @@ export const CRUDFilmPage = () => {
 
       {/* Modal Update Film */}
       <Modal
-        open={isModalVisible}
+        open={isModalEditVisible}
         className="text-center "
         title={
           <h2 className="text-2xl font-bold text-[#f18966]  animate-slideIn">
-            Create New Film
+            Edit Film
           </h2>
         }
-        onCancel={handleCancel}
+        onCancel={handleCancelEdit}
         footer={null}
       >
         <Formik
           initialValues={{
-            name: "",
-            description: "",
-            cast: [],
-            releaseYear: "",
-            rangeUser: [],
-            genre: [],
-            small_image: "",
-            large_image: "",
-            trailer: "",
-            movie: [],
-            isSeries: false,
-            numberTitle: [],
-            director: "",
+            name: film.name || "",
+            description: film.description || "",
+            cast: film.cast || [],
+            releaseYear: film.releaseYear || "",
+            rangeUser: film.rangeUser || [],
+            genre: film.genre || [],
+            small_image: film.small_image || "",
+            large_image: film.large_image || "",
+            trailer: film.trailer || "",
+            movie: film.movie,
+            isSeries: isSeries,
+            numberTitle: film.numberTitle || [],
+            director: film.director || "",
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
@@ -929,6 +953,7 @@ export const CRUDFilmPage = () => {
                       className="w-full"
                       mode="multiple"
                       placeholder="Select type user"
+                      value={values.rangeUser}
                       style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("rangeUser", value)}
                     >
@@ -952,6 +977,7 @@ export const CRUDFilmPage = () => {
                     <Select
                       className="w-full"
                       mode="multiple"
+                      value={values.genre}
                       placeholder="Select genres"
                       style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("genre", value)}
@@ -1011,13 +1037,33 @@ export const CRUDFilmPage = () => {
                   <div className="w-full flex flex-col items-start">
                     <Upload
                       listType="picture-card"
+                      fileList={
+                        values.small_image
+                          ? [
+                              {
+                                uid: "-1", // UID tạm
+                                name: "Small Image", // Tên mặc định
+                                status: "done",
+                                url: values.small_image, // URL của ảnh
+                              },
+                            ]
+                          : []
+                      }
                       onChange={(info) => {
                         if (info.fileList.length > 0) {
                           const file = info.fileList[0];
-                          setFieldValue("small_image", file.originFileObj);
+                          setFieldValue(
+                            "small_image",
+                            file.originFileObj
+                              ? URL.createObjectURL(file.originFileObj) // Tạo URL tạm cho file mới
+                              : file.url // Giữ nguyên URL cũ nếu không đổi
+                          );
                         } else {
-                          setFieldValue("small_image", "");
+                          setFieldValue("small_image", ""); // Reset nếu không có file nào
                         }
+                      }}
+                      onPreview={() => {
+                        window.open(values.small_image, "_blank");
                       }}
                     >
                       <Button
@@ -1046,13 +1092,33 @@ export const CRUDFilmPage = () => {
                   <div className="w-full flex flex-col items-start">
                     <Upload
                       listType="picture-card"
+                      fileList={
+                        values.large_image
+                          ? [
+                              {
+                                uid: "-1", // UID tạm
+                                name: "Large Image", // Tên mặc định
+                                status: "done",
+                                url: values.large_image, // URL của ảnh
+                              },
+                            ]
+                          : []
+                      }
                       onChange={(info) => {
                         if (info.fileList.length > 0) {
                           const file = info.fileList[0];
-                          setFieldValue("large_image", file.originFileObj);
+                          setFieldValue(
+                            "large_image",
+                            file.originFileObj
+                              ? URL.createObjectURL(file.originFileObj) // Tạo URL tạm cho file mới
+                              : file.url // Giữ nguyên URL cũ nếu không đổi
+                          );
                         } else {
-                          setFieldValue("large_image", "");
+                          setFieldValue("large_image", ""); // Reset nếu không có file nào
                         }
+                      }}
+                      onPreview={() => {
+                        window.open(values.large_image, "_blank");
                       }}
                     >
                       <Button
@@ -1075,21 +1141,28 @@ export const CRUDFilmPage = () => {
               </div>
               <Select
                 className="w-4/5"
-                mode="only"
-                placeholder="Select type film"
                 style={{
                   flex: 1,
                 }}
-                onChange={(value) => handleTypeChange(value)}
-              >
-                <Select.Option value="Movie">Movie</Select.Option>
-                <Select.Option value="TV Shows">TV Shows</Select.Option>
-              </Select>
+                value={filmType}
+              ></Select>
               {filmType === "Movie" ? (
                 <div className="flex items-start justify-center">
                   <label className="label-input-tnvd truncate">Movie:</label>
                   <div className="w-2/3 flex flex-col items-start">
                     <Upload
+                      fileList={
+                        typeof values.movie === "string" && values.movie.trim() // Kiểm tra nếu movie là chuỗi và không rỗng
+                          ? [
+                              {
+                                uid: "-1", // UID tạm thời cho file duy nhất
+                                name: "Uploaded File", // Tên hiển thị
+                                status: "done", // Trạng thái tải lên
+                                url: values.movie, // URL của file
+                              },
+                            ]
+                          : []
+                      }
                       onChange={(info) => {
                         setFieldValue(
                           "movie",

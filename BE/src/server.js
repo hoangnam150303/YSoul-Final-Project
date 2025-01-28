@@ -8,6 +8,7 @@ const session = require("express-session");
 const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoutes");
 const filmRoute = require("./routes/filmRoutes");
+const invoiceRoute = require("./routes/invoiceRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -35,6 +36,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", userRoute);
 app.use("/film", filmRoute);
+app.use("/invoice", invoiceRoute);
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
