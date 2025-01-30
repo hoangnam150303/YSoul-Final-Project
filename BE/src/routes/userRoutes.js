@@ -10,7 +10,7 @@ userRoute.post(
 );
 
 userRoute.post("/register", userController.register);
-userRoute.post("/verify", userController.verify);
+userRoute.post("/sendCode", userController.sendCode);
 userRoute.post("/loginLocal", userController.loginLocal);
 userRoute.get("/getUser", auth.isAuth, userController.getUser);
 module.exports = userRoute;

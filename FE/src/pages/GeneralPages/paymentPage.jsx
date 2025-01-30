@@ -1,96 +1,75 @@
 import React, { useState } from "react";
-import { Card, Radio, Button, Row, Col, Typography, Image } from "antd";
+import { Card, Button } from "antd";
 
 const PaymentPage = () => {
-  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const handlePayment = () => {
-    if (!selectedMethod) {
-      alert("Please select a payment method!");
-      return;
-    }
-    alert(`Proceeding with ${selectedMethod} payment!`);
+  const handlePaymentChange = (event) => {
+    setSelectedPayment(event.target.value);
   };
 
-  const paymentMethods = [
-    {
-      id: "stripe",
-      name: "Stripe",
-      logo: "https://via.placeholder.com/50?text=Stripe",
-    },
-    {
-      id: "vnpay",
-      name: "VNPay",
-      logo: "https://via.placeholder.com/50?text=VNPay",
-    },
-    {
-      id: "momo",
-      name: "MoMo",
-      logo: "https://via.placeholder.com/50?text=MoMo",
-    },
-  ];
+  const handleAcceptPayment = () => {
+    if (selectedPayment) {
+      alert(`Proceeding with payment via ${selectedPayment}`);
+      // Here you would typically handle the payment processing logic
+    } else {
+      alert("Please select a payment method.");
+    }
+  };
 
   return (
-    <div className="h-screen w-full bg-gray-100 flex items-center justify-center">
-      <Card className="w-full max-w-3xl p-4" title="Payment Page">
-        <Row gutter={24}>
-          {/* Cột bên trái: Thông tin và logo */}
-          <Col span={12}>
-            <div className="flex flex-col items-start">
-              <Typography.Title level={4}>
-                Pay for Update Account
-              </Typography.Title>
-              <Image
-                src="https://via.placeholder.com/150?text=Logo"
-                alt="Website Logo"
-                width={150}
-                preview={false}
-              />
-            </div>
-          </Col>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Left Column for Logo and Header */}
+      <div className="w-1/3 bg-white flex flex-col items-center justify-center p-8 shadow-lg">
+        <img src="/path/to/your/logo.png" alt="Website Logo" className="mb-4" />
+        <h2 className="text-xl font-semibold">Update to Become VIP User</h2>
+      </div>
 
-          {/* Cột bên phải: Phương thức thanh toán và nút */}
-          <Col span={12}>
-            <div className="space-y-3">
-              <Radio.Group
-                value={selectedMethod}
-                onChange={(e) => setSelectedMethod(e.target.value)}
-                className="w-full"
-              >
-                <Row gutter={16}>
-                  {paymentMethods.map((method) => (
-                    <Col span={8} key={method.id}>
-                      <Radio.Button
-                        value={method.id}
-                        className={`w-full flex items-center justify-between p-3 border rounded-lg ${
-                          selectedMethod === method.id
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-300"
-                        }`}
-                      >
-                        <img
-                          src={method.logo}
-                          alt={method.name}
-                          className="w-12 h-12 rounded-full mr-4"
-                        />
-                        <span className="font-medium text-gray-700">
-                          {method.name}
-                        </span>
-                      </Radio.Button>
-                    </Col>
-                  ))}
-                </Row>
-              </Radio.Group>
-              <Button
-                className="w-full mt-6 bg-blue-500 text-white hover:bg-blue-600"
-                onClick={handlePayment}
-              >
-                Proceed to Pay
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </Card>
+      {/* Right Column for Payment Options */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <h1 className="text-2xl font-bold mb-6">Choose Your Payment Method</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="shadow-lg">
+            <input
+              type="radio"
+              id="momo"
+              name="payment"
+              value="Momo"
+              checked={selectedPayment === "Momo"}
+              onChange={handlePaymentChange}
+              className="mr-2"
+            />
+            <label htmlFor="momo">Momo</label>
+          </Card>
+          <Card className="shadow-lg">
+            <input
+              type="radio"
+              id="stripe"
+              name="payment"
+              value="Stripe"
+              checked={selectedPayment === "Stripe"}
+              onChange={handlePaymentChange}
+              className="mr-2"
+            />
+            <label htmlFor="stripe">Stripe</label>
+          </Card>
+          <Card className="shadow-lg">
+            <input
+              type="radio"
+              id="vnpay"
+              name="payment"
+              value="VNPay"
+              checked={selectedPayment === "VNPay"}
+              onChange={handlePaymentChange}
+              className="mr-2"
+            />
+            <label htmlFor="vnpay">VNPay</label>
+          </Card>
+        </div>
+        <Button type="primary" className="mt-6" onClick={handleAcceptPayment}>
+          Accept Payment
+        </Button>
+      </div>
     </div>
   );
 };

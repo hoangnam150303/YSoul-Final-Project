@@ -26,7 +26,10 @@ exports.loginGoogle = async (req, res) => {
 // this function is register account with email, password and user name.
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, email, password, confirmPassword, otp, verifyToken } =
+      req.body;
+    console.log(req.body);
+
     const reg = /^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)*$/;
     const isCheckEmail = reg.test(email);
     if (!name || !email || !password || !confirmPassword) {
@@ -43,7 +46,13 @@ exports.register = async (req, res) => {
         error,
       });
     }
-    const respone = await userService.registerService(name, email, password);
+    const respone = await userService.registerService(
+      name,
+      email,
+      password,
+      otp,
+      verifyToken
+    );
     if (!respone.success) {
       return res
         .status(401)
@@ -55,26 +64,22 @@ exports.register = async (req, res) => {
   }
 };
 
-// After register account, user will get an otp number, use that number to verify account and user can use that account to enjoy website
-exports.verify = async (req, res) => {
+exports.sendCode = async (req, res) => {
   try {
-    const { verifyToken, otp } = req.body;
-    if (!verifyToken || !otp) {
+    const { email, name } = req.body;
+    if (!email) {
       return res
         .status(401)
         .json({ message: "All fields are required.", error });
     }
-    const respone = await userService.verifyService(verifyToken, otp);
-    console.log(respone);
+    const respone = await userService.sendCodeService(email, name);
     if (!respone.success) {
       return res
         .status(401)
         .json({ message: "Error! Please try again.", error });
     }
     return res.status(200).json(respone);
-  } catch (error) {
-    return res.status(401).json({ mesage: "Error! Please try again.", error });
-  }
+  } catch (error) {}
 };
 
 // this function is login account with email and password
