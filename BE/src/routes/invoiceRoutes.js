@@ -4,14 +4,15 @@ const invoiceController = require("../controllers/invoiceController");
 const auth = require("../middlewares/auth");
 
 invoiceRoute.post(
-  "/createStripeInvoice/:id",
+  "/createInvoice/:id/:paymentMethod",
   auth.isAuth,
-  invoiceController.createStripeInvoice
+  invoiceController.createInvoice
 );
-invoiceRoute.post(
-  "/createVNPayInvoice/:id",
+
+invoiceRoute.get(
+  "/returnInvoice/:orderId",
   auth.isAuth,
-  invoiceController.createVNPayInvoice
+  invoiceController.returnInvoice
 );
 
 module.exports = invoiceRoute;

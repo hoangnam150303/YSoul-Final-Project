@@ -8,15 +8,16 @@ export const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [name, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const navigate = useNavigate();
 
   const onSuccess = async (data) => {
     try {
       console.log(data);
       if (data.success) {
-        message.success("OTP sent to your email.");
-        localStorage.setItem(constants.VERIFY_TOKEN, data.verifyToken);
-        navigate("/approve");
+        message.success("Register success.");
+        localStorage.removeItem("verify_token");
+        navigate("/login");
       } else {
         message.error("login falied");
       }
@@ -28,21 +29,43 @@ export const SignUpPage = () => {
 
   const handleSignUp = async (event) => {
     event.preventDefault(); // Ngăn chặn hành vi tải lại trang mặc định
-    const value = {
+    const verifyToken = localStorage.getItem("verify_token");
+
+    const values = {
       email,
       name,
       password,
       confirmPassword,
+      otp,
+      verifyToken,
     };
 
     try {
-      const response = await userApi.postRegister(value);
+      const response = await userApi.postRegister(values);
       onSuccess(response.data);
     } catch (error) {
       console.error("Error during sign-up:", error);
     }
   };
 
+  const handleSendCode = async (event) => {
+    event.preventDefault();
+    const value = {
+      email,
+      name,
+    };
+    try {
+      const respone = await userApi.postSendCode(value);
+      const token = respone.data.verifyToken;
+
+      if (respone.status === 200) {
+        message.success("Send code success.");
+        localStorage.setItem(constants.VERIFY_TOKEN, token);
+      }
+    } catch (error) {
+      console.error("Error during sign-up:", error);
+    }
+  };
   return (
     <div className="h-screen w-full hero-bg">
       <header className="max-w-6x1 max-auto flex items-center justify-between p-4">
@@ -127,6 +150,32 @@ export const SignUpPage = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label
+                htmlFor="otp"
+                className="text-sm font-medium text-gray-300 block"
+              >
+                OTP Code
+              </label>
+              <div className="flex gap-2 mt-1">
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-700 rounded-md bg-transparent text-white focus:outline-none focus:ring"
+                  placeholder="Enter OTP"
+                  id="otp"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={handleSendCode}
+                  className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-800"
+                >
+                  Send Code
+                </button>
+              </div>
             </div>
 
             <button className="w-full py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-800">

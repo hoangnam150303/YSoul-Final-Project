@@ -11,8 +11,8 @@ const userApi = {
     const url = "/register";
     return axiosClient.post(url, value);
   },
-  postVerify: (value) => {
-    const url = "/verify";
+  postSendCode: (value) => {
+    const url = "/sendCode";
     return axiosClient.post(url, value);
   },
   postLoginLocal: (value) => {
