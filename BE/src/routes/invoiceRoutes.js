@@ -9,7 +9,7 @@ invoiceRoute.post(
   invoiceController.createInvoice
 );
 
-invoiceRoute.get(
+invoiceRoute.put(
   "/returnInvoice/:orderId",
   auth.isAuth,
   invoiceController.returnInvoice

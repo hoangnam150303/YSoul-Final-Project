@@ -7,6 +7,7 @@ const getUserRequest = () => {
     try {
       const response = await userApi.getUser();
       const user = response.data;
+
       dispatch(getUser(user));
     } catch (error) {
       throw error;
@@ -29,7 +30,7 @@ const getUser = (user) => {
   };
 };
 
-const initialState = { role: "" };
+const initialState = { role: "", name: "", id: 0, vip: false };
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {
