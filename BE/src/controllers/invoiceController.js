@@ -4,6 +4,7 @@ exports.createInvoice = async (req, res) => {
     const userId = req.params.id;
     const paymentMethod = req.params.paymentMethod;
     const { totalPrice } = req.body;
+
     let response;
     if (paymentMethod === "stripe") {
       response = await invoiceService.createStripeInvoiceSerivice(

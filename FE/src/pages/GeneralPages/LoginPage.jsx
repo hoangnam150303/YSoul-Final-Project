@@ -12,6 +12,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const role = useSelector((state) => state.user.role);
+  
   const navigate = useNavigate();
 
   const onLoginSuccess = async (data) => {

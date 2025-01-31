@@ -5,6 +5,7 @@ const moment = require("moment");
 const crypto = require("crypto");
 const querystring = require("qs");
 const axios = require("axios");
+const { stringify } = require("querystring");
 exports.createStripeInvoiceSerivice = async (id, totalPrice) => {
   try {
     const user = await conectPostgresDb.query(
@@ -132,22 +133,21 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
     if (totalPrice <= 0) {
       throw new Error("Total price must be greater than 0");
     }
-
+    var amount = `${totalPrice * 100000}`;
     const invoice = await Invoice.create({
       user_id: user.rows[0].id,
       price: totalPrice,
       isSuccess: false, // Ban đầu chưa thành công
       paymentMethod: "MoMo",
     });
-    const urlReturn = process.env.CLIENT_URL;
     var accessKey = process.env.MOMO_ACCESS_KEY;
     var secretKey = process.env.MOMO_SECRET_KEY;
     var orderInfo = "pay with MoMo";
     var partnerCode = "MOMO";
-    var redirectUrl = urlReturn + `/paymentSuccess/${invoice._id}`;
+    var redirectUrl = `${process.env.CLIENT_URL}/paymentSuccess/${invoice._id}`;
     var ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b";
     var requestType = "payWithMethod";
-    var amount = totalPrice.toString();
+    var amount = amount;
     var orderId = invoice._id.toString();
     var requestId = orderId;
     var extraData = "";
@@ -176,7 +176,8 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
       requestId +
       "&requestType=" +
       requestType;
-    //signature
+    //puts raw signature
+
     const crypto = require("crypto");
     var signature = crypto
       .createHmac("sha256", secretKey)
@@ -184,7 +185,7 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
       .digest("hex");
 
     //json object send to MoMo endpoint
-    const requestBody = JSON.stringify({
+    const requestBody = {
       partnerCode: partnerCode,
       partnerName: "Test",
       storeId: "MomoTestStore",
@@ -200,7 +201,7 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
       extraData: extraData,
       orderGroupId: orderGroupId,
       signature: signature,
-    });
+    };
 
     const options = {
       method: "POST",
@@ -214,12 +215,13 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
     let result;
 
     result = await axios(options);
-    console.log(result.data);
+    console.log("MoMo response:", result.data);
 
     return {
       requestBody,
       invoiceId: invoice._id,
       result: result.data,
+      url: result.data.payUrl,
       success: true,
     };
   } catch (error) {

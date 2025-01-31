@@ -1,8 +1,21 @@
 // src/PaymentSuccess.js
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Result } from "antd";
+import paymentApi from "../../hooks/paymentApi";
+import { useParams } from "react-router-dom";
 
 const PaymentSuccess = () => {
+  const invoice_id = useParams().invoice_id;
+  const handleAcceptPayment = async () => {
+    try {
+      await paymentApi.putReturnInvoice(invoice_id);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    handleAcceptPayment();
+  }, []);
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Result
