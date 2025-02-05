@@ -21,6 +21,7 @@ export const WatchPage = () => {
   const movieId = useParams().movieId;
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
+  const [resultRating, setResultRating] = useState(0);
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -30,7 +31,9 @@ export const WatchPage = () => {
   };
   const fetchFilm = async (id) => {
     const respone = await filmApi.getFilmById(id);
+
     setFilm(respone.data.data);
+    setResultRating(respone.data.resultRating);
     if (respone.data.data?.episodes.length > 0) {
       setIsMovie(false);
       setEpisodes(respone.data.data.episodes);
@@ -38,12 +41,17 @@ export const WatchPage = () => {
     }
   };
 
+  const handleUpdateStatus = async (id, type, data) => {
+    await filmApi.postUpdateStatusFilm(id, type, data);
+    fetchFilm(id);
+  };
   const handlePageChange = (pageNumber) => {
     setPage(pageNumber);
   };
   useEffect(() => {
     fetchFilm(movieId);
-  }, [movieId]);
+    console.log(resultRating);
+  }, [movieId, resultRating]);
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -71,15 +79,20 @@ export const WatchPage = () => {
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled
               style={{ fontSize: "24px", color: favorite ? "red" : "white" }}
-              onClick={() => setFavorite(!favorite)}
+              onClick={() => setFavorite((prev) => !prev)}
             />
             <ShareAltOutlined style={{ fontSize: "24px" }} />
             <CommentOutlined style={{ fontSize: "24px" }} />
             <Rate
               allowHalf
-              defaultValue={2.5}
+              key={resultRating}
+              defaultValue={resultRating}
               style={{ fontSize: "24px", color: "red" }}
+              onChange={(value) =>
+                handleUpdateStatus(film?._id, "rating", value)
+              }
             />
+            <span className="font-bold"> {film?.countRating} rates</span>
           </div>
           {!isMovie && (
             <Pagination

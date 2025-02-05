@@ -9,3 +9,6 @@
 .approve-bg{
     background-image: linear-gradient(rgba(0,0,0,.8),rgba(0,0,0,0.1)), url("https://alea.tok-md.com/argazkiak/UJE/netflix-image.jpg");
 }
+::-webkit-scrollbar {
+    display: none;
+  }

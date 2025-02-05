@@ -14,6 +14,7 @@ exports.createFilm = async (req, res) => {
       title,
       isSeries,
       rangeUser,
+      age,
     } = req.body;
 
     const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
@@ -22,7 +23,6 @@ exports.createFilm = async (req, res) => {
 
     let response;
     if (isSeries === "true") {
-
       // Nếu có episode (phim nhiều tập)
       response = await filmService.createFilmService(
         name,
@@ -37,7 +37,8 @@ exports.createFilm = async (req, res) => {
         releaseYear,
         title,
         movieFiles,
-        rangeUser // Truyền video (tập)
+        rangeUser,
+        age
       );
     } else {
       // Nếu là phim đơn lẻ
@@ -52,7 +53,8 @@ exports.createFilm = async (req, res) => {
         director,
         genre,
         releaseYear,
-        rangeUser
+        rangeUser,
+        age
       );
     }
     if (!response.success) {
@@ -108,6 +110,7 @@ exports.getFilmById = async (req, res) => {
     }
     return res.status(200).json({
       data: response.data,
+      resultRating: response.resultRating,
       success: true,
     });
   } catch (error) {}
@@ -202,5 +205,25 @@ exports.updateFilmById = async (req, res) => {
 // this funtion will update film when user play video or click to the film, get that film into favourite list.
 exports.updateStatusFilmById = async (req, res) => {
   try {
-  } catch (error) {}
+    const { id, type } = req.params;
+
+    const { data } = req.body;
+    console.log(id, type, data);
+
+    const response = await filmService.updateStatusFilmByIdService(
+      id,
+      type,
+      data
+    );
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error update status film",
+      });
+    }
+    return res.status(200).json("Update successfully");
+  } catch (error) {
+    return res.status(400).json({
+      message: "Error update status film",
+    });
+  }
 };
