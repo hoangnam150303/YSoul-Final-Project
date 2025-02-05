@@ -83,7 +83,6 @@ export const AlbumPage = () => {
             </p>
           </div>
         </div>
-
         <Table
           className="mt-10 pl-32 pr-20 text-gray-400 bg-black"
           columns={columns}
