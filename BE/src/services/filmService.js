@@ -1,5 +1,6 @@
 const Film = require("../models/film");
 const HistoryFilm = require("../models/historyFilm");
+const wishList = require("../models/wishList");
 exports.createFilmService = async (
   name,
   description,
@@ -13,7 +14,8 @@ exports.createFilmService = async (
   releaseYear,
   title = null,
   video = null,
-  rangeUser
+  rangeUser,
+  age
 ) => {
   try {
     let film;
@@ -49,7 +51,8 @@ exports.createFilmService = async (
         releaseYear,
         rangeUser: rangeUser,
         isDeleted: false,
-        episodes: episodes, // Thêm mảng episodes
+        episodes: episodes,
+        age: age,
       });
     } else {
       // Nếu không có `numberTitle`, lưu phim cơ bản
@@ -66,6 +69,7 @@ exports.createFilmService = async (
         isDeleted: false,
         releaseYear,
         rangeUser: rangeUser,
+        age: age,
       });
     }
 
@@ -170,7 +174,8 @@ exports.getFilmByIdService = async (filmId) => {
     if (!film) {
       throw new Error("Film not found");
     }
-    return { success: true, data: film };
+    const resultRating = film.rating / film.countRating;
+    return { success: true, data: film, resultRating };
   } catch (error) {
     console.error("Error getting film by ID:", error.message);
     return { success: false, error: error.message };
@@ -259,4 +264,25 @@ exports.updateFilmByIdService = async (
   } catch (error) {}
 };
 
-exports.updateStatusFilmByIdSerive = async (filmId, data) => {};
+exports.updateStatusFilmByIdService = async (filmId, type, data) => {
+  try {
+    const film = await Film.findById(filmId);
+
+    if (!film) {
+      throw new Error("Film not found");
+    }
+
+    if (type === "rating") {
+      film.rating = (film.rating || 0) + data;
+      film.countRating = (film.countRating || 0) + 1;
+      film.save();
+    } else if (type === "click") {
+      film.countClick = (film.countClick || 0) + 1;
+      film.save();
+    } else if (type === "favourite") {
+      await wishList.create({ user_id: data, film_id: filmId });
+    }
+
+    return { success: true };
+  } catch (error) {}
+};

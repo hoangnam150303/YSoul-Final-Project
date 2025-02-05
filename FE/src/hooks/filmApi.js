@@ -31,5 +31,12 @@ const filmApi = {
     const url = `${FILM_API_ENDPOINT}/activeOrDeactiveFilmById/${id}`;
     return axiosClient.put(url);
   },
+
+  postUpdateStatusFilm: (id, type, data) => {
+    console.log(id, type, data);
+
+    const url = `${FILM_API_ENDPOINT}/updateStatusFilmById/${id}/${type}`;
+    return axiosClient.put(url, { data });
+  },
 };
 export default filmApi;

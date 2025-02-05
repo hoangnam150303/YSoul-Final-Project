@@ -6,6 +6,8 @@ import "./styles/index.css";
 import { Provider } from "react-redux";
 import configStore from "./configs/configureStore";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
 const store = configStore();
 
 const clientId = import.meta.env.VITE_CLIENT_ID;

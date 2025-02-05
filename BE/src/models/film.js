@@ -54,12 +54,6 @@ const filmSchema = new mongoose.Schema(
         video: {
           type: String,
         },
-        ratingEpisode: {
-          type: Number,
-        },
-        numberRating: {
-          type: Number,
-        },
       },
     ],
     views: {

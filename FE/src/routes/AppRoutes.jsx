@@ -11,12 +11,15 @@ import { AdminHomePage } from "../pages/AdminPages/AdminHomePage";
 import { CRUDFilmPage } from "../pages/AdminPages/CRUDFilmPage";
 import PaymentPage from "../pages/GeneralPages/PaymentPage";
 import PaymentSuccess from "../pages/GeneralPages/PaymentSuccessPage";
+import { MusicHomePage } from "../pages/MusicPages/MusicHomePage";
+import { AlbumPage } from "../pages/MusicPages/AlbumPage";
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/" element={<MovieHomePage />}></Route>
+        <Route path="/musicHomePage" element={<MusicHomePage />}></Route>
         <Route path="/login" element={<LoginPage />}></Route>
         <Route path="/signup" element={<SignUpPage />}></Route>
         <Route path="/watchPage/:movieId" element={<WatchPage />}></Route>
@@ -30,6 +33,7 @@ function App() {
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}
         ></Route>
+        <Route path="/album" element={<AlbumPage />}></Route>
       </Routes>
       <Footer />
     </>

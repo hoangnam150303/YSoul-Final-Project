@@ -35,4 +35,10 @@ filmRoute.put(
   filmController.activeOrDeactiveFilmById
 );
 
+filmRoute.put(
+  "/updateStatusFilmById/:id/:type",
+  auth.isAuth,
+  filmController.updateStatusFilmById
+);
+
 module.exports = filmRoute;
