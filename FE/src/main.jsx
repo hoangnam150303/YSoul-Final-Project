@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import configStore from "./configs/configureStore";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import PlayerContextProvider from "./context/PlayerContext";
 
 const store = configStore();
 
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <GoogleOAuthProvider clientId={clientId}>
     <Provider store={store}>
       <BrowserRouter>
-        <AppRoutes />
+        <PlayerContextProvider>
+          <AppRoutes />
+        </PlayerContextProvider>
       </BrowserRouter>
     </Provider>
   </GoogleOAuthProvider>

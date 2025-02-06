@@ -13,8 +13,6 @@ const PaymentPage = () => {
   };
 
   const handleAcceptPayment = async () => {
-    console.log(userId);
-
     if (selectedPayment) {
       message.success(`Proceeding with payment via ${selectedPayment}`);
       const respone = await paymentApi.postPayment(10, userId, selectedPayment);

@@ -1,5 +1,4 @@
 const Film = require("../models/film");
-const HistoryFilm = require("../models/historyFilm");
 const wishList = require("../models/wishList");
 exports.createFilmService = async (
   name,
@@ -174,8 +173,7 @@ exports.getFilmByIdService = async (filmId) => {
     if (!film) {
       throw new Error("Film not found");
     }
-    const resultRating = film.rating / film.countRating;
-    return { success: true, data: film, resultRating };
+    return { success: true, data: film };
   } catch (error) {
     console.error("Error getting film by ID:", error.message);
     return { success: false, error: error.message };
@@ -264,25 +262,41 @@ exports.updateFilmByIdService = async (
   } catch (error) {}
 };
 
-exports.updateStatusFilmByIdService = async (filmId, type, data) => {
+exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
   try {
     const film = await Film.findById(filmId);
-
     if (!film) {
       throw new Error("Film not found");
     }
 
     if (type === "rating") {
-      film.rating = (film.rating || 0) + data;
-      film.countRating = (film.countRating || 0) + 1;
-      film.save();
+      let userFeedback = film.feedback.find((item) => item.user_id === userId);
+
+      if (userFeedback) {
+        // Nếu user đã đánh giá trước đó, cập nhật rating
+        userFeedback.rating = data;
+      } else {
+        // Nếu user chưa đánh giá, thêm mới
+        film.feedback.push({
+          user_id: userId,
+          rating: (film.feedback.rating || 0) + data,
+        });
+      }
+      film.totalRating =
+        film.feedback.reduce((sum, item) => sum + (item.rating || 0), 0) /
+        (film.feedback.length || 1);
+
+      await film.save();
     } else if (type === "click") {
       film.countClick = (film.countClick || 0) + 1;
-      film.save();
+      await film.save();
     } else if (type === "favourite") {
       await wishList.create({ user_id: data, film_id: filmId });
     }
 
     return { success: true };
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error updating film status:", error);
+    return { success: false, message: error.message };
+  }
 };

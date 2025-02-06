@@ -36,7 +36,7 @@ filmRoute.put(
 );
 
 filmRoute.put(
-  "/updateStatusFilmById/:id/:type",
+  "/updateStatusFilmById/:id/:type/:userId",
   auth.isAuth,
   filmController.updateStatusFilmById
 );

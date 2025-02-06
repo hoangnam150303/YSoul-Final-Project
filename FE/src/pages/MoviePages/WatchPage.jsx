@@ -10,6 +10,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import { Pagination, Rate } from "antd";
 import filmApi from "../../hooks/filmApi";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserRequest } from "../../reducers/user";
 export const WatchPage = () => {
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,7 +23,9 @@ export const WatchPage = () => {
   const movieId = useParams().movieId;
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [resultRating, setResultRating] = useState(0);
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.user.id);
+  dispatch(getUserRequest());
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -33,7 +37,6 @@ export const WatchPage = () => {
     const respone = await filmApi.getFilmById(id);
 
     setFilm(respone.data.data);
-    setResultRating(respone.data.resultRating);
     if (respone.data.data?.episodes.length > 0) {
       setIsMovie(false);
       setEpisodes(respone.data.data.episodes);
@@ -42,7 +45,7 @@ export const WatchPage = () => {
   };
 
   const handleUpdateStatus = async (id, type, data) => {
-    await filmApi.postUpdateStatusFilm(id, type, data);
+    await filmApi.postUpdateStatusFilm(id, type, data, userId);
     fetchFilm(id);
   };
   const handlePageChange = (pageNumber) => {
@@ -50,8 +53,7 @@ export const WatchPage = () => {
   };
   useEffect(() => {
     fetchFilm(movieId);
-    console.log(resultRating);
-  }, [movieId, resultRating]);
+  }, [movieId]);
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -85,14 +87,17 @@ export const WatchPage = () => {
             <CommentOutlined style={{ fontSize: "24px" }} />
             <Rate
               allowHalf
-              key={resultRating}
-              defaultValue={resultRating}
+              key={film.totalRating}
+              defaultValue={film.totalRating}
               style={{ fontSize: "24px", color: "red" }}
               onChange={(value) =>
                 handleUpdateStatus(film?._id, "rating", value)
               }
             />
-            <span className="font-bold"> {film?.countRating} rates</span>
+            <span className="font-bold">
+              {" "}
+              {film?.feedback?.length || 0} rates
+            </span>
           </div>
           {!isMovie && (
             <Pagination
