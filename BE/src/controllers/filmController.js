@@ -205,15 +205,15 @@ exports.updateFilmById = async (req, res) => {
 // this funtion will update film when user play video or click to the film, get that film into favourite list.
 exports.updateStatusFilmById = async (req, res) => {
   try {
-    const { id, type } = req.params;
+    const { id, type,userId } = req.params;
 
     const { data } = req.body;
-    console.log(id, type, data);
 
     const response = await filmService.updateStatusFilmByIdService(
       id,
       type,
-      data
+      data,
+      userId
     );
     if (!response.success) {
       return res.status(400).json({

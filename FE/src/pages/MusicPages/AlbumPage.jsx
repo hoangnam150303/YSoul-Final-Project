@@ -3,6 +3,7 @@ import { MusicSideBar } from "../../components/SideBar/MusicSideBar";
 import { NavbarMusic } from "../../components/Navbar/NavbarMusic";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import { Space, Table, Tag } from "antd";
+import { BreadCrumb } from "../../components/BreadCrumb/BreadCrumb";
 
 export const AlbumPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -60,7 +61,7 @@ export const AlbumPage = () => {
         <MusicSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />
       </div>
       <div className="flex-1 flex flex-col">
-        <NavbarMusic />
+        <BreadCrumb pageName="Album" />
         <div className="mt-10 flex gap-8 flex-col md:flex-row md:items-center w-full px-60">
           <img
             src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1738655275/71Q82A9HWBL_mtuanu.jpg"

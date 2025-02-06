@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Player } from "../../components/Player/Player";
 import { MusicSideBar } from "../../components/SideBar/MusicSideBar";
 import { NavbarMusic } from "../../components/Navbar/NavbarMusic";
 import { MusicSlider } from "../../components/Slider/MusicSlider/MusicSlider";
+import { PlayerContext } from "../../context/PlayerContext";
 
 export const MusicHomePage = () => {
+  const { audioRef, track } = useContext(PlayerContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const category = [
     { id: 1, name: "Newest" },
@@ -41,6 +43,7 @@ export const MusicHomePage = () => {
 
       <div className="fixed bottom-0 w-full">
         <Player />
+        <audio preload="auto" ref={audioRef} src={track}></audio>
       </div>
     </>
   );

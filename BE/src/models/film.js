@@ -37,13 +37,23 @@ const filmSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    rating: {
-      type: Number,
-    },
-    countRating: {
+    feedback: [
+      {
+        user_id: {
+          type: String,
+        },
+        rating: {
+          type: Number,
+        },
+      },
+    ],
+    totalRating: {
       type: Number,
     },
     countClick: {
+      type: Number,
+    },
+    views: {
       type: Number,
     },
     episodes: [
@@ -56,9 +66,6 @@ const filmSchema = new mongoose.Schema(
         },
       },
     ],
-    views: {
-      type: Number,
-    },
     rangeUser: [{ type: String }],
     isDeleted: { type: Boolean },
     age: {

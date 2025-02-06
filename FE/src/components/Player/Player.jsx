@@ -1,14 +1,17 @@
 import {
   ArrowsAltOutlined,
   CaretRightOutlined,
+  PauseOutlined,
   RetweetOutlined,
   StepBackwardOutlined,
   StepForwardOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
-import React from "react";
+import React, { useContext } from "react";
+import { PlayerContext } from "../../context/PlayerContext";
 
 export const Player = () => {
+  const { seekBar, seekBg, playStatus, play, pause, time } =
+    useContext(PlayerContext);
   return (
     <div className="h-[10%] w-full bg-black flex justify-between items-center text-white px-96">
       <div className="hidden lg:flex items-center gap-4">
@@ -26,16 +29,31 @@ export const Player = () => {
         <div className="flex gap-4">
           <i className="bi bi-shuffle text-white cursor-pointer"></i>
           <StepBackwardOutlined className="w-4 cursor-pointer" />
-          <CaretRightOutlined className="w-4 cursor-pointer" />
+          {playStatus ? (
+            <PauseOutlined onClick={pause} className="w-4 cursor-pointer" />
+          ) : (
+            <CaretRightOutlined onClick={play} className="w-4 cursor-pointer" />
+          )}
+
           <StepForwardOutlined className="w-4 cursor-pointer" />
           <RetweetOutlined className="w-4 cursor-pointer" />
         </div>
         <div className="flex items-center gap-5">
-          <p>1:06</p>
-          <div className="w-[60vw] max-w-[500px] bg-gray-300 rounded-full cursor-pointer">
-            <hr className="h-1 border-none w-20 bg-green-800 rounded-full" />
+          <p>
+            {time.currentTime.minute}:{time.currentTime.seconds}
+          </p>
+          <div
+            ref={seekBg}
+            className="w-[60vw] max-w-[500px] bg-gray-300 rounded-full cursor-pointer"
+          >
+            <hr
+              ref={seekBar}
+              className="h-1 border-none w-20 bg-green-800 rounded-full"
+            />
           </div>
-          <p>3:20</p>
+          <p>
+            {time.totalTime.minute}:{time.totalTime.seconds}
+          </p>
         </div>
       </div>
       <div className="hidden lg:flex items-center gap-2 opacity-75">
