@@ -107,6 +107,12 @@ exports.getAllFilmService = async (
       case "Popular":
         sortOption = { countClick: -1 };
         break;
+      case "IsDeleted":
+        sortOption = { isDeleted: true };
+        break;
+      case "Active":
+        sortOption = { isDeleted: false };
+        break;
       default:
         sortOption = {};
         break;
@@ -116,7 +122,6 @@ exports.getAllFilmService = async (
       films = await Film.find({
         episodes: { $exists: true, $size: 0 },
         ...(category && { genre: category }),
-        isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
@@ -126,7 +131,6 @@ exports.getAllFilmService = async (
       films = await Film.find({
         episodes: { $exists: true, $not: { $size: 0 } },
         ...(category && { genre: category }),
-        isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
@@ -135,7 +139,6 @@ exports.getAllFilmService = async (
     } else if (type === "All") {
       films = await Film.find({
         ...(category && { genre: category }),
-        isDeleted: false,
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
         .sort(sortOption)
@@ -143,7 +146,6 @@ exports.getAllFilmService = async (
         .limit(limit);
     } else if (type === "Person") {
       films = await Film.find({
-        isDeleted: false,
         ...(search && { cast: { $regex: search, $options: "i" } }),
       }).sort(sortOption);
     } else {
