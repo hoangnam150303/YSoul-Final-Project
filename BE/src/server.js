@@ -9,6 +9,7 @@ const bodyParser = require("body-parser");
 const userRoute = require("./routes/userRoutes");
 const filmRoute = require("./routes/filmRoutes");
 const invoiceRoute = require("./routes/invoiceRoutes");
+const artistRoute = require("./routes/artistRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -37,6 +38,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", userRoute);
 app.use("/film", filmRoute);
 app.use("/invoice", invoiceRoute);
+app.use("/artist", artistRoute);
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);

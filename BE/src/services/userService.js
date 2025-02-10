@@ -59,8 +59,9 @@ exports.loginLocalService = async (email, password) => {
     }
     await conectPostgresDb.query(
       "UPDATE users SET lastlogin = $1 WHERE id = $2",
-      [new Date(), user.id]
+      [new Date(), user.rows[0].id]
     );
+
     const access_token = jwt.sign(
       { id: user.rows[0].id, role: user.rows[0].role, name: user.rows[0].name },
       process.env.ACCESS_TOKEN,
