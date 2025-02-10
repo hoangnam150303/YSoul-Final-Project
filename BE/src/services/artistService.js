@@ -146,6 +146,7 @@ exports.interactArtistService = async (id, userId, type) => {
     } else if (type === "unlike") {
       query = `UPDATE artists SET likes = likes - 1 WHERE id = ${id}`;
     }
+    
     await conectPostgresDb.query(query);
     return { success: true };
   } catch (error) {
