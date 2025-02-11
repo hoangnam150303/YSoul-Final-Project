@@ -10,7 +10,9 @@ const createSingleTableQuery = `
     isdeleted BOOLEAN DEFAULT false,
     countlisten INTEGER DEFAULT 0,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
-    album_id INTEGER REFERENCES albums(id) ON DELETE CASCADE
+    album_id INTEGER REFERENCES albums(id) ON DELETE CASCADE,
+    likes INTEGER DEFAULT 0,
+    user_id_like INTEGER[] DEFAULT '{}';
 )
 `;
 

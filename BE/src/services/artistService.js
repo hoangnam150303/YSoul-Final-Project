@@ -130,26 +130,65 @@ exports.getArtistByIdService = async (id) => {
 
 exports.interactArtistService = async (id, userId, type) => {
   try {
-    const artist = await conectPostgresDb.query(
-      "SELECT * FROM artists WHERE id = $1"
+    // Lấy dữ liệu artist theo id
+    const artistResult = await conectPostgresDb.query(
+      "SELECT * FROM artists WHERE id = $1",
+      [id]
     );
-    if (!artist) {
-      throw new Error("Error");
-    }
-    let query;
-    if (type === "follow") {
-      query = `UPDATE artists SET follows = follows + 1 WHERE id = ${id}`;
-    } else if (type === "unfollow") {
-      query = `UPDATE artists SET follows = follows - 1 WHERE id = ${id}`;
-    } else if (type === "like") {
-      query = `UPDATE artists SET likes = likes + 1 WHERE id = ${id}`;
-    } else if (type === "unlike") {
-      query = `UPDATE artists SET likes = likes - 1 WHERE id = ${id}`;
+    
+    if (artistResult.rowCount === 0) {
+      throw new Error("Artist not found");
     }
     
-    await conectPostgresDb.query(query);
+    const artist = artistResult.rows[0];
+
+    if (type === "follow") {
+      // Kiểm tra nếu userId đã có trong mảng user_id_follow hay chưa
+      if (artist.user_id_follow.includes(userId)) {
+        // Nếu đã follow, tiến hành xóa userId khỏi mảng và giảm follows đi 1
+        await conectPostgresDb.query(
+          `UPDATE artists
+           SET follows = follows - 1,
+               user_id_follow = array_remove(user_id_follow, $1)
+           WHERE id = $2`,
+          [userId, id]
+        );
+      } else {
+        // Nếu chưa follow, thêm userId vào mảng và tăng follows lên 1
+        await conectPostgresDb.query(
+          `UPDATE artists
+           SET follows = follows + 1,
+               user_id_follow = array_append(user_id_follow, $1)
+           WHERE id = $2`,
+          [userId, id]
+        );
+      }
+    } else if (type === "like") {
+      // Kiểm tra nếu userId đã có trong mảng user_id_like hay chưa
+      if (artist.user_id_like.includes(userId)) {
+        // Nếu đã like, tiến hành xóa userId khỏi mảng và giảm likes đi 1
+        await conectPostgresDb.query(
+          `UPDATE artists
+           SET likes = likes - 1,
+               user_id_like = array_remove(user_id_like, $1)
+           WHERE id = $2`,
+          [userId, id]
+        );
+      } else {
+        // Nếu chưa like, thêm userId vào mảng và tăng likes lên 1
+        await conectPostgresDb.query(
+          `UPDATE artists
+           SET likes = likes + 1,
+               user_id_like = array_append(user_id_like, $1)
+           WHERE id = $2`,
+          [userId, id]
+        );
+      }
+    }
     return { success: true };
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
+

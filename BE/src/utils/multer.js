@@ -6,12 +6,12 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "YSoul",
-    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mkv"],
+    allowed_formats: ["jpg", "jpeg", "png", "webp", "mp4", "mkv", "mp3"],
     resource_type: "auto",
   },
 });
 
 const upload = multer({
-  storage
+  storage,
 });
 module.exports = upload;
