@@ -7,7 +7,10 @@ const createArtistTableQuery = `
     avatar VARCHAR(200),
     isdeleted BOOLEAN DEFAULT false,
     likes INTEGER DEFAULT 0,
-    follows INTEGER DEFAULT 0
+    follows INTEGER DEFAULT 0,
+    user_id_like INTEGER[] DEFAULT '{}',
+    user_id_follow INTEGER[] DEFAULT '{}'
+
 )
 `;
 

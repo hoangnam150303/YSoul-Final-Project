@@ -1,19 +1,20 @@
 const { connectPostgresDb } = require("../configs/database");
 
-const createSingleTableQuery = `
+const createAlbumTableQuery = `
  CREATE TABLE IF NOT EXISTS albums  (
     id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     image VARCHAR(200),
-    mp3 VARCHAR(200),
     release_date DATE,
-     isdeleted BOOLEAN DEFAULT false,
+    isdeleted BOOLEAN DEFAULT false,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
+    likes INTEGER DEFAULT 0,
+    user_id_like INTEGER[] DEFAULT '{}';
     
 )
 `;
 
-connectPostgresDb.query(createSingleTableQuery, (err, res) => {
+connectPostgresDb.query(createAlbumTableQuery, (err, res) => {
   if (err) {
     console.error("Error creating single table:", err);
   } else {
