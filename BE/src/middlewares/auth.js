@@ -45,9 +45,10 @@ exports.isVip = async (req, res, next) => {
 
     const decode = jwt.verify(token, process.env.ACCESS_TOKEN); // Giải mã token
     const vipUser = await conectPostgresDb.query(
-      "SELECT * FROM users WHERE id = $1 AND role = $2 AND vip = $4",
-      [decode.id, "user", true, true]
+      "SELECT * FROM users WHERE id = $1 AND role = $2 or role = $3 AND vip = $4",
+      [decode.id, "user", "admin", true]
     );
+
     if (vipUser.rows[0].status === false) {
       return res.status(404).json({
         message: "Your account is not active",

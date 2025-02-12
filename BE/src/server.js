@@ -10,6 +10,7 @@ const userRoute = require("./routes/userRoutes");
 const filmRoute = require("./routes/filmRoutes");
 const invoiceRoute = require("./routes/invoiceRoutes");
 const artistRoute = require("./routes/artistRoutes");
+const albumRoute = require("./routes/albumRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -39,6 +40,7 @@ app.use("/", userRoute);
 app.use("/film", filmRoute);
 app.use("/invoice", invoiceRoute);
 app.use("/artist", artistRoute);
+app.use("/album", albumRoute);
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);

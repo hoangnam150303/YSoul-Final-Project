@@ -48,76 +48,84 @@ exports.updateArtistService = async (id, name, avatar) => {
   }
 };
 
+// this function is for admin, admin can delete artist
 exports.activeOrDeactiveArtistService = async (id) => {
   try {
-    const artist = await conectPostgresDb.query(
+    const artist = await conectPostgresDb.query( // get artist by id
       `SELECT * FROM artists WHERE id = ${id}`
     );
-    if (!artist) {
+    if (!artist) { // if artist not found, return error message
       throw new Error("Error");
     }
-    let query;
-    if (artist.rows[0].isdeleted === true) {
-      query = `UPDATE artists SET isdeleted = false WHERE id = ${id}`;
-    } else {
-      query = `UPDATE artists SET isdeleted = true WHERE id = ${id}`;
+    let query; // create variable query
+    if (artist.rows[0].is_deleted === true) { // if artist is deleted
+      query = `UPDATE artists SET is_deleted = false WHERE id = ${id}`; // set is_deleted to false
+    } else { // if artist is not deleted
+      query = `UPDATE artists SET is_deleted = true WHERE id = ${id}`; // set is_deleted to true
     }
-    await conectPostgresDb.query(query);
+    await conectPostgresDb.query(query); // update artist to database
     return { success: true };
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.getAllArtistService = async (filter, search) => {
+// this function is for admin and user, admin and user can get all artists
+exports.getAllArtistService = async (filter, search, typeUser) => {
   try {
-    let filterOptions = "";
-    let sortOrder = "DESC";
-    const searchValue = search ? `%${search}%` : "%";
-    switch (filter) {
-      case "Popular":
-        filterOptions = "likes";
-        break;
-      case "Favorites":
-        filterOptions = "follows";
+    let filterOptions = ""; // set filterOptions to empty string
+    let sortOrder = "DESC"; // set sortOrder to DESC
+    const searchValue = search ? `%${search}%` : "%"; //  set searchValue to search or to empty string
+    switch (filter) { // switch filter,
+      case "popular":
+        filterOptions = "likes";  // if filter is popular, set filterOptions to likes
         break;
       case "isDeleted":
-        filterOptions = "isdeleted = true";
+        filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
       case "Active":
-        filterOptions = "isdeleted = false";
+        filterOptions = "is_deleted = false"; // if filter is Active, set filterOptions to is_deleted = false
         break;
       default:
-        filterOptions = "id";
+        filterOptions = "id"; // if filter is not popular, isDeleted, Active, set filterOptions to id
     }
-    const artists = await conectPostgresDb.query(
-      `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`,
-      [searchValue]
-    );
-    if (!artists) {
+    let artists; // create variable artists
+    if (typeUser === "admin") { // if typeUser is admin
+      artists = await conectPostgresDb.query(
+        `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+        [searchValue]
+      );
+    } else if (typeUser === "user") { // if typeUser is user
+      artists = await conectPostgresDb.query( // get all artists from database where is_deleted is false
+        `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
+        [searchValue]
+      );
+    }
+    if (!artists) { // if artists not found, return error message
       throw new Error("No artists found");
     }
-    return { success: true, artists: artists.rows };
+    return { success: true, artists: artists.rows }; // return success message and artists
   } catch (error) {
     console.log(error);
   }
 };
 
+// this function is for user, admin, user or admin can get artist by id
 exports.getArtistByIdService = async (id) => {
   try {
-    const artist = await conectPostgresDb.query(
+    const artist = await conectPostgresDb.query( // get artist by id
       `SELECT * FROM artists WHERE id = ${id}`
     );
-    const singles = await conectPostgresDb.query(
+    const singles = await conectPostgresDb.query( // get singles by artist_id
       `SELECT * FROM singles WHERE artist_id = ${id}`
     );
-    const albums = await conectPostgresDb.query(
+    const albums = await conectPostgresDb.query( // get albums by artist_id
       `SELECT * FROM albums WHERE artist_id = ${id}`
     );
-    if (!artist) {
+    if (!artist) { // if artist not found, return error message
       throw new Error("No artist found");
     }
-    return {
+    return { // return artist, singles and albums
       success: true,
       artist: artist.rows[0],
       singles: singles.rows,
@@ -128,24 +136,25 @@ exports.getArtistByIdService = async (id) => {
   }
 };
 
+// this function is for user, user can interact with artist
 exports.interactArtistService = async (id, userId, type) => {
   try {
-    // Lấy dữ liệu artist theo id
-    const artistResult = await conectPostgresDb.query(
+
+    const artistResult = await conectPostgresDb.query( // get artist by id
       "SELECT * FROM artists WHERE id = $1",
       [id]
     );
-    
-    if (artistResult.rowCount === 0) {
+
+    if (artistResult.rowCount === 0) { // if artist not found, return error message
       throw new Error("Artist not found");
     }
-    
+
     const artist = artistResult.rows[0];
 
     if (type === "follow") {
-      // Kiểm tra nếu userId đã có trong mảng user_id_follow hay chưa
+      // check if userId is in user_id_follow array or not
       if (artist.user_id_follow.includes(userId)) {
-        // Nếu đã follow, tiến hành xóa userId khỏi mảng và giảm follows đi 1
+        // if userId is in user_id_follow array, remove userId from array and decrease follows by 1
         await conectPostgresDb.query(
           `UPDATE artists
            SET follows = follows - 1,
@@ -154,7 +163,7 @@ exports.interactArtistService = async (id, userId, type) => {
           [userId, id]
         );
       } else {
-        // Nếu chưa follow, thêm userId vào mảng và tăng follows lên 1
+        // if userId is not in user_id_follow array, add userId to array and increase follows by 1
         await conectPostgresDb.query(
           `UPDATE artists
            SET follows = follows + 1,
@@ -164,9 +173,9 @@ exports.interactArtistService = async (id, userId, type) => {
         );
       }
     } else if (type === "like") {
-      // Kiểm tra nếu userId đã có trong mảng user_id_like hay chưa
+      // check if userId is in user_id_like array or not
       if (artist.user_id_like.includes(userId)) {
-        // Nếu đã like, tiến hành xóa userId khỏi mảng và giảm likes đi 1
+        // if userId is in user_id_like array, remove userId from array and decrease likes by 1
         await conectPostgresDb.query(
           `UPDATE artists
            SET likes = likes - 1,
@@ -175,7 +184,7 @@ exports.interactArtistService = async (id, userId, type) => {
           [userId, id]
         );
       } else {
-        // Nếu chưa like, thêm userId vào mảng và tăng likes lên 1
+        //  if userId is not in user_id_like array, add userId to array and increase likes by 1
         await conectPostgresDb.query(
           `UPDATE artists
            SET likes = likes + 1,
@@ -191,4 +200,3 @@ exports.interactArtistService = async (id, userId, type) => {
     throw error;
   }
 };
-
