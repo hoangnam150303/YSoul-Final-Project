@@ -73,8 +73,8 @@ exports.activeOrDeactiveArtist = async (req, res) => {
 
 exports.getAllArtist = async (req, res) => {
   try {
-    const { filter, search } = req.query;
-    const response = await artistService.getAllArtistService(filter, search);
+    const { filter, search, typeUser } = req.query;
+    const response = await artistService.getAllArtistService(filter, search,typeUser);
     if (!response.success) {
       return res
         .status(401)
