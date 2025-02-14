@@ -1,5 +1,5 @@
 const { conectPostgresDb } = require("../configs/database");
-
+const cloudinaryHelpers = require("../helpers/cloudinaryHelpers");
 // this function is for admin, admin can create new album
 exports.createAlbumService = async (title, artistId, image, releaseYear) => {
   try {
@@ -53,7 +53,14 @@ exports.updateAlbumService = async (
     }
     if (image) {
       // if image exists, update album with image
-      query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, image = '${image}', release_year = '${releaseYear}' WHERE id = ${id}`;
+      const result = await cloudinaryHelpers.removeFile(
+        validAlbum.rows[0].image
+      );
+      if (!result.success) {
+        throw new Error("Error removing old mp3");
+      } else {
+        query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, image = '${image}', release_year = '${releaseYear}' WHERE id = ${id}`;
+      }
     } else {
       // if image not exists, update album without image
       query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, release_year = '${releaseYear}' WHERE id = ${id}`;

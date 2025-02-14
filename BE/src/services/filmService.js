@@ -219,7 +219,7 @@ exports.updateFilmByIdService = async (
     if (!film) {
       throw new Error("Film not found");
     }
-    let filmUpdate = "";
+    let filmUpdate;
     if (numberTitle && video) {
       filmUpdate = await Film.findByIdAndUpdate(
         filmId,

@@ -74,7 +74,11 @@ exports.activeOrDeactiveArtist = async (req, res) => {
 exports.getAllArtist = async (req, res) => {
   try {
     const { filter, search, typeUser } = req.query;
-    const response = await artistService.getAllArtistService(filter, search,typeUser);
+    const response = await artistService.getAllArtistService(
+      filter,
+      search,
+      typeUser
+    );
     if (!response.success) {
       return res
         .status(401)
@@ -108,7 +112,8 @@ exports.getArtistById = async (req, res) => {
 
 exports.interactArtist = async (req, res) => {
   try {
-    const { id, userId, type } = req.params;
+    const { id, type } = req.params;
+    const userId = req.user.id;
     if (!id) {
       return res
         .status(401)

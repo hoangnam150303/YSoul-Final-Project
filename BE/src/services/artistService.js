@@ -1,5 +1,5 @@
 const { conectPostgresDb } = require("../configs/database");
-
+const cloudinaryHelpers = require("../helpers/cloudinaryHelpers");
 // this function is for admin, admin can create new artist
 exports.createArtistService = async (name, avatar) => {
   try {
@@ -27,10 +27,21 @@ exports.updateArtistService = async (id, name, avatar) => {
     // create 2 variables query and values
     let query, values;
 
+    const validArtist = await conectPostgresDb.query(
+      "SELECT * FROM artists where id = $1",
+      [id]
+    );
     if (avatar) {
       // if avatar is exist update name and avatar
-      query = "UPDATE artists SET name = $1, avatar = $2 WHERE id = $3";
-      values = [name, avatar, id];
+      const result = await cloudinaryHelpers.removeFile(
+        validArtist.rows[0].avatar
+      );
+      if (!result.success) {
+        throw new Error("Error removing old avatar");
+      } else {
+        query = "UPDATE artists SET name = $1, avatar = $2 WHERE id = $3";
+        values = [name, avatar, id];
+      }
     } else {
       // if avatar is not exist update name
       query = "UPDATE artists SET name = $1 WHERE id = $2";
@@ -51,16 +62,20 @@ exports.updateArtistService = async (id, name, avatar) => {
 // this function is for admin, admin can delete artist
 exports.activeOrDeactiveArtistService = async (id) => {
   try {
-    const artist = await conectPostgresDb.query( // get artist by id
+    const artist = await conectPostgresDb.query(
+      // get artist by id
       `SELECT * FROM artists WHERE id = ${id}`
     );
-    if (!artist) { // if artist not found, return error message
+    if (!artist) {
+      // if artist not found, return error message
       throw new Error("Error");
     }
     let query; // create variable query
-    if (artist.rows[0].is_deleted === true) { // if artist is deleted
+    if (artist.rows[0].is_deleted === true) {
+      // if artist is deleted
       query = `UPDATE artists SET is_deleted = false WHERE id = ${id}`; // set is_deleted to false
-    } else { // if artist is not deleted
+    } else {
+      // if artist is not deleted
       query = `UPDATE artists SET is_deleted = true WHERE id = ${id}`; // set is_deleted to true
     }
     await conectPostgresDb.query(query); // update artist to database
@@ -76,9 +91,11 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
     let filterOptions = ""; // set filterOptions to empty string
     let sortOrder = "DESC"; // set sortOrder to DESC
     const searchValue = search ? `%${search}%` : "%"; //  set searchValue to search or to empty string
-    switch (filter) { // switch filter,
+    switch (
+      filter // switch filter,
+    ) {
       case "popular":
-        filterOptions = "likes";  // if filter is popular, set filterOptions to likes
+        filterOptions = "likes"; // if filter is popular, set filterOptions to likes
         break;
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
@@ -90,18 +107,22 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
         filterOptions = "id"; // if filter is not popular, isDeleted, Active, set filterOptions to id
     }
     let artists; // create variable artists
-    if (typeUser === "admin") { // if typeUser is admin
+    if (typeUser === "admin") {
+      // if typeUser is admin
       artists = await conectPostgresDb.query(
         `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
         [searchValue]
       );
-    } else if (typeUser === "user") { // if typeUser is user
-      artists = await conectPostgresDb.query( // get all artists from database where is_deleted is false
+    } else if (typeUser === "user") {
+      // if typeUser is user
+      artists = await conectPostgresDb.query(
+        // get all artists from database where is_deleted is false
         `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     }
-    if (!artists) { // if artists not found, return error message
+    if (!artists) {
+      // if artists not found, return error message
       throw new Error("No artists found");
     }
     return { success: true, artists: artists.rows }; // return success message and artists
@@ -113,19 +134,24 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
 // this function is for user, admin, user or admin can get artist by id
 exports.getArtistByIdService = async (id) => {
   try {
-    const artist = await conectPostgresDb.query( // get artist by id
+    const artist = await conectPostgresDb.query(
+      // get artist by id
       `SELECT * FROM artists WHERE id = ${id}`
     );
-    const singles = await conectPostgresDb.query( // get singles by artist_id
+    const singles = await conectPostgresDb.query(
+      // get singles by artist_id
       `SELECT * FROM singles WHERE artist_id = ${id}`
     );
-    const albums = await conectPostgresDb.query( // get albums by artist_id
+    const albums = await conectPostgresDb.query(
+      // get albums by artist_id
       `SELECT * FROM albums WHERE artist_id = ${id}`
     );
-    if (!artist) { // if artist not found, return error message
+    if (!artist) {
+      // if artist not found, return error message
       throw new Error("No artist found");
     }
-    return { // return artist, singles and albums
+    return {
+      // return artist, singles and albums
       success: true,
       artist: artist.rows[0],
       singles: singles.rows,
@@ -139,13 +165,14 @@ exports.getArtistByIdService = async (id) => {
 // this function is for user, user can interact with artist
 exports.interactArtistService = async (id, userId, type) => {
   try {
-
-    const artistResult = await conectPostgresDb.query( // get artist by id
+    const artistResult = await conectPostgresDb.query(
+      // get artist by id
       "SELECT * FROM artists WHERE id = $1",
       [id]
     );
 
-    if (artistResult.rowCount === 0) { // if artist not found, return error message
+    if (artistResult.rowCount === 0) {
+      // if artist not found, return error message
       throw new Error("Artist not found");
     }
 
