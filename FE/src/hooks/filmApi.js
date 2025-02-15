@@ -32,7 +32,7 @@ const filmApi = {
     return axiosClient.put(url);
   },
 
-  postUpdateStatusFilm: (id, type, data,userId) => {
+  postUpdateStatusFilm: (id, type, data, userId) => {
     console.log(id, type, data);
 
     const url = `${FILM_API_ENDPOINT}/updateStatusFilmById/${id}/${type}/${userId}`;

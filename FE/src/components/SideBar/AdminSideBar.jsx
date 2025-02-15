@@ -32,6 +32,7 @@ export const AdminSideBar = () => {
       key: "3",
       icon: <UploadOutlined />,
       label: "Music",
+      path: "/musicAdmin",
     },
   ];
 

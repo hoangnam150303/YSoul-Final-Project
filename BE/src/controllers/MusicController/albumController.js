@@ -1,31 +1,30 @@
-const albumService = require("../services/albumService");
+const albumService = require("../../services/MusicService/albumService");
 
 // this function is for admin, admin can create new album
 exports.createAlbum = async (req, res) => {
   try {
-    const { title, artistId, releaseYear } = req.body; // get title, artistId, releaseYear from request body
-    if (!title || !artistId || !releaseYear) {
+    const { title, artist_id, release_year } = req.body; // get title, artistId, releaseYear from request body
+
+    if (!title || !artist_id || !release_year) {
       // if title, artistId, releaseYear is empty, return error message
-      return res
-        .status(401)
-        .json({ message: "All fields are required.", error });
+      return res.status(401).json({ message: "All fields are required." });
     }
     const image = req.file.path; // get image path from request file
+
     const response = await albumService.createAlbumService(
       // call createAlbumService from albumService
       title,
-      artistId,
+      artist_id,
       image,
-      releaseYear
+      release_year
     );
     if (!response.success) {
       // if response is not success, return error message
-      return res
-        .status(401)
-        .json({ message: "Error! Please try again.", error });
+      return res.status(401).json({ message: "Error! Please try again." });
     }
     return res.status(200).json(response); // return response
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "Error! Please try again.", error });
   }
 };
@@ -118,8 +117,13 @@ exports.interactAlbum = async (req, res) => {
     const albumId = req.params.id; // get albumId from request params
     const type = req.query.type; // get type from request query
     const userId = req.user.id; // get userId from request user
-    const response = await albumService.interactAlbumService(albumId, type,userId); // call interactAlbumService from albumService
-    if (!response.success) { // if response is not success, return error message
+    const response = await albumService.interactAlbumService(
+      albumId,
+      type,
+      userId
+    ); // call interactAlbumService from albumService
+    if (!response.success) {
+      // if response is not success, return error message
       return res.status(401).json({ message: "Error! Please try again." });
     }
     return res.status(200).json(response); // return response

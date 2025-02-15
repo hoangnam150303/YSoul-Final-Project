@@ -1,5 +1,5 @@
-const Film = require("../models/film");
-const wishList = require("../models/wishList");
+const Film = require("../../models/film");
+const wishList = require("../../models/wishList");
 exports.createFilmService = async (
   name,
   description,
