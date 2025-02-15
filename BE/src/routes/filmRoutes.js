@@ -1,7 +1,7 @@
 const express = require("express");
 const filmRoute = express.Router();
 const auth = require("../middlewares/auth");
-const filmController = require("../controllers/filmController");
+const filmController = require("../controllers/FilmController/filmController");
 const upload = require("../utils/multer");
 
 filmRoute.post(

@@ -1,5 +1,5 @@
-const { conectPostgresDb } = require("../configs/database");
-const cloudinaryHelpers = require("../helpers/cloudinaryHelpers");
+const { conectPostgresDb } = require("../../configs/database");
+const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is for admin, admin can create new album
 exports.createAlbumService = async (title, artistId, image, releaseYear) => {
   try {

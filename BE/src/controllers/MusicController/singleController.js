@@ -1,4 +1,4 @@
-const singleService = require("../services/singleService");
+const singleService = require("../../services/MusicService/singleService");
 
 // this function is for admin, admin can create new single
 exports.createSingle = async (req, res) => {

@@ -1,4 +1,4 @@
-const artistService = require("../services/artistService");
+const artistService = require("../../services/MusicService/artistService");
 
 // this function is for admin, admin can create new artist
 exports.createArtist = async (req, res) => {

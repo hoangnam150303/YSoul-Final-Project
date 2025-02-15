@@ -13,6 +13,7 @@ import PaymentPage from "../pages/GeneralPages/PaymentPage";
 import PaymentSuccess from "../pages/GeneralPages/PaymentSuccessPage";
 import { MusicHomePage } from "../pages/MusicPages/MusicHomePage";
 import { AlbumPage } from "../pages/MusicPages/AlbumPage";
+import { CRUDMusicPage } from "../pages/AdminPages/CRUDMusicPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/favouriteMovie" element={<FavouriteMoviePage />}></Route>
         <Route path="/homePageAdmin" element={<AdminHomePage />}></Route>
         <Route path="/movieAdmin" element={<CRUDFilmPage />}></Route>
+        <Route path="/musicAdmin" element={<CRUDMusicPage />}></Route>
         <Route path="/payment" element={<PaymentPage />}></Route>
         <Route
           path="/paymentSuccess/:invoice_id"
