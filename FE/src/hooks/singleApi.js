@@ -1,3 +1,4 @@
+
 import { axiosClient } from "../ApiConfig/apiConfig";
 
 const SINGLE_API_ENDPOINT = "/single";
@@ -14,6 +15,20 @@ const singleApi = {
       },
     });
   },
+
+  changeStatusSingle: (id) => {
+    const url = `${SINGLE_API_ENDPOINT}/activeOrDeactive/${id}`;
+    return axiosClient.put(url);
+  },
+
+  updateSingle: (id, value) => {
+    const url = `${SINGLE_API_ENDPOINT}/updateSingle/${id}`; // update single by id
+    return axiosClient.put(url, value, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  }
 };
 
 export default singleApi;

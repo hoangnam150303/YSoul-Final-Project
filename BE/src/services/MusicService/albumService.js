@@ -46,6 +46,8 @@ exports.updateAlbumService = async (
       // check if album already exists
       `SELECT * FROM albums WHERE id = ${id}`
     );
+  
+    
     let query;
     if (validAlbum.rows.length === 0) {
       // if album not exists, return error message
@@ -57,14 +59,16 @@ exports.updateAlbumService = async (
         validAlbum.rows[0].image
       );
       if (!result.success) {
-        throw new Error("Error removing old mp3");
+        throw new Error("Error removing old image");
       } else {
         query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, image = '${image}', release_year = '${releaseYear}' WHERE id = ${id}`;
       }
     } else {
+      
       // if image not exists, update album without image
       query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, release_year = '${releaseYear}' WHERE id = ${id}`;
     }
+    
     validAlbum = await conectPostgresDb.query(
       // update album to database
       query

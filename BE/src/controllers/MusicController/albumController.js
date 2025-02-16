@@ -32,7 +32,8 @@ exports.createAlbum = async (req, res) => {
 // this function is for admin, admin can update album
 exports.updateAlbum = async (req, res) => {
   try {
-    const { title, artistId, releaseYear } = req.body; // get title, artistId, releaseYear from request body
+    const { title,  artist_id, release_year } = req.body; // get title, artistId, releaseYear from request body
+
     const id = req.params.id; // get id from request params
     if (!id) {
       return res.status(401).json({ message: "Album id is required." });
@@ -42,9 +43,9 @@ exports.updateAlbum = async (req, res) => {
       // call updateAlbumService from albumService
       id,
       title,
-      artistId,
+      artist_id,
       image,
-      releaseYear
+      release_year
     );
     if (!response.success) {
       // if response is not success, return error message

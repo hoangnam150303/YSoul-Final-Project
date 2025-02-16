@@ -14,6 +14,18 @@ const artistApi = {
       },
     });
   },
+  changeStatusArtist: (id) => {
+    const url = `${ARTIST_API_ENDPOINT}/activeOrDeactiveArtist/${id}`;
+    return axiosClient.put(url);
+  },
+  upateArtist: (id, value) => {
+    const url = `${ARTIST_API_ENDPOINT}/updateArtist/${id}`;
+    return axiosClient.put(url, value, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 export default artistApi;
