@@ -14,6 +14,19 @@ const albumApi = {
       },
     });
   },
+
+  changeStatusAlbum: (id) => {
+    const url = `${ALBUM_API_ENDPOINT}/activeOrDeactive/${id}`;
+    return axiosClient.put(url);
+  },
+  updateAlbum: (id, value) => {
+    const url = `${ALBUM_API_ENDPOINT}/updateAlbum/${id}`; // update album by id
+    return axiosClient.put(url, value, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 export default albumApi;
