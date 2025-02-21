@@ -29,7 +29,7 @@ singleRoute.put(
   singleController.activeOrDeactiveSingle
 );
 singleRoute.put("/interactSingle/:id",auth.isVip,singleController.interactSingle)
-singleRoute.get("/getSingleById/:id",auth.isVip, singleController.getSingleById);
+singleRoute.get("/getSngleById/:id",auth.isVip, singleController.getSingleById);
 singleRoute.get("/getAllSingle", auth.isVip, singleController.getAllSingle);
 singleRoute.get("/nextSingle/:id",auth.isVip, singleController.nextSingle)
 module.exports = singleRoute;
