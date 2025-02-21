@@ -28,6 +28,14 @@ const singleApi = {
         "Content-Type": "multipart/form-data",
       },
     });
+  },
+  getSingleById: (id) => {
+    const url = `${SINGLE_API_ENDPOINT}/getSngleById/${id}`;
+    return axiosClient.get(url);
+  },
+  nextSingle: (id) => {
+    const url = `${SINGLE_API_ENDPOINT}/nextSingle/${id}`;
+    return axiosClient.get(url);
   }
 };
 

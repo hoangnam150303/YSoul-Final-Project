@@ -151,15 +151,28 @@ exports.activeOrDeactiveSingleService = async (id) => {
 // this function is for user, user can get single
 exports.getSingleByIdService = async (id) => {
   try {
+    if (!id || isNaN(id)) {
+      console.log(!id);
+
+      throw new Error("Invalid id");
+    }
     const single = await conectPostgresDb.query(
-      // get single by id
-      `SELECT * FROM singles WHERE id = ${id}`
+      "SELECT * FROM singles WHERE id = $1",
+      [id]
     );
+
     if (single.rows.length === 0) {
       // if single not exists, return error message
       throw new Error("Single not found");
     }
-    return { success: true, data: single.rows[0] }; // if single exists, return single
+    const artistName = await conectPostgresDb.query(
+      `SELECT * FROM artists WHERE id = ${single.rows[0].artist_id}`
+    );
+    return {
+      success: true,
+      data: single.rows[0],
+      artistName: artistName.rows[0].name,
+    }; // if single exists, return single
   } catch (error) {
     console.log(error);
   }
@@ -258,9 +271,12 @@ exports.interactSingleService = async (id, status, userId) => {
 // this function is for user,  user can forward to another song
 exports.nextSingleService = async (id) => {
   try {
+    if (!id || isNaN(id)) {
+      throw new Error("Invalid id");
+    }
     const currentSingle = await conectPostgresDb.query(
-      // select current single by id
-      `SELECT * from singles where id = ${id}`
+      "SELECT * FROM singles WHERE id = $1",
+      [id]
     );
     if (currentSingle.rows.length === 0) {
       // if current single is not exist return error
@@ -272,8 +288,14 @@ exports.nextSingleService = async (id) => {
     );
     const randomIndex = Math.floor(Math.random() * singles.rows.length); // create randomIndex and set it equal one number random from singles.rows.length
     const randomSingle = singles.rows[randomIndex]; // create randomeSingle and set it equal result from singles which has index equal randomIndex
-
-    return { success: true, nextSingle: randomSingle };
+    const artistName = await conectPostgresDb.query(
+      `SELECT * FROM artists WHERE id = ${randomSingle.artist_id}`
+    );
+    return {
+      success: true,
+      data: randomSingle,
+      artistName: artistName.rows[0].name,
+    };
   } catch (error) {
     console.log(error);
   }

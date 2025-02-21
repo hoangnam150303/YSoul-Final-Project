@@ -10,37 +10,48 @@ import React, { useContext } from "react";
 import { PlayerContext } from "../../context/PlayerContext";
 
 export const Player = () => {
-  const { seekBar, seekBg, playStatus, play, pause, time } =
-    useContext(PlayerContext);
+  const {
+    seekBar,
+    seekBg,
+    playStatus,
+    play,
+    pause,
+    time,
+    information,
+    nextSong,
+    prevSong,
+  } = useContext(PlayerContext);
   return (
     <div className="h-[10%] w-full bg-black flex justify-between items-center text-white px-96">
       <div className="hidden lg:flex items-center gap-4">
-        <img
-          className="w-12"
-          src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1738655275/71Q82A9HWBL_mtuanu.jpg"
-          alt=""
-        />
+        <img className="w-12" src={information?.data?.image} alt="" />
         <div>
-          <p>Confidnet</p>
-          <p>This is description</p>
+          <p>{information?.data?.title}</p>
+          <p>{information?.artistName}</p>
         </div>
       </div>
       <div className="flex flex-col items-center gap-1 m-auto">
         <div className="flex gap-4">
           <i className="bi bi-shuffle text-white cursor-pointer"></i>
-          <StepBackwardOutlined className="w-4 cursor-pointer" />
+          <StepBackwardOutlined
+            onClick={prevSong}
+            className="w-4 cursor-pointer"
+          />
           {playStatus ? (
             <PauseOutlined onClick={pause} className="w-4 cursor-pointer" />
           ) : (
             <CaretRightOutlined onClick={play} className="w-4 cursor-pointer" />
           )}
 
-          <StepForwardOutlined className="w-4 cursor-pointer" />
+          <StepForwardOutlined
+            onClick={nextSong}
+            className="w-4 cursor-pointer"
+          />
           <RetweetOutlined className="w-4 cursor-pointer" />
         </div>
         <div className="flex items-center gap-5">
           <p>
-            {time.currentTime.minute}:{time.currentTime.seconds}
+            {time.currentTime?.minute}:{time.currentTime?.seconds}
           </p>
           <div
             ref={seekBg}
@@ -52,7 +63,7 @@ export const Player = () => {
             />
           </div>
           <p>
-            {time.totalTime.minute}:{time.totalTime.seconds}
+            {time.totalTime?.minute}:{time.totalTime?.seconds}
           </p>
         </div>
       </div>

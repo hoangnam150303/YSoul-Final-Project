@@ -46,8 +46,7 @@ exports.updateAlbumService = async (
       // check if album already exists
       `SELECT * FROM albums WHERE id = ${id}`
     );
-  
-    
+
     let query;
     if (validAlbum.rows.length === 0) {
       // if album not exists, return error message
@@ -64,11 +63,10 @@ exports.updateAlbumService = async (
         query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, image = '${image}', release_year = '${releaseYear}' WHERE id = ${id}`;
       }
     } else {
-      
       // if image not exists, update album without image
       query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, release_year = '${releaseYear}' WHERE id = ${id}`;
     }
-    
+
     validAlbum = await conectPostgresDb.query(
       // update album to database
       query
@@ -112,7 +110,7 @@ exports.activeOrDeactiveAlbumService = async (id) => {
 exports.getAllAlbumService = async (filter, search, typeUser) => {
   try {
     let filterOptions = ""; // set filterOptions to empty string
-    let sortOrder = "DESC"; // set sortOrder to DESC
+    let sortOrder = "ASC"; // set sortOrder to DESC
     const searchValue = search ? `%${search}%` : "%"; // set searchValue to search or to empty string
     switch (
       filter // switch filter,
@@ -122,6 +120,9 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
         break;
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
+        break;
+      case "newest":
+        filterOptions = "release_year"; // if filter is newest, set filterOptions to release_year
         break;
       case "Active":
         filterOptions = "is_deleted = false"; // if filter is Active, set filterOptions to is_deleted = false
