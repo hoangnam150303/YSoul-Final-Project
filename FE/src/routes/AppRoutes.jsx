@@ -35,7 +35,7 @@ function App() {
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}
         ></Route>
-        <Route path="/album" element={<AlbumPage />}></Route>
+        <Route path="/album/:id" element={<AlbumPage />}></Route>
       </Routes>
       <Footer />
     </>

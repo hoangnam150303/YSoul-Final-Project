@@ -5,6 +5,7 @@ exports.createFilmService = async (
   description,
   small_image,
   large_image,
+  rangeUser,
   trailer,
   movieFiles,
   cast,
@@ -13,11 +14,11 @@ exports.createFilmService = async (
   releaseYear,
   title = null,
   video = null,
-  rangeUser,
   age
 ) => {
   try {
     let film;
+    console.log(rangeUser);
     let episodes = [];
     let videoArr = [];
     if (title && video) {
@@ -37,6 +38,7 @@ exports.createFilmService = async (
         });
       }
 
+      
       // Nếu có `numberTitle` và `video`, tạo với episodes
       film = await Film.create({
         name,

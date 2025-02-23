@@ -310,6 +310,8 @@ export const CRUDFilmPage = () => {
           }}
           validationSchema={validationSchema}
           onSubmit={async (values, { setSubmitting, setFieldError }) => {
+            console.log(111111);
+            
             try {
               // Prepare FormData
               const formData = new FormData();
@@ -767,8 +769,11 @@ export const CRUDFilmPage = () => {
             director: film.director || "",
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, setFieldError }) => {
+          onSubmit={async (values, { setSubmitting}) => {
+            console.log(1111);
             try {
+           
+              
               // Prepare FormData
               const formData = new FormData();
               formData.append("name", values.name);
@@ -793,14 +798,17 @@ export const CRUDFilmPage = () => {
               } else {
                 values.movie.forEach((file) => formData.append("movie", file));
               }
-
+              console.log(1111);
+              
               const response = await filmApi.postCreateFilm(formData);
+              console.log(response);
+              
               if (response.status === 200) {
                 message.success("Film created successfully!");
                 handleCancel(); // Close modal
               }
             } catch (error) {
-              console.error("Error adding film:", error);
+              console.error("Error update film:", error);
               message.error("An error occurred while adding the film.");
             } finally {
               setSubmitting(false); // Stop form submission spinner/loading
