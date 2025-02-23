@@ -28,24 +28,29 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, confirmPassword, otp, verifyToken } =
       req.body;
-    console.log(req.body);
-
     const reg = /^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)*$/;
     const isCheckEmail = reg.test(email);
+    
     if (!name || !email || !password || !confirmPassword) {
       return res
         .status(401)
         .json({ message: "All fields are required.", error });
     }
+
     if (!isCheckEmail) {
+      
       return res.status(401).json({ message: "Email is not valid.", error });
     }
+    
     if (password !== confirmPassword) {
+      console.log(password !== confirmPassword);
       return res.status(401).json({
         message: "Password and confirm password do not match.",
         error,
       });
     }
+    
+    
     const respone = await userService.registerService(
       name,
       email,

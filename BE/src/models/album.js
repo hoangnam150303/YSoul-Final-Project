@@ -5,12 +5,11 @@ const createAlbumTableQuery = `
     id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     image VARCHAR(200),
-    release_year DATE,
-    isdeleted BOOLEAN DEFAULT false,
+    release_year VARCHAR(10),
+    is_deleted BOOLEAN DEFAULT false,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
     likes INTEGER DEFAULT 0,
-    user_id_like INTEGER[] DEFAULT '{}';
-    
+    user_id_like INTEGER[] DEFAULT '{}'
 )
 `;
 

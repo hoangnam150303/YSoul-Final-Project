@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import albumApi from "../../../hooks/albumApi";
+import { Link } from "react-router-dom";
 export const AlbumSlider = ({ category }) => {
   const [album, setAlbum] = useState([]);
   const fetchAlbum = async () => {
@@ -22,9 +23,11 @@ export const AlbumSlider = ({ category }) => {
       <h4 className="text-lg font-semibold mb-3">{category}</h4>
       <div className="grid grid-cols-8 gap-4">
         {album.map((item) => (
+         <Link to={`/album/${item.id}`}>
           <div
             key={item.id}
             className="min-w-[180px] p-2 rounded cursor-pointer hover:bg-gray-600"
+            
           >
             <img
               className="rounded w-full h-[150px] object-cover"
@@ -35,6 +38,7 @@ export const AlbumSlider = ({ category }) => {
             <p className="text-sm text-gray-400">{item.artist}</p>
             <p className="text-sm text-gray-400">{item.release_year}</p>
           </div>
+         </Link>
         ))}
       </div>
     </div>

@@ -21,7 +21,6 @@ const PlayerContextProvider = (props) => {
   // Function lấy thông tin bài hát dựa trên songId hiện tại
   const getSong = async () => {
     if (!songId.current) {
-      console.log("songId chưa được thiết lập");
       return;
     }
     try {
@@ -38,7 +37,6 @@ const PlayerContextProvider = (props) => {
   const prevSong = async () => {
     // Nếu mảng chỉ có 0 hoặc 1 phần tử, không có bài trước đó
     if (listSong.length <= 1) {
-      console.log("Không có bài trước đó");
       return;
     }
     try {

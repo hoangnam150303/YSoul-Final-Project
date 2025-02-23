@@ -6,16 +6,25 @@ const jwt = require("jsonwebtoken");
 exports.registerService = async (name, email, password, otp, verifyToken) => {
   try {
     const decoded = jwt.verify(verifyToken, process.env.VERIFY_TOKEN);
-    if (decoded.otp !== otp) {
+    
+    if (decoded.otp.toString !== otp.toString) {
       return { success: false, error: "OTP is incorrect." };
     }
+
+    
     const hashPassword = await passwordHelpers.hashPassword(password, 10);
-    await conectPostgresDb.query(
+    console.log(hashPassword);
+    
+ const success =    await conectPostgresDb.query(
       "INSERT INTO users (name, email, status, authprovider, password,role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
       [name, email, true, "local", hashPassword, "user"]
     );
+    console.log(success);
+    
     return { success: true };
   } catch (error) {
+    console.log(error);
+    
     return { success: false, error };
   }
 };

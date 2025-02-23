@@ -27,6 +27,10 @@ const albumApi = {
       },
     });
   },
+  getAlbumById: (id) => {
+    const url = `${ALBUM_API_ENDPOINT}/getAlbumById/${id}`; // get album by id
+    return axiosClient.get(url);
+  }
 };
 
 export default albumApi;

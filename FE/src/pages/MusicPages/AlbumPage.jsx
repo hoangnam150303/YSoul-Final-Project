@@ -1,12 +1,34 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { MusicSideBar } from "../../components/SideBar/MusicSideBar";
 import { NavbarMusic } from "../../components/Navbar/NavbarMusic";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import { Space, Table, Tag } from "antd";
 import { BreadCrumb } from "../../components/BreadCrumb/BreadCrumb";
+import { useParams } from "react-router-dom";
+import albumApi from "../../hooks/albumApi";
+import { Player } from "../../components/Player/Player";
+import { PlayerContext } from "../../context/PlayerContext";
 
 export const AlbumPage = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+   const { audioRef, track } = useContext(PlayerContext);
+   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+   const [albumSelected, setAlbumSelected] = useState({});
+   const [artist, setArtist] = useState({});
+   const [listSong, setListSong] = useState([]);
+  const id = useParams().id;
+  useEffect(() => {
+    const fetchAlbum = async () => {
+      try {
+        const response = await albumApi.getAlbumById(id);
+        setAlbumSelected(response.data.album);
+        setArtist(response.data.artist);
+        setListSong(response.data.singles);
+      } catch (error) {
+        
+      }
+    };
+    fetchAlbum();
+  },[id])
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Toggle sidebar state
   };
@@ -31,31 +53,17 @@ export const AlbumPage = () => {
       dataIndex: "clock",
       key: "clock",
     },
+    
   ];
-  const data = [
-    {
-      key: "1",
-      title: "John Brown",
-      album: 32,
-      dateAdded: "New York No. 1 Lake Park",
-      clock: ["nice", "developer"],
-    },
-    {
-      key: "2",
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      tags: ["loser"],
-    },
-    {
-      key: "3",
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      tags: ["cool", "teacher"],
-    },
-  ];
+  const data = listSong.map((song) => ({
+    key: song.id,
+    title: song.title,
+    album: albumSelected.title,
+    dateAdded: song.createdAt,
+    clock: song.duration,
+  }))
   return (
+  <>
     <div className="relative min-h-screen bg-black text-white flex">
       <div className="z-50">
         <MusicSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />
@@ -64,23 +72,22 @@ export const AlbumPage = () => {
         <BreadCrumb pageName="Album" />
         <div className="mt-10 flex gap-8 flex-col md:flex-row md:items-center w-full px-60">
           <img
-            src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1738655275/71Q82A9HWBL_mtuanu.jpg"
+            src={albumSelected.image}
             alt="Album Cover"
             className="w-48 rounded"
           />
           <div className="flex flex-col">
             <p>Playlist</p>
-            <h2 className="text-5xl font-bold mb-4 md:text-7xl">Confident</h2>
-            <h4>This is description</h4>
+            <h2 className="text-5xl font-bold mb-4 md:text-7xl">{albumSelected.title}</h2>
+            <h4>{artist.name}</h4>
             <p className="mt-1">
               <img
                 className="inline-block w-5"
                 src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
                 alt=""
               />
-              <b>YSoul</b> • 1,323,154 likes
-              <b> • 50 songs, </b>
-              about 2hr 30 min
+              <b>YSoul</b> • {albumSelected.likes} likes
+              <b> • {listSong.length} songs</b>
             </p>
           </div>
         </div>
@@ -97,5 +104,11 @@ export const AlbumPage = () => {
         />
       </div>
     </div>
+    
+          <div className="fixed bottom-0 w-full">
+            <Player />
+            <audio preload="auto" ref={audioRef} src={track}></audio>
+          </div>
+    </>
   );
 };

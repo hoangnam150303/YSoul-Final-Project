@@ -16,7 +16,8 @@ exports.createFilm = async (req, res) => {
       rangeUser,
       age,
     } = req.body;
-
+    console.log(req.body);
+    
     const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
@@ -29,6 +30,7 @@ exports.createFilm = async (req, res) => {
         description,
         smallImage,
         largeImage,
+        rangeUser,
         trailer,
         null, // Không truyền movie khi tạo episodes
         cast,
@@ -37,7 +39,6 @@ exports.createFilm = async (req, res) => {
         releaseYear,
         title,
         movieFiles,
-        rangeUser,
         age
       );
     } else {
@@ -47,13 +48,13 @@ exports.createFilm = async (req, res) => {
         description,
         smallImage,
         largeImage,
+        rangeUser,
         trailer,
         movieFiles, // Truyền file phim
         cast,
         director,
         genre,
         releaseYear,
-        rangeUser,
         age
       );
     }
