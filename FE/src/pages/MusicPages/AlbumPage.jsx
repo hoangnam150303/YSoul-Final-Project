@@ -10,7 +10,7 @@ import { Player } from "../../components/Player/Player";
 import { PlayerContext } from "../../context/PlayerContext";
 
 export const AlbumPage = () => {
-   const { audioRef, track } = useContext(PlayerContext);
+   const { audioRef, track,updateSong } = useContext(PlayerContext);
    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
    const [albumSelected, setAlbumSelected] = useState({});
    const [artist, setArtist] = useState({});
@@ -92,6 +92,14 @@ export const AlbumPage = () => {
           </div>
         </div>
         <Table
+        onRow={(record) => {
+          return {
+            onClick: () => {
+              // Lấy id của bản ghi được click (ở đây record.key chính là id)
+              updateSong(record.key);
+            },
+          };
+        }}
           className="mt-10 pl-32 pr-20 text-gray-400 bg-black"
           columns={columns}
           dataSource={data}
@@ -102,6 +110,8 @@ export const AlbumPage = () => {
             showTotal: (total) => `Total ${total} items`,
           }}
         />
+       
+
       </div>
     </div>
     

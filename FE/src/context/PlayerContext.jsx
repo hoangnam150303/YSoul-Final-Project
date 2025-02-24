@@ -1,5 +1,6 @@
 import { createContext, useEffect, useRef, useState } from "react";
 import singleApi from "../hooks/singleApi";
+import contants from "../constants/contants";
 
 export const PlayerContext = createContext();
 
@@ -12,7 +13,14 @@ const PlayerContextProvider = (props) => {
   const [track, setTrack] = useState("");
   const [information, setInformation] = useState({});
   const [playStatus, setPlayStatus] = useState(false);
-  const [listSong, setListSong] = useState([]);
+  const [listSong, setListSong] = useState(() => {
+    const savedList = localStorage.getItem(contants.LIST_SONG);
+    return savedList ? JSON.parse(savedList) : [];
+  });
+  const [currentSong, setCurrentSong] = useState(() => {
+    const savedCurrentSong = localStorage.getItem(contants.CURRENT_SONG);
+    return savedCurrentSong ? savedCurrentSong : null;
+  })
   const [time, setTime] = useState({
     currentTime: { seconds: 0, minute: 0 },
     totalTime: { seconds: 0, minute: 0 },
@@ -20,13 +28,14 @@ const PlayerContextProvider = (props) => {
 
   // Function lấy thông tin bài hát dựa trên songId hiện tại
   const getSong = async () => {
-    if (!songId.current) {
+    if (!currentSong) {
       return;
     }
-    try {
-      const response = await singleApi.getSingleById(songId.current);
+    try {      
+      const response = await singleApi.getSingleById(currentSong);
       setInformation(response.data);
       setTrack(response.data.data.mp3);
+      
       if (!listSong.includes(response.data.data.id)) {
         setListSong((prevList) => [...prevList, response.data.data.id]);
       }
@@ -36,14 +45,12 @@ const PlayerContextProvider = (props) => {
   };
   const prevSong = async () => {
     // Nếu mảng chỉ có 0 hoặc 1 phần tử, không có bài trước đó
-    if (listSong.length <= 1) {
-      return;
-    }
+   
     try {
       // Tạo một bản sao của mảng listSong
-      const newList = [...listSong];
-      console.log(newList);
+      const storedList = JSON.parse(localStorage.getItem(contants.LIST_SONG));
 
+      const newList = [...storedList];
       // Loại bỏ bài hiện tại (phần tử cuối cùng)
       newList.pop();
       // Lấy bài trước đó: phần tử cuối của newList
@@ -73,6 +80,11 @@ const PlayerContextProvider = (props) => {
     }
   };
   useEffect(() => {
+    localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
+  }, [listSong]);
+  
+  useEffect(() => {
+
     if (track && audioRef.current) {
       audioRef.current.src = track; // Đảm bảo audio element nhận src mới
       audioRef.current.load();
@@ -82,8 +94,10 @@ const PlayerContextProvider = (props) => {
   }, [track]);
 
   // Function cập nhật songId và gọi getSong
-  const updateSong = (id) => {
+  const updateSong = (id) => {    
     songId.current = id;
+    setCurrentSong(id);
+    localStorage.setItem(contants.CURRENT_SONG, id);
     getSong();
   };
 
@@ -98,6 +112,7 @@ const PlayerContextProvider = (props) => {
   };
 
   useEffect(() => {
+    
     getSong();
     // Chờ audio metadata được load xong
     if (audioRef.current) {
@@ -122,7 +137,7 @@ const PlayerContextProvider = (props) => {
         };
       };
     }
-  }, [audioRef, songId]);
+  }, [audioRef, currentSong]);
 
   const contextValue = {
     audioRef,

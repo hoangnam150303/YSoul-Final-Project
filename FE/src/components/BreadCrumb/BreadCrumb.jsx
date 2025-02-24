@@ -9,7 +9,7 @@ export const BreadCrumb = ({ pageName }) => {
         items={[
           {
             title: (
-              <a href="/" style={{ color: "white", fontSize: "15px" }}>
+              <a href="/MusicHomePage" style={{ color: "white", fontSize: "15px" }}>
                 <HomeOutlined />
               </a>
             ),
