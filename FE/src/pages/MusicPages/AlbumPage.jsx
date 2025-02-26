@@ -34,14 +34,19 @@ export const AlbumPage = () => {
   };
   const columns = [
     {
-      title: "# Title",
-      dataIndex: "title",
-      key: "title",
+      title: "# Image",
+      dataIndex: "image",
+      key: "image",
+      render: (text) => (
+        <div className="w-16 h-16">
+          <img src={text} alt="..." className="w-full h-auto" />
+        </div>
+      ),
     },
     {
-      title: "Album",
-      dataIndex: "album",
-      key: "album",
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
     },
     {
       title: "Date Added",
@@ -57,8 +62,8 @@ export const AlbumPage = () => {
   ];
   const data = listSong.map((song) => ({
     key: song.id,
+    image:song.image,
     title: song.title,
-    album: albumSelected.title,
     dateAdded: song.createdAt,
     clock: song.duration,
   }))

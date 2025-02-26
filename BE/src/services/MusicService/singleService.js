@@ -152,9 +152,7 @@ exports.activeOrDeactiveSingleService = async (id) => {
 exports.getSingleByIdService = async (id) => {
   try {
     if (!id || isNaN(id)) {
-      console.log(!id);
-
-      throw new Error("Invalid id");
+      return;
     }
     const single = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
@@ -272,7 +270,7 @@ exports.interactSingleService = async (id, status, userId) => {
 exports.nextSingleService = async (id) => {
   try {
     if (!id || isNaN(id)) {
-      throw new Error("Invalid id");
+      return;
     }
     const currentSingle = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",

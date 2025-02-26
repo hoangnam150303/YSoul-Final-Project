@@ -20,6 +20,8 @@ export const Player = () => {
     information,
     nextSong,
     prevSong,
+    handleSongLoop,
+    isLoop,
   } = useContext(PlayerContext);
   return (
     <div className="h-[10%] w-full bg-black flex justify-between items-center text-white px-96">
@@ -47,7 +49,19 @@ export const Player = () => {
             onClick={nextSong}
             className="w-4 cursor-pointer"
           />
-          <RetweetOutlined className="w-4 cursor-pointer" />
+          {
+            isLoop ? (
+              <RetweetOutlined
+                onClick={handleSongLoop}
+                className="w-4 cursor-pointer color-green-600"
+              />
+            ) : (
+              <RetweetOutlined
+              onClick={handleSongLoop}
+              className="w-4 cursor-pointer color-white"
+            />
+            )
+          }
         </div>
         <div className="flex items-center gap-5">
           <p>

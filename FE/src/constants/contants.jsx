@@ -3,5 +3,6 @@ export default {
     ACCESS_TOKEN: 'access_token',
     LIST_SONG: 'listSong',
     CURRENT_SONG: 'currentSong',
+    IS_LOOP: 'isLoop',
   }
   

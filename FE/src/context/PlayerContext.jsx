@@ -20,7 +20,12 @@ const PlayerContextProvider = (props) => {
   const [currentSong, setCurrentSong] = useState(() => {
     const savedCurrentSong = localStorage.getItem(contants.CURRENT_SONG);
     return savedCurrentSong ? savedCurrentSong : null;
-  })
+  });
+  // Đồng nhất key với contants.IS_LOOP
+  const [songLoop, setSongLoop] = useState(() => {
+    const savedSongLoop = localStorage.getItem(contants.IS_LOOP);
+    return savedSongLoop === "true";
+  });
   const [time, setTime] = useState({
     currentTime: { seconds: 0, minute: 0 },
     totalTime: { seconds: 0, minute: 0 },
@@ -28,14 +33,12 @@ const PlayerContextProvider = (props) => {
 
   // Function lấy thông tin bài hát dựa trên songId hiện tại
   const getSong = async () => {
-    if (!currentSong) {
-      return;
-    }
-    try {      
+    if (!currentSong) return;
+    try {
       const response = await singleApi.getSingleById(currentSong);
       setInformation(response.data);
       setTrack(response.data.data.mp3);
-      
+
       if (!listSong.includes(response.data.data.id)) {
         setListSong((prevList) => [...prevList, response.data.data.id]);
       }
@@ -43,22 +46,16 @@ const PlayerContextProvider = (props) => {
       console.log(error);
     }
   };
-  const prevSong = async () => {
-    // Nếu mảng chỉ có 0 hoặc 1 phần tử, không có bài trước đó
-   
-    try {
-      // Tạo một bản sao của mảng listSong
-      const storedList = JSON.parse(localStorage.getItem(contants.LIST_SONG));
 
+  const prevSong = async () => {
+    try {
+      const storedList = JSON.parse(localStorage.getItem(contants.LIST_SONG));
       const newList = [...storedList];
-      // Loại bỏ bài hiện tại (phần tử cuối cùng)
-      newList.pop();
-      // Lấy bài trước đó: phần tử cuối của newList
+      newList.pop(); // Loại bỏ bài hiện tại
       let prevSongId = newList[newList.length - 1];
       if (prevSongId === songId.current) {
         prevSongId = newList[newList.length - 1];
       }
-      // Cập nhật lại state listSong
       setListSong(newList);
       updateSong(prevSongId);
     } catch (error) {
@@ -79,12 +76,29 @@ const PlayerContextProvider = (props) => {
       console.log(error);
     }
   };
+
+  // Hàm chuyển đổi chế độ loop
+  const handleSongLoop = () => {
+    setSongLoop((prev) => {
+      const newLoopState = !prev;
+      // Sử dụng key đồng nhất với useState: contants.IS_LOOP
+      localStorage.setItem(contants.IS_LOOP, newLoopState);
+      return newLoopState;
+    });
+    // Lưu ý: songLoop ở đây chưa được cập nhật ngay do setState bất đồng bộ
+    console.log("Loop state (old):", songLoop);
+  };
+
+  // Dùng useEffect để log giá trị mới khi songLoop thay đổi
+  useEffect(() => {
+    console.log("Loop state (new):", songLoop);
+  }, [songLoop]);
+
   useEffect(() => {
     localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
   }, [listSong]);
-  
-  useEffect(() => {
 
+  useEffect(() => {
     if (track && audioRef.current) {
       audioRef.current.src = track; // Đảm bảo audio element nhận src mới
       audioRef.current.load();
@@ -94,7 +108,7 @@ const PlayerContextProvider = (props) => {
   }, [track]);
 
   // Function cập nhật songId và gọi getSong
-  const updateSong = (id) => {    
+  const updateSong = (id) => {
     songId.current = id;
     setCurrentSong(id);
     localStorage.setItem(contants.CURRENT_SONG, id);
@@ -112,9 +126,7 @@ const PlayerContextProvider = (props) => {
   };
 
   useEffect(() => {
-    
     getSong();
-    // Chờ audio metadata được load xong
     if (audioRef.current) {
       audioRef.current.onloadedmetadata = () => {
         audioRef.current.ontimeupdate = () => {
@@ -135,9 +147,14 @@ const PlayerContextProvider = (props) => {
             });
           }
         };
+        // Khi bài nhạc kết thúc
+        audioRef.current.onended = () => {
+
+            nextSong();
+        };
       };
     }
-  }, [audioRef, currentSong]);
+  }, [audioRef, currentSong, songLoop]);
 
   const contextValue = {
     audioRef,
@@ -154,7 +171,9 @@ const PlayerContextProvider = (props) => {
     updateSong,
     information,
     nextSong,
-    prevSong, // Truyền function updateSong qua context
+    prevSong,
+    handleSongLoop,
+    isLoop: songLoop, // Đặt tên thống nhất cho context
   };
 
   return (
