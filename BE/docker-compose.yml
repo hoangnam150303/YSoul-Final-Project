@@ -24,6 +24,8 @@ services:
     volumes:
       - ysoul_postgres_data:/var/lib/postgresql/data
 
+
+
 volumes:
   ysoul_mongo_data:
   ysoul_postgres_data:

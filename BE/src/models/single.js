@@ -6,7 +6,7 @@ const createSingleTableQuery = `
     title VARCHAR(100) NOT NULL,
     image VARCHAR(200),
     mp3 VARCHAR(200),
-    release_year DATE,
+    release_year VARCHAR(10),,
     is_deleted BOOLEAN DEFAULT false,
     count_listen INTEGER DEFAULT 0,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
