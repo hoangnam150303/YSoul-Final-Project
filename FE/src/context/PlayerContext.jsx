@@ -65,17 +65,26 @@ const PlayerContextProvider = (props) => {
 
   const nextSong = async () => {
     try {
-      const response = await singleApi.nextSingle(songId.current);
-      const newTrack = response.data.data.mp3;
-      setInformation(response.data); // Lưu thông tin bài nhạc
-      setTrack(newTrack);
-      if (!listSong.includes(response.data.data.id)) {
-        setListSong((prevList) => [...prevList, response.data.data.id]);
+      if (songLoop) {
+        // Nếu bật loop, reset lại thời gian và phát lại bài hiện tại
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play();
+        }
+      } else {
+        const response = await singleApi.nextSingle(songId.current);
+        const newTrack = response.data.data.mp3;
+        setInformation(response.data); // Lưu thông tin bài nhạc
+        setTrack(newTrack);
+        if (!listSong.includes(response.data.data.id)) {
+          setListSong((prevList) => [...prevList, response.data.data.id]);
+        }
       }
     } catch (error) {
       console.log(error);
     }
   };
+  
 
   // Hàm chuyển đổi chế độ loop
   const handleSongLoop = () => {
@@ -86,13 +95,11 @@ const PlayerContextProvider = (props) => {
       return newLoopState;
     });
     // Lưu ý: songLoop ở đây chưa được cập nhật ngay do setState bất đồng bộ
-    console.log("Loop state (old):", songLoop);
+  
   };
 
   // Dùng useEffect để log giá trị mới khi songLoop thay đổi
-  useEffect(() => {
-    console.log("Loop state (new):", songLoop);
-  }, [songLoop]);
+
 
   useEffect(() => {
     localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
