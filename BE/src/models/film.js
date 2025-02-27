@@ -21,9 +21,6 @@ const filmSchema = new mongoose.Schema(
     trailer: {
       type: String,
     },
-    movie: {
-      type: String,
-    },
     cast: [{ type: String, required: true }],
     director: {
       type: String,
@@ -33,6 +30,9 @@ const filmSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    video:[{
+     type: mongoose.Schema.Types.ObjectId, ref: "Episode" 
+    }],
     releaseYear: {
       type: String,
       required: true,
@@ -56,16 +56,7 @@ const filmSchema = new mongoose.Schema(
     views: {
       type: Number,
     },
-    episodes: [
-      {
-        title: {
-          type: String,
-        },
-        video: {
-          type: String,
-        },
-      },
-    ],
+  
     rangeUser: [{ type: String }],
     isDeleted: { type: Boolean },
     age: {

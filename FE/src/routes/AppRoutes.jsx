@@ -15,6 +15,7 @@ import { MusicHomePage } from "../pages/MusicPages/MusicHomePage";
 import { AlbumPage } from "../pages/MusicPages/AlbumPage";
 import { CRUDMusicPage } from "../pages/AdminPages/CRUDMusicPage";
 import { ArtistPage } from "../pages/MusicPages/ArtistPage";
+import UserProfilePage from "../pages/GeneralPages/UserProfilePage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/movieAdmin" element={<CRUDFilmPage />}></Route>
         <Route path="/musicAdmin" element={<CRUDMusicPage />}></Route>
         <Route path="/payment" element={<PaymentPage />}></Route>
+        <Route path="/userProfile" element={<UserProfilePage />}></Route>
         <Route
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}

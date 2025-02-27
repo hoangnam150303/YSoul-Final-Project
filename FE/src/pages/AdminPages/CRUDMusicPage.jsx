@@ -698,6 +698,7 @@ export const CRUDMusicPage = () => {
                         <label className="label-input-tnvd">Artist:</label>
                         <Select
                           className="w-full"
+                          value={values.artist_id}
                           placeholder="Choose Artist"
                           onChange={(value) =>
                             setFieldValue("artist_id", value)
@@ -810,6 +811,7 @@ export const CRUDMusicPage = () => {
                         <Select
                           className="w-full"
                           placeholder="Choose Artist"
+                          value={values.artist_id}
                           onChange={(value) =>
                             setFieldValue("artist_id", value)
                           }
@@ -835,6 +837,7 @@ export const CRUDMusicPage = () => {
                         <Select
                           className="w-full"
                           placeholder="Choose Album"
+                          value={values.album_id}
                           onChange={(value) => setFieldValue("album_id", value)}
                         >
                           {album.map((album) => (
@@ -857,6 +860,7 @@ export const CRUDMusicPage = () => {
                         <label className="label-input-tnvd">MP3:</label>
                         <Upload
                           accept=".mp3"
+                          
                           onChange={(info) => {
                             if (info.fileList.length > 0) {
                               const file = info.fileList[0];

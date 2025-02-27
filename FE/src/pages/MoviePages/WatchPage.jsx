@@ -17,14 +17,16 @@ export const WatchPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const navigate = useNavigate();
-  const [film, setFilm] = useState([]);
+  const [film, setFilm] = useState({});
   const [isMovie, setIsMovie] = useState(true);
   const [episodes, setEpisodes] = useState([]);
+  const [video,setVideo] = useState([]);
   const movieId = useParams().movieId;
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
+  const [videoSelected, setVideoSelected] = useState("");
   const dispatch = useDispatch();
-  const userId = useSelector((state) => state.user.id);
+  const isVip = useSelector((state) => state.user.vip);
   dispatch(getUserRequest());
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
@@ -35,13 +37,9 @@ export const WatchPage = () => {
   };
   const fetchFilm = async (id) => {
     const respone = await filmApi.getFilmById(id);
-
+    setVideo(respone.data.data.video);    
     setFilm(respone.data.data);
-    if (respone.data.data?.episodes.length > 0) {
-      setIsMovie(false);
-      setEpisodes(respone.data.data.episodes);
-      setTotalPage(respone.data.data.episodes.length);
-    }
+    
   };
 
   const handleUpdateStatus = async (id, type, data) => {
@@ -49,11 +47,28 @@ export const WatchPage = () => {
     fetchFilm(id);
   };
   const handlePageChange = (pageNumber) => {
+    console.log(pageNumber);
+    
     setPage(pageNumber);
   };
   useEffect(() => {
     fetchFilm(movieId);
+  
   }, [movieId]);
+
+  useEffect(() => {
+    if (video.length > 1) {
+      setIsMovie(false);
+      setTotalPage(video?.length);
+    }
+    if (film) {
+      console.log(film);
+      
+      if (isVip === false  && film?.rangeUser?.[0] === `["VIP"]`) {
+        navigate("/payment")
+      }
+    }
+  },[video,isVip]);
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -76,7 +91,7 @@ export const WatchPage = () => {
             width={"100%"}
             height={"70vh"}
             className="mx-auto overflow-hidden rounded-lg"
-            url={film?.movie || episodes[page - 1]?.video}
+            url={video[page - 1]?.urlVideo}
           />
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled

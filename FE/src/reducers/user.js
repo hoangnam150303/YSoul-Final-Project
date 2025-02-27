@@ -8,6 +8,7 @@ const getUserRequest = () => {
       const response = await userApi.getUser();
       const user = response.data;
 
+      
       dispatch(getUser(user));
     } catch (error) {
       throw error;

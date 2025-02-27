@@ -146,8 +146,8 @@ export const CRUDFilmPage = () => {
     kind: film.movie ? "Movie" : "TV Shows",
     genre: film.genre.replace(/[\[\]]/g, "").split(","),
     isDeleted: film.isDeleted ? "Yes" : "No",
-    rating: film.rating || "N/A",
-    views: film.views || "N/A",
+    rating: film.totalRating || "N/A",
+    views: film.countClick || "N/A",
     rangeUser:
       film.rangeUser.length > 0
         ? film.rangeUser.join(", ").replace(/[\[\]]/g, "")
@@ -305,43 +305,51 @@ export const CRUDFilmPage = () => {
             trailer: "",
             movie: [],
             isSeries: false,
-            numberTitle: [],
+            // Nếu filmType là TV Shows, sử dụng mảng videos chứa file video và title
+            videos: [],
             director: "",
           }}
-          validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting, setFieldError }) => {
-            console.log(111111);
-            
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
             try {
               // Prepare FormData
               const formData = new FormData();
               formData.append("name", values.name);
               formData.append("description", values.description);
-              formData.append("cast", JSON.stringify(values.cast)); // Convert to JSON string if needed
-              formData.append("rangeUser", JSON.stringify(values.rangeUser)); // Same here
+              formData.append("cast", JSON.stringify(values.cast));
+              formData.append("rangeUser", JSON.stringify(values.rangeUser));
               formData.append("releaseYear", values.releaseYear);
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
-              formData.append("genre", JSON.stringify(values.genre)); // Convert to JSON string if needed
+              formData.append("genre", JSON.stringify(values.genre));
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
-              formData.append("isSeries", isSeries);
-              if (isSeries === true) {
-                formData.append("title", JSON.stringify(title));
-                video.forEach((fileArray) => {
-                  // Vì mỗi fileArray là một mảng có một phần tử duy nhất, bạn có thể lấy phần tử đầu tiên
-                  const file = fileArray[0];
-                  formData.append("movie", file); // Thêm file vào formData
+
+              if (filmType === "TV Shows") {
+                // Lấy mảng title từ values.videos, chỉ lấy những title không rỗng
+                const titles = values.videos
+                  .map((v) => v.title)
+                  .filter((t) => t.trim() !== "");
+                if (titles.length > 0) {
+                  // Append title nếu có giá trị
+                  formData.append("title", JSON.stringify(titles));
+                }
+                // Append từng video file
+                values.videos.forEach((videoObj) => {
+                  if (videoObj.file) {
+                    formData.append("movie", videoObj.file);
+                  }
                 });
-                // Convert to JSON string if needed
               } else {
+                // Với Movie thì gửi file từ values.movie
                 values.movie.forEach((file) => formData.append("movie", file));
               }
 
               const response = await filmApi.postCreateFilm(formData);
               if (response.status === 200) {
                 message.success("Film created successfully!");
-                handleCancel(); // Close modal
+                handleCancel();
+                resetForm();
+                fetchFilms();
               }
             } catch (error) {
               console.error("Error adding film:", error);
@@ -496,6 +504,7 @@ export const CRUDFilmPage = () => {
                     <Select
                       className="w-full"
                       mode="multiple"
+                      value={values.rangeUser}
                       placeholder="Select type user"
                       style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("rangeUser", value)}
@@ -520,6 +529,7 @@ export const CRUDFilmPage = () => {
                     <Select
                       className="w-full"
                       mode="multiple"
+                      value={values.genre}
                       placeholder="Select genres"
                       style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("genre", value)}
@@ -641,13 +651,12 @@ export const CRUDFilmPage = () => {
                   </div>
                 </div>
               </div>
+
               <Select
                 className="w-4/5"
                 mode="only"
                 placeholder="Select type film"
-                style={{
-                  flex: 1,
-                }}
+                style={{ flex: 1 }}
                 onChange={(value) => handleTypeChange(value)}
               >
                 <Select.Option value="Movie">Movie</Select.Option>
@@ -670,68 +679,94 @@ export const CRUDFilmPage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col space-y-4 items-start justify-center">
-                  {/* Additional Fields */}
-                  {additionalFields.map((field, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col space-y-2 items-start justify-center"
-                    >
-                      {/* Video Upload Field */}
-                      <div className="flex items-start justify-center">
-                        <label className="label-input-tnvd truncate">
-                          Video {index + 1}:
-                        </label>
-                        <div className="w-2/3 flex flex-col items-start">
-                          <Upload
-                            onChange={(info) => {
-                              const updatedFields = [...additionalFields];
-                              updatedFields[index].movieFiles =
-                                info.fileList.map((file) => file.originFileObj);
-                              setAdditionalFields(updatedFields);
-                              handleVideoChange(
-                                info.fileList.map((file) => file.originFileObj),
-                                index
-                              );
-                            }}
+                // FieldArray cho TV Shows
+                <FieldArray name="videos">
+                  {({ push, remove, form }) => (
+                    <div className="flex flex-col space-y-4 items-start justify-center">
+                      {form.values.videos && form.values.videos.length > 0 ? (
+                        form.values.videos.map((video, index) => (
+                          <div
+                            key={index}
+                            className="flex flex-col space-y-2 items-start justify-center border p-2 rounded"
                           >
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                          </Upload>
-                        </div>
-                      </div>
+                            {/* Video Upload Field */}
+                            <div className="flex items-start justify-center">
+                              <label className="label-input-tnvd truncate">
+                                Video {index + 1}:
+                              </label>
+                              <div className="w-2/3 flex flex-col items-start">
+                                <Upload
+                                  fileList={video.fileList || []}
+                                  onChange={(info) => {
+                                    const newFileList = info.fileList;
+                                    form.setFieldValue(
+                                      `videos[${index}].fileList`,
+                                      newFileList
+                                    );
+                                    if (newFileList.length > 0) {
+                                      form.setFieldValue(
+                                        `videos[${index}].file`,
+                                        newFileList[0].originFileObj
+                                      );
+                                    } else {
+                                      form.setFieldValue(
+                                        `videos[${index}].file`,
+                                        null
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <Button icon={<UploadOutlined />}>
+                                    Upload
+                                  </Button>
+                                </Upload>
+                              </div>
+                            </div>
 
-                      {/* Number Title Field */}
-                      <div className="flex items-start justify-center">
-                        <label className="label-input-tnvd truncate">
-                          Number Title:
-                        </label>
-                        <div className="w-2/3 flex flex-col items-start">
-                          <input
-                            type="text"
-                            className="input-field"
-                            value={field.numberTitle || ""}
-                            onChange={(e) => {
-                              const updatedFields = [...additionalFields];
-                              updatedFields[index].numberTitle = e.target.value;
-                              setAdditionalFields(updatedFields);
-                              handleTitleChange(e.target.value, index);
-                            }}
-                            placeholder={`Enter number title for Video ${
-                              index + 1
-                            }`}
-                          />
-                        </div>
-                      </div>
+                            {/* Title Field cho video */}
+                            <div className="flex items-start justify-center">
+                              <label className="label-input-tnvd truncate">
+                                Title:
+                              </label>
+                              <div className="w-2/3 flex flex-col items-start">
+                                <Field
+                                  name={`videos[${index}].title`}
+                                  placeholder={`Enter title for Video ${
+                                    index + 1
+                                  }`}
+                                  className="input-field"
+                                />
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              onClick={() => remove(index)}
+                              className="bg-red-500 text-white px-3 py-1 rounded"
+                            >
+                              Remove Video
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div>No videos added.</div>
+                      )}
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          push({ fileList: [], file: null, title: "" })
+                        }
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                      >
+                        Add More
+                      </Button>
                     </div>
-                  ))}
-
-                  <Button onClick={handleAddMore}>Add More</Button>
-                </div>
+                  )}
+                </FieldArray>
               )}
               <button
                 className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
                 type="submit"
-                disabled={isSubmitting} // Disable button while submitting
+                disabled={isSubmitting}
               >
                 Save Details
               </button>
@@ -743,9 +778,9 @@ export const CRUDFilmPage = () => {
       {/* Modal Update Film */}
       <Modal
         open={isModalEditVisible}
-        className="text-center "
+        className="text-center"
         title={
-          <h2 className="text-2xl font-bold text-[#f18966]  animate-slideIn">
+          <h2 className="text-2xl font-bold text-[#f18966] animate-slideIn">
             Edit Film
           </h2>
         }
@@ -753,83 +788,113 @@ export const CRUDFilmPage = () => {
         footer={null}
       >
         <Formik
+          enableReinitialize
           initialValues={{
             name: film.name || "",
             description: film.description || "",
-            cast: film.cast || [],
+            cast: film.cast ? JSON.parse(film.cast) : [],
             releaseYear: film.releaseYear || "",
-            rangeUser: film.rangeUser || [],
-            genre: film.genre || [],
+            rangeUser: film.rangeUser ? JSON.parse(film.rangeUser) : [],
+            // Giả sử genre được lưu dưới dạng mảng, nếu không thì convert lại
+            genre: film.genre ? JSON.parse(film.genre) : [],
             small_image: film.small_image || "",
             large_image: film.large_image || "",
             trailer: film.trailer || "",
-            movie: film.movie,
-            isSeries: isSeries,
-            numberTitle: film.numberTitle || [],
             director: film.director || "",
+            // Với TV Shows, chuyển mảng video thành mảng object chứa title và fileList
+            videos:
+              isSeries === true && film.video && film.video.length > 0
+                ? film.video.map((episode) => ({
+                    title: episode.title || "",
+                    fileList: [
+                      {
+                        uid: "-1",
+                        name: "Uploaded Video",
+                        status: "done",
+                        url: episode.urlVideo,
+                      },
+                    ],
+                    // Giữ file ở đây nếu người dùng muốn upload file mới (ban đầu null)
+                    file: null,
+                  }))
+                : [],
+            // Với Movie, giả sử film.video có đúng 1 phần tử và lưu url video
+            movie:
+              isSeries !== true && film.video && film.video.length > 0
+                ? film.video[0].urlVideo
+                : "",
+            isSeries: isSeries,
           }}
-          validationSchema={validationSchema}
-          onSubmit={async (values, { setSubmitting}) => {
-            console.log(1111);
+          onSubmit={async (values, { setSubmitting }) => {
             try {
-           
-              
-              // Prepare FormData
               const formData = new FormData();
               formData.append("name", values.name);
               formData.append("description", values.description);
-              formData.append("cast", JSON.stringify(values.cast)); // Convert to JSON string if needed
-              formData.append("rangeUser", JSON.stringify(values.rangeUser)); // Same here
+              // Nếu backend mong đợi chuỗi JSON, gọi stringify một lần:
+              formData.append("cast", JSON.stringify(values.cast));
+              formData.append("rangeUser", JSON.stringify(values.rangeUser));
               formData.append("releaseYear", values.releaseYear);
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
-              formData.append("genre", JSON.stringify(values.genre)); // Convert to JSON string if needed
+              // Với genre, nếu initialValues đã xử lý JSON.parse, thì values.genre đã là mảng, gọi stringify một lần:
+              formData.append("genre", JSON.stringify(values.genre));
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
               formData.append("isSeries", isSeries);
+          
               if (isSeries === true) {
-                formData.append("title", JSON.stringify(title));
-                video.forEach((fileArray) => {
-                  // Vì mỗi fileArray là một mảng có một phần tử duy nhất, bạn có thể lấy phần tử đầu tiên
-                  const file = fileArray[0];
-                  formData.append("movie", file); // Thêm file vào formData
+                const filteredVideos = values.videos.filter(
+                  (vid) => vid.title && vid.title.trim() !== ""
+                );
+                const titles = filteredVideos.map((vid) => vid.title);
+                formData.append("title", JSON.stringify(titles));
+                filteredVideos.forEach((vid) => {
+                  if (vid.file) {
+                    formData.append("movie", vid.file);
+                  } else if (vid.fileList && vid.fileList.length > 0) {
+                    formData.append("movie", vid.fileList[0].url);
+                  }
                 });
-                // Convert to JSON string if needed
               } else {
-                values.movie.forEach((file) => formData.append("movie", file));
+                if (typeof values.movie === "object") {
+                  values.movie.forEach((file) =>
+                    formData.append("movie", file.originFileObj)
+                  );
+                } else {
+                  formData.append("movie", values.movie);
+                }
               }
-              console.log(1111);
-              
-              const response = await filmApi.postCreateFilm(formData);
-              console.log(response);
-              
+          
+              const response = await filmApi.postUpdateFilm(film._id, formData);
+          
               if (response.status === 200) {
-                message.success("Film created successfully!");
-                handleCancel(); // Close modal
+                message.success("Film updated successfully!");
+                handleCancelEdit();
+                fetchFilms();
               }
             } catch (error) {
               console.error("Error update film:", error);
-              message.error("An error occurred while adding the film.");
+              message.error("An error occurred while updating the film.");
             } finally {
-              setSubmitting(false); // Stop form submission spinner/loading
+              setSubmitting(false);
             }
           }}
+          
         >
           {({ values, setFieldValue, errors, touched, isSubmitting }) => (
             <Form className="mt-5">
+              {/* Các field cơ bản */}
               <div className="grid grid-cols-2 gap-6">
                 {/* Name Field */}
                 <div className="flex-input-tnvd">
                   <label className="label-input-tnvd">Name:</label>
                   <div className="w-full flex flex-col items-start">
                     <Field name="name" as={Input} className="w-full py-2" />
-                    <div className="h-8 py-1">
-                      {touched.name && errors.name && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.name}
-                        </div>
-                      )}
-                    </div>
+                    {touched.name && errors.name && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.name}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -842,13 +907,11 @@ export const CRUDFilmPage = () => {
                       as={TextArea}
                       className="w-full py-2"
                     />
-                    <div className="h-8 py-1">
-                      {touched.description && errors.description && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.description}
-                        </div>
-                      )}
-                    </div>
+                    {touched.description && errors.description && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.description}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -859,16 +922,13 @@ export const CRUDFilmPage = () => {
                     <Field
                       name="releaseYear"
                       as={Input}
-                      rows={4}
                       className="w-full py-1"
                     />
-                    <div className="h-8 py-1">
-                      {touched.releaseYear && errors.releaseYear && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.releaseYear}
-                        </div>
-                      )}
-                    </div>
+                    {touched.releaseYear && errors.releaseYear && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.releaseYear}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -893,7 +953,7 @@ export const CRUDFilmPage = () => {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => arrayHelpers.remove(index)} // Remove member
+                                  onClick={() => arrayHelpers.remove(index)}
                                   className="text-red-500"
                                 >
                                   Remove
@@ -905,7 +965,7 @@ export const CRUDFilmPage = () => {
                           )}
                           <button
                             type="button"
-                            onClick={() => arrayHelpers.push("")} // Add new member
+                            onClick={() => arrayHelpers.push("")}
                             className="mt-2 bg-blue-500 text-white py-1 px-2 rounded"
                           >
                             Add Cast Member
@@ -913,13 +973,11 @@ export const CRUDFilmPage = () => {
                         </div>
                       )}
                     />
-                    <div className="h-8 py-1">
-                      <ErrorMessage
-                        name="cast"
-                        component="div"
-                        className="error text-red-500 ml-1"
-                      />
-                    </div>
+                    <ErrorMessage
+                      name="cast"
+                      component="div"
+                      className="error text-red-500 ml-1"
+                    />
                   </div>
                 </div>
 
@@ -928,13 +986,11 @@ export const CRUDFilmPage = () => {
                   <label className="label-input-tnvd">Trailer:</label>
                   <div className="w-full flex flex-col items-start">
                     <Field name="trailer" as={Input} className="w-full py-2" />
-                    <div className="h-8 py-1">
-                      {touched.trailer && errors.trailer && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.trailer}
-                        </div>
-                      )}
-                    </div>
+                    {touched.trailer && errors.trailer && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.trailer}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -943,13 +999,11 @@ export const CRUDFilmPage = () => {
                   <label className="label-input-tnvd">Director:</label>
                   <div className="w-full flex flex-col items-start">
                     <Field name="director" as={Input} className="w-full py-2" />
-                    <div className="h-8 py-1">
-                      {touched.director && errors.director && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.director}
-                        </div>
-                      )}
-                    </div>
+                    {touched.director && errors.director && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.director}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -962,19 +1016,16 @@ export const CRUDFilmPage = () => {
                       mode="multiple"
                       placeholder="Select type user"
                       value={values.rangeUser}
-                      style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("rangeUser", value)}
                     >
                       <Select.Option value="All">All User</Select.Option>
                       <Select.Option value="VIP">VIP User</Select.Option>
                     </Select>
-                    <div className="h-8 py-1">
-                      {touched.rangeUser && errors.rangeUser && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.rangeUser}
-                        </div>
-                      )}
-                    </div>
+                    {touched.rangeUser && errors.rangeUser && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.rangeUser}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -985,9 +1036,8 @@ export const CRUDFilmPage = () => {
                     <Select
                       className="w-full"
                       mode="multiple"
-                      value={values.genre}
                       placeholder="Select genres"
-                      style={{ flex: 1 }}
+                      value={values.genre}
                       onChange={(value) => setFieldValue("genre", value)}
                     >
                       <Select.Option value="Adventure">Adventure</Select.Option>
@@ -1027,13 +1077,11 @@ export const CRUDFilmPage = () => {
                         Novel/Light Novel
                       </Select.Option>
                     </Select>
-                    <div className="h-8 py-1">
-                      {touched.genre && errors.genre && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.genre}
-                        </div>
-                      )}
-                    </div>
+                    {touched.genre && errors.genre && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.genre}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1049,10 +1097,10 @@ export const CRUDFilmPage = () => {
                         values.small_image
                           ? [
                               {
-                                uid: "-1", // UID tạm
-                                name: "Small Image", // Tên mặc định
+                                uid: "-1",
+                                name: "Small Image",
                                 status: "done",
-                                url: values.small_image, // URL của ảnh
+                                url: values.small_image,
                               },
                             ]
                           : []
@@ -1063,16 +1111,16 @@ export const CRUDFilmPage = () => {
                           setFieldValue(
                             "small_image",
                             file.originFileObj
-                              ? URL.createObjectURL(file.originFileObj) // Tạo URL tạm cho file mới
-                              : file.url // Giữ nguyên URL cũ nếu không đổi
+                              ? URL.createObjectURL(file.originFileObj)
+                              : file.url
                           );
                         } else {
-                          setFieldValue("small_image", ""); // Reset nếu không có file nào
+                          setFieldValue("small_image", "");
                         }
                       }}
-                      onPreview={() => {
-                        window.open(values.small_image, "_blank");
-                      }}
+                      onPreview={() =>
+                        window.open(values.small_image, "_blank")
+                      }
                     >
                       <Button
                         type="button"
@@ -1082,13 +1130,11 @@ export const CRUDFilmPage = () => {
                         <div>Upload</div>
                       </Button>
                     </Upload>
-                    <div className="h-8 py-1">
-                      {touched.small_image && errors.small_image && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.small_image}
-                        </div>
-                      )}
-                    </div>
+                    {touched.small_image && errors.small_image && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.small_image}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1104,10 +1150,10 @@ export const CRUDFilmPage = () => {
                         values.large_image
                           ? [
                               {
-                                uid: "-1", // UID tạm
-                                name: "Large Image", // Tên mặc định
+                                uid: "-1",
+                                name: "Large Image",
                                 status: "done",
-                                url: values.large_image, // URL của ảnh
+                                url: values.large_image,
                               },
                             ]
                           : []
@@ -1118,16 +1164,16 @@ export const CRUDFilmPage = () => {
                           setFieldValue(
                             "large_image",
                             file.originFileObj
-                              ? URL.createObjectURL(file.originFileObj) // Tạo URL tạm cho file mới
-                              : file.url // Giữ nguyên URL cũ nếu không đổi
+                              ? URL.createObjectURL(file.originFileObj)
+                              : file.url
                           );
                         } else {
-                          setFieldValue("large_image", ""); // Reset nếu không có file nào
+                          setFieldValue("large_image", "");
                         }
                       }}
-                      onPreview={() => {
-                        window.open(values.large_image, "_blank");
-                      }}
+                      onPreview={() =>
+                        window.open(values.large_image, "_blank")
+                      }
                     >
                       <Button
                         type="button"
@@ -1137,36 +1183,40 @@ export const CRUDFilmPage = () => {
                         <div>Upload</div>
                       </Button>
                     </Upload>
-                    <div className="h-8 py-1">
-                      {touched.large_image && errors.large_image && (
-                        <div className="error text-red-500 ml-1">
-                          {errors.large_image}
-                        </div>
-                      )}
-                    </div>
+                    {touched.large_image && errors.large_image && (
+                      <div className="error text-red-500 ml-1">
+                        {errors.large_image}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Film Type Selector (chỉ hiển thị thông tin, có thể disable nếu không muốn sửa đổi) */}
               <Select
                 className="w-4/5"
-                style={{
-                  flex: 1,
-                }}
+                style={{ flex: 1 }}
                 value={filmType}
-              ></Select>
+                disabled
+              >
+                <Select.Option value="Movie">Movie</Select.Option>
+                <Select.Option value="TV Shows">TV Shows</Select.Option>
+              </Select>
+
+              {/* Hiển thị Upload cho Movie hoặc FieldArray cho TV Shows */}
               {filmType === "Movie" ? (
-                <div className="flex items-start justify-center">
+                <div className="flex items-start justify-center mt-4">
                   <label className="label-input-tnvd truncate">Movie:</label>
                   <div className="w-2/3 flex flex-col items-start">
                     <Upload
                       fileList={
-                        typeof values.movie === "string" && values.movie.trim() // Kiểm tra nếu movie là chuỗi và không rỗng
+                        typeof values.movie === "string" && values.movie.trim()
                           ? [
                               {
-                                uid: "-1", // UID tạm thời cho file duy nhất
-                                name: "Uploaded File", // Tên hiển thị
-                                status: "done", // Trạng thái tải lên
-                                url: values.movie, // URL của file
+                                uid: "-1",
+                                name: "Uploaded File",
+                                status: "done",
+                                url: values.movie,
                               },
                             ]
                           : []
@@ -1183,68 +1233,98 @@ export const CRUDFilmPage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col space-y-4 items-start justify-center">
-                  {/* Additional Fields */}
-                  {additionalFields.map((field, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col space-y-2 items-start justify-center"
-                    >
-                      {/* Video Upload Field */}
-                      <div className="flex items-start justify-center">
-                        <label className="label-input-tnvd truncate">
-                          Video {index + 1}:
-                        </label>
-                        <div className="w-2/3 flex flex-col items-start">
-                          <Upload
-                            onChange={(info) => {
-                              const updatedFields = [...additionalFields];
-                              updatedFields[index].movieFiles =
-                                info.fileList.map((file) => file.originFileObj);
-                              setAdditionalFields(updatedFields);
-                              handleVideoChange(
-                                info.fileList.map((file) => file.originFileObj),
-                                index
-                              );
-                            }}
+                // TV Shows: Sử dụng FieldArray để quản lý danh sách video và title
+                <FieldArray name="videos">
+                  {({ push, remove, form }) => (
+                    <div className="flex flex-col space-y-4 items-start justify-center mt-4">
+                      {form.values.videos && form.values.videos.length > 0 ? (
+                        form.values.videos.map((vid, index) => (
+                          <div
+                            key={index}
+                            className="flex flex-col space-y-2 items-start justify-center border p-2 rounded"
                           >
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                          </Upload>
-                        </div>
-                      </div>
+                            {/* Video Upload Field */}
+                            <div className="flex items-start justify-center">
+                              <label className="label-input-tnvd truncate">
+                                Video {index + 1}:
+                              </label>
+                              <div className="w-2/3 flex flex-col items-start">
+                                <Upload
+                                  fileList={vid.fileList || []}
+                                  onChange={(info) => {
+                                    console.log(info.fileList);
 
-                      {/* Number Title Field */}
-                      <div className="flex items-start justify-center">
-                        <label className="label-input-tnvd truncate">
-                          Number Title:
-                        </label>
-                        <div className="w-2/3 flex flex-col items-start">
-                          <input
-                            type="text"
-                            className="input-field"
-                            value={field.numberTitle || ""}
-                            onChange={(e) => {
-                              const updatedFields = [...additionalFields];
-                              updatedFields[index].numberTitle = e.target.value;
-                              setAdditionalFields(updatedFields);
-                              handleTitleChange(e.target.value, index);
-                            }}
-                            placeholder={`Enter number title for Video ${
-                              index + 1
-                            }`}
-                          />
-                        </div>
-                      </div>
+                                    const newFileList = info.fileList;
+                                    form.setFieldValue(
+                                      `videos[${index}].fileList`,
+                                      newFileList
+                                    );
+                                    if (newFileList.length > 0) {
+                                      form.setFieldValue(
+                                        `videos[${index}].file`,
+                                        newFileList[0].originFileObj
+                                      );
+                                    } else {
+                                      form.setFieldValue(
+                                        `videos[${index}].file`,
+                                        null
+                                      );
+                                    }
+                                  }}
+                                >
+                                  <Button icon={<UploadOutlined />}>
+                                    Upload
+                                  </Button>
+                                </Upload>
+                              </div>
+                            </div>
+
+                            {/* Title Field */}
+                            <div className="flex items-start justify-center">
+                              <label className="label-input-tnvd truncate">
+                                Title:
+                              </label>
+                              <div className="w-2/3 flex flex-col items-start">
+                                <Field
+                                  name={`videos[${index}].title`}
+                                  placeholder={`Enter title for Video ${
+                                    index + 1
+                                  }`}
+                                  className="input-field"
+                                />
+                              </div>
+                            </div>
+
+                            <Button
+                              type="button"
+                              onClick={() => remove(index)}
+                              className="bg-red-500 text-white px-3 py-1 rounded"
+                            >
+                              Remove Video
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div>No videos added.</div>
+                      )}
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          push({ fileList: [], file: null, title: "" })
+                        }
+                        className="bg-blue-500 text-white px-3 py-1 rounded"
+                      >
+                        Add More
+                      </Button>
                     </div>
-                  ))}
-
-                  <Button onClick={handleAddMore}>Add More</Button>
-                </div>
+                  )}
+                </FieldArray>
               )}
+
               <button
-                className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
+                className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089] mt-4"
                 type="submit"
-                disabled={isSubmitting} // Disable button while submitting
+                disabled={isSubmitting}
               >
                 Save Details
               </button>

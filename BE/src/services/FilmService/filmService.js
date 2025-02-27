@@ -1,5 +1,6 @@
 const Film = require("../../models/film");
 const wishList = require("../../models/wishList");
+const Episode = require("../../models/episode");
 exports.createFilmService = async (
   name,
   description,
@@ -7,77 +8,72 @@ exports.createFilmService = async (
   large_image,
   rangeUser,
   trailer,
-  movieFiles,
   cast,
   director,
   genre,
   releaseYear,
-  title = null,
-  video = null,
+  title,
+  video,
   age
 ) => {
   try {
-    let film;
-    console.log(rangeUser);
-    let episodes = [];
-    let videoArr = [];
-    if (title && video) {
-      const videoUrls = video.split(",").map((v) => v.trim()); // Tách chuỗi video thành mảng và loại bỏ khoảng trắng thừa
-      const parsedTitle = JSON.parse(title);
-      videoUrls.forEach((video) => {
-        videoArr.push(video);
-      });
+    let resultVideo = [];
+    let parsedTitle = [];
 
-      // Kiểm tra nếu numberTitle và video có cùng số lượng phần tử
-
-      // Duyệt qua từng phần tử của numberTitle và video
-      for (let i = 0; i < parsedTitle.length; i++) {
-        episodes.push({
-          title: parsedTitle[i],
-          video: videoArr[i],
-        });
+    // Parse title nếu có
+    if (title) {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (err) {
+        parsedTitle = [];
       }
+    }
+
+    // Nếu parsedTitle có phần tử (không rỗng) thì xử lý tạo Episode có title
+    if (parsedTitle && parsedTitle.length > 0) {
+      const videoUrls = video.split(",").map((v) => v.trim());
 
       
-      // Nếu có `numberTitle` và `video`, tạo với episodes
-      film = await Film.create({
-        name,
-        description,
-        small_image,
-        large_image,
-        trailer,
-        cast,
-        director,
-        genre,
-        releaseYear,
-        rangeUser: rangeUser,
-        isDeleted: false,
-        episodes: episodes,
-        age: age,
-      });
+      // Nếu số lượng video không khớp với số lượng title, có thể ném lỗi hoặc xử lý khác
+      if (videoUrls.length !== parsedTitle.length) {
+        throw new Error("Số lượng video và title không khớp");
+      }
+
+      for (let i = 0; i < parsedTitle.length; i++) {
+        let result = await Episode.create({
+          title: parsedTitle[i],
+          urlVideo: videoUrls[i],
+        });
+        resultVideo.push(result._id);
+      }
     } else {
-      // Nếu không có `numberTitle`, lưu phim cơ bản
-      film = await Film.create({
-        name,
-        description,
-        small_image,
-        large_image,
-        trailer,
-        movie: movieFiles, // Lưu trường `movie`
-        cast,
-        director,
-        genre,
-        isDeleted: false,
-        releaseYear,
-        rangeUser: rangeUser,
-        age: age,
+      // Nếu title rỗng hoặc không hợp lệ, chỉ tạo Episode với trường urlVideo
+      let result = await Episode.create({
+        urlVideo: video,
       });
+      resultVideo.push(result._id);
     }
+
+    // Tạo film với các thông tin nhận được, bao gồm cả danh sách Episode vừa tạo
+    const film = await Film.create({
+      name,
+      description,
+      small_image,
+      large_image,
+      trailer,
+      cast,
+      director,
+      genre,
+      releaseYear,
+      rangeUser: rangeUser,
+      isDeleted: false,
+      video: resultVideo,
+      age: age,
+    });
 
     if (!film) {
       throw new Error("Film not created");
     }
-
     return { success: true };
   } catch (error) {
     console.error("Error creating film:", error.message);
@@ -85,23 +81,15 @@ exports.createFilmService = async (
   }
 };
 
-exports.getAllFilmService = async (
-  page,
-  limit,
-  type,
-  category,
-  sort,
-  search
-) => {
+exports.getAllFilmService = async (type, category, sort, search) => {
   try {
-    let films = [];
     let sortOption = {};
     switch (sort) {
       case "Trending":
         sortOption = { views: -1 };
         break;
-      case "Top Rated":
-        sortOption = { rating: -1 };
+      case "Top":
+        sortOption = { totalRating: -1 };
         break;
       case "Newest":
         sortOption = { releaseYear: -1 };
@@ -119,51 +107,46 @@ exports.getAllFilmService = async (
         sortOption = {};
         break;
     }
+    
 
-    if (type === "Movie") {
-      films = await Film.find({
-        episodes: { $exists: true, $size: 0 },
-        ...(category && { genre: category }),
-        ...(search && { name: { $regex: search, $options: "i" } }),
-      })
-        .sort(sortOption)
-        .skip((page - 1) * limit)
-        .limit(limit);
-    } else if (type === "TV Shows") {
-      films = await Film.find({
-        episodes: { $exists: true, $not: { $size: 0 } },
-        ...(category && { genre: category }),
-        ...(search && { name: { $regex: search, $options: "i" } }),
-      })
-        .sort(sortOption)
-        .skip((page - 1) * limit)
-        .limit(limit);
-    } else if (type === "All") {
-      films = await Film.find({
-        ...(category && { genre: category }),
-        ...(search && { name: { $regex: search, $options: "i" } }),
-      })
-        .sort(sortOption)
-        .skip((page - 1) * limit)
-        .limit(limit);
-    } else if (type === "Person") {
-      films = await Film.find({
-        ...(search && { cast: { $regex: search, $options: "i" } }),
-      }).sort(sortOption);
-    } else {
-      films = await Film.find({
-        isDeleted: false,
-      }).sort(sortOption);
+    // Xây dựng query object chung
+    let query = {};
+
+    // Kiểm tra category trước khi thêm vào query
+    if (category && category !== "undefined") {
+      query.genre = category;
     }
 
-    const total = await Film.countDocuments(films);
+    // Kiểm tra search trước khi thêm vào query
+    if (search && search !== "undefined") {
+      if (type === "Person") {
+        query.cast = { $regex: search, $options: "i" };
+      } else {
+        query.name = { $regex: search, $options: "i" };
+      }
+    }
+
+    // Kiểm tra type, nếu tồn tại và khác "undefined" thì áp dụng điều kiện về video
+    if (type && type !== "undefined") {
+      if (type === "Movie") {
+        query.$expr = { $eq: [{ $size: { $ifNull: ["$video", []] } }, 1] };
+      } else if (type === "TV Shows") {
+        query.$expr = { $gt: [{ $size: { $ifNull: ["$video", []] } }, 1] };
+      } else if (type === "All") {
+        // Không thêm điều kiện nào về video
+      } else if (type === "Person") {
+        // Đã xử lý phần tìm kiếm cast ở trên
+      } else {
+        // Nếu type không khớp với các giá trị trên, ví dụ mặc định lấy phim active
+        query.isDeleted = false;
+      }
+    }
+
+    const films = await Film.find(query).sort(sortOption).populate("video","urlVideo");
 
     return {
       success: true,
       data: films,
-      currentPage: page,
-      totalPage: Math.ceil(total / limit),
-      total,
     };
   } catch (error) {
     console.error("Error getting all films:", error.message);
@@ -171,9 +154,11 @@ exports.getAllFilmService = async (
   }
 };
 
+
+
 exports.getFilmByIdService = async (filmId) => {
   try {
-    const film = await Film.findById(filmId);
+    const film = await Film.findById(filmId).populate("video","urlVideo title")
     if (!film) {
       throw new Error("Film not found");
     }
@@ -202,69 +187,113 @@ exports.activeOrDeactiveFilmByIdService = async (filmId) => {
 };
 
 exports.updateFilmByIdService = async (
-  filmId,
+  id,
   name,
   description,
-  small_image,
-  large_image,
+  smallImage,
+  largeImage,
   trailer,
-  movie,
   cast,
   director,
   genre,
   releaseYear,
-  numberTitle = null,
-  video = null
+  title,     // Dữ liệu title mới truyền dưới dạng JSON string (ví dụ: '["New Title 1", "New Title 2"]')
+  rangeUser,
+  video,     // Dữ liệu video mới truyền dưới dạng chuỗi URL, phân cách bằng dấu phẩy
+  age
 ) => {
   try {
-    const film = await Film.findById(filmId);
+    // Tìm film theo id và populate các episode hiện tại (nếu cần)
+    const film = await Film.findById(id);
     if (!film) {
       throw new Error("Film not found");
     }
-    let filmUpdate;
-    if (numberTitle && video) {
-      filmUpdate = await Film.findByIdAndUpdate(
-        filmId,
-        {
-          name,
-          description,
-          small_image,
-          large_image,
-          trailer,
-          cast,
-          director,
-          genre,
-          releaseYear,
-          episodes: [
-            {
-              numberTitle: Number(numberTitle),
-              video,
-            },
-          ],
-        },
-        { new: true }
-      );
-    } else {
-      filmUpdate = await Film.findByIdAndUpdate(
-        filmId,
-        {
-          name,
-          description,
-          small_image,
-          large_image,
-          trailer,
-          movie,
-          cast,
-          director,
-          genre,
-          releaseYear,
-        },
-        { new: true }
-      );
+    
+    // Lấy mảng episode hiện tại (đang lưu trong film.video)
+    const existingEpisodes = film.video; // Đây là mảng ObjectId của Episode
+
+    let newEpisodeIds = [];
+    let parsedTitle = [];
+    if (title && video) {
+      try {
+        parsedTitle = JSON.parse(title); // Chuyển sang mảng
+      } catch (err) {
+        parsedTitle = [];
+      }
     }
-    return { success: true };
-  } catch (error) {}
+    
+    // Nếu có dữ liệu title mới, tạo các episode mới chỉ với những title không rỗng
+    if (parsedTitle.length > 0) {
+      const videoUrls = video.split(",").map((v) => v.trim());
+      
+      if (videoUrls.length !== parsedTitle.length) {
+        throw new Error("Số lượng video và title không khớp");
+      }
+      
+      for (let i = 0; i < parsedTitle.length; i++) {
+        console.log(parsedTitle[i]);
+        
+        if (parsedTitle[i].trim() !== "") {
+          const episode = await Episode.create({
+            title: parsedTitle[i],
+            urlVideo: videoUrls[i],
+          });
+          newEpisodeIds.push(episode._id);
+        }
+      }
+      // Nếu sau khi lọc không có episode nào được tạo, tạo một episode mặc định
+      if (newEpisodeIds.length === 0) {
+        const episode = await Episode.create({ urlVideo: video });
+        newEpisodeIds.push(episode._id);
+      }
+    } else if(video) {
+      
+      // Nếu không có title mới hợp lệ, tạo một episode mới với video
+      const episode = await Episode.create({ urlVideo: video });
+      newEpisodeIds.push(episode._id);
+    }
+
+    // Giữ lại các episode cũ và nối với các episode mới
+    const updatedEpisodeIds = [...existingEpisodes, ...newEpisodeIds];
+
+    
+    // Cập nhật film với thông tin mới và danh sách episode mới được nối thêm
+    const filmUpdate = await Film.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        small_image: smallImage,
+        large_image: largeImage,
+        trailer,
+        cast,
+        director,
+        genre,
+        releaseYear,
+        rangeUser,
+     
+        age,
+      },
+      { new: true }
+    );
+    if (filmUpdate.video.length !== updatedEpisodeIds.length) {
+      filmUpdate.video = updatedEpisodeIds;
+      await filmUpdate.save();
+    }
+    if (!filmUpdate) {
+      throw new Error("Film update failed");
+    }
+
+    return { success: true, data: filmUpdate };
+  } catch (error) {
+    console.error("Error updating film:", error.message);
+    return { success: false, error: error.message };
+  }
 };
+
+
+
+
 
 exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
   try {
