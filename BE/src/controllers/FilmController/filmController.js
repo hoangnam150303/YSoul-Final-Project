@@ -12,27 +12,23 @@ exports.createFilm = async (req, res) => {
       genre,
       releaseYear,
       title,
-      isSeries,
       rangeUser,
       age,
     } = req.body;
-    console.log(req.body);
+   
     
-    const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
+    const movieFiles = req.files?.movie.map((file) => file.path).join(", ");
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
 
-    let response;
-    if (isSeries === "true") {
-      // Nếu có episode (phim nhiều tập)
-      response = await filmService.createFilmService(
+    
+    const response = await filmService.createFilmService(
         name,
         description,
         smallImage,
         largeImage,
         rangeUser,
         trailer,
-        null, // Không truyền movie khi tạo episodes
         cast,
         director,
         genre,
@@ -41,23 +37,7 @@ exports.createFilm = async (req, res) => {
         movieFiles,
         age
       );
-    } else {
-      // Nếu là phim đơn lẻ
-      response = await filmService.createFilmService(
-        name,
-        description,
-        smallImage,
-        largeImage,
-        rangeUser,
-        trailer,
-        movieFiles, // Truyền file phim
-        cast,
-        director,
-        genre,
-        releaseYear,
-        age
-      );
-    }
+  
     if (!response.success) {
       return res.status(400).json({
         message: "Error creating film",
@@ -77,10 +57,8 @@ exports.createFilm = async (req, res) => {
 // this function can use in many situation, search film, sort film, get all film and Front end can use this function many time with many page.
 exports.getAllFilm = async (req, res) => {
   try {
-    const { page, limit, typeFilm, category, sort, search } = req.query;
+    const {typeFilm, category, sort, search } = req.query;
     const response = await filmService.getAllFilmService(
-      page,
-      limit,
       typeFilm,
       category,
       sort,
@@ -145,48 +123,35 @@ exports.updateFilmById = async (req, res) => {
       director,
       genre,
       releaseYear,
-      numberTitle,
-      episode,
+      title,
+      rangeUser,
+      age,
     } = req.body;
     const { id } = req.params;
-
+  
+    
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
-    const movieFile = req.files?.movie?.path;
-    let response;
-    if (episode) {
+    const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
+
       // Nếu có episode (phim nhiều tập)
-      response = await filmService.updateFilmByIdService(
+     const response = await filmService.updateFilmByIdService(
         id,
         name,
         description,
         smallImage,
         largeImage,
         trailer,
-        null, // Không truyền movie khi tạo episodes
         cast,
         director,
         genre,
         releaseYear,
-        numberTitle,
-        movieFile // Truyền video (tập)
+        title,
+        rangeUser,
+        movieFiles,
+        age,
       );
-    } else {
-      // Nếu là phim đơn lẻ
-      response = await filmService.updateFilmByIdService(
-        id,
-        name,
-        description,
-        smallImage,
-        largeImage,
-        trailer,
-        movieFile, // Truyền file phim
-        cast,
-        director,
-        genre,
-        releaseYear
-      );
-    }
+  
     if (!response.success) {
       return res.status(400).json({
         message: "Error creating film",

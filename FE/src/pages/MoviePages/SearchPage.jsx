@@ -11,13 +11,10 @@ export const SearchPage = () => {
   const [results, setResults] = useState([]);
   const [status, setStatus] = useState("");
   const [category, setCategory] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+
   const [totalFilm, setTotalFilm] = useState(0);
   const fetchFilm = async () => {
     const response = await filmApi.getAllFilm({
-      page: page,
-      limit: limit,
       typeFilm: type,
       category: category,
       sort: status,
@@ -126,14 +123,14 @@ export const SearchPage = () => {
     setCategory(checkedValues);
   };
   const onChangeStatus = (value) => {
-    console.log(`selected ${value}`);
+    setStatus(value);
   };
   useEffect(() => {
     fetchFilm();
     handleSearch();
     onChange(category);
     handleTypeChange(type);
-  }, [category, type, searchTerm, page, limit, status]);
+  }, [category, type, searchTerm, status]);
   return (
     <div className="bg-black min-h-screen text-white">
       <div className="z-50">

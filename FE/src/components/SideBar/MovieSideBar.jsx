@@ -25,7 +25,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
     {
       title: "Profile",
       icon: <UserOutlined className="text-2xl" />,
-      path: `/`,
+      path: `/userprofile`,
     },
     {
       title: "Search",
@@ -54,19 +54,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
     },
   ];
 
-  // useEffect(() => {
-  //     const fetchShopDetail = async () => {
-  //         try {
-  //             const response = await shopApi.getDetailShop(id); // Gọi API
-  //             const { shop } = response.data; // Lấy dữ liệu từ response
-  //             setShopDetail(shop); // Lưu thông tin shop
-  //         } catch (error) {
-  //             console.error("Error fetching shop detail:", error);
-  //         }
-  //     };
 
-  //     fetchShopDetail();
-  // }, [id]);
 
   // Tablet - Mobile - Ipad
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -76,11 +64,8 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
   const onCloseDrawer = () => {
     setOpenDrawer(false);
   };
-  useEffect(() => {
-    console.log(role);
-  }, [role]);
+
   const handleLogout = () => {
-    console.log(role);
     dispatch(logoutUser()); // Dispatch action logout
   };
 

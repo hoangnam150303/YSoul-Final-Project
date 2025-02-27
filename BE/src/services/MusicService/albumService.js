@@ -158,8 +158,6 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
 // this function is for user, admin, user or admin can get album by id
 exports.getAlbumByIdService = async (id) => {
   try {
-    console.log(id);
-    
     const validAlbum = await conectPostgresDb.query(
       `SELECT * FROM albums WHERE id = ${id}`
     ); // get album by id from database

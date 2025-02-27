@@ -25,7 +25,6 @@ export const MovieSlider = ({ category }) => {
   };
   const handleUpdateStatus = async (id, type, data) => {
     await filmApi.postUpdateStatusFilm(id, type, data);
-    fetchFilm(id);
   };
   useEffect(() => {
     updateMoviesToShow(); // Cập nhật khi component được render lần đầu

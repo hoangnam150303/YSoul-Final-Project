@@ -4,8 +4,6 @@ const FILM_API_ENDPOINT = "/film";
 const filmApi = {
   getAllFilm: ({ page, limit, typeFilm, category, sort, search }) => {
     const queryParams = new URLSearchParams({
-      page,
-      limit,
       typeFilm,
       category,
       sort,
@@ -37,6 +35,15 @@ const filmApi = {
 
     const url = `${FILM_API_ENDPOINT}/updateStatusFilmById/${id}/${type}/${userId}`;
     return axiosClient.put(url, { data });
+  },
+
+  postUpdateFilm: (id, formData) => {
+    const url = `${FILM_API_ENDPOINT}/updateFilmById/${id}`; // update album by id
+    return axiosClient.put(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 };
 export default filmApi;
