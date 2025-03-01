@@ -9,6 +9,7 @@ export const MovieSlider = ({ category }) => {
   const fetchMovie = async () => {
     const response = await filmApi.getAllFilm({
       sort: category,
+      typeUser: "user",
     });
 
     setMovies(response.data.data.data);
@@ -42,7 +43,7 @@ export const MovieSlider = ({ category }) => {
     <div className="bg-black text-white relative px-5 md:px-20 ">
       <div className="flex items-center">
         <h2 className="font-bold text-2xl pt-7 mb-5">{category}</h2>
-        <Link to={"/"}>
+        <Link to={"/search"}>
           <RightCircleOutlined className="text-3xl pl-3" />
         </Link>
       </div>

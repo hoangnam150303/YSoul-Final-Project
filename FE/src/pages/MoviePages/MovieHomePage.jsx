@@ -3,68 +3,34 @@ import { MovieSideBar } from "../../components/SideBar/MovieSideBar";
 import { Link } from "react-router-dom";
 import { CaretRightOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { MovieSlider } from "../../components/Slider/MovieSlider/MovieSlider";
+import filmApi from "../../hooks/filmApi";
 
 export const MovieHomePage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-
+  const [films, setFilms] = useState([]);
   const category = [
     { id: 1, name: "Newest" },
     { id: 2, name: "Top Rated" },
     { id: 3, name: "Popular" },
     { id: 4, name: "Trending" },
   ];
-
-  const banners = [
-    {
-      id: 1,
-      imageSrc:
-        "https://res.cloudinary.com/dnv7bjvth/image/upload/v1736866910/5fed6514-2bab-49fd-b713-a223e376bc6f.png",
-      title: "Extraction",
-      year: 2014,
-      rating: "18+",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea repudiandae ad atque eligendi. Doloremque, maiores? Quis a quasi molestiae illo at distinctio iure quaerat. Ipsa doloribus molestiae consequatur cupiditate sapiente.",
-      watchLink: "/watchPage",
-      infoLink: "/watch/123",
-    },
-    {
-      id: 2,
-      imageSrc:
-        "https://res.cloudinary.com/dnv7bjvth/image/upload/v1736866910/5fed6514-2bab-49fd-b713-a223e376bc6f.png",
-      title: "Inception",
-      year: 2010,
-      rating: "13+",
-      description:
-        "A mind-bending thriller that blurs the lines between dreams and reality. Directed by Christopher Nolan.",
-      watchLink: "/watch/inception",
-      infoLink: "/watch/456",
-    },
-    {
-      id: 3,
-      imageSrc:
-        "https://res.cloudinary.com/dnv7bjvth/image/upload/v1736954981/logo_large.8b77e59c_j8vxkt.png",
-      title: "Interstellar",
-      year: 2014,
-      rating: "PG-13",
-      description:
-        "A journey through space and time to save humanity. Directed by Christopher Nolan.",
-      watchLink: "/watch/interstellar",
-      infoLink: "/watch/789",
-    },
-    {
-      id: 4,
-      imageSrc:
-        "https://res.cloudinary.com/dnv7bjvth/image/upload/v1737045316/8f4828ec-f6fa-4ba5-aa51-67a4da3b2cfd.png",
-      title: "The Matrix",
-      year: 1999,
-      rating: "R",
-      description:
-        "A computer hacker learns about the true nature of his reality and his role in the war against its controllers.",
-      watchLink: "/watch/the-matrix",
-      infoLink: "/watch/101",
-    },
-  ];
+  const fetchNewestFilm = async () => {
+    try {
+      const response = await filmApi.getAllFilm({
+        sort: "Newest",
+        typeUser: "user"
+      })
+      setFilms(response.data.data.data);
+    } catch (error) {
+      console.log(error);
+      
+    }
+  };
+  useEffect(() => {
+    fetchNewestFilm();
+  }, []);
+ 
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
@@ -72,11 +38,11 @@ export const MovieHomePage = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
+      setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % films.length);
     }, 5000);
 
     return () => clearInterval(interval); // Dọn dẹp bộ đếm thời gian
-  }, [banners.length]);
+  }, [films.length]);
 
   return (
     <>
@@ -88,15 +54,15 @@ export const MovieHomePage = () => {
 
         <div className="">
           <div className="relative w-screen h-screen">
-            {banners.map((banner, index) => (
+            {films.map((film, index) => (
               <div
-                key={banner.id}
+                key={film._id}
                 className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
                   index === currentBannerIndex ? "opacity-100" : "opacity-0"
                 }`}
               >
                 <img
-                  src={banner.imageSrc}
+                  src={film.large_image}
                   alt="banner"
                   className="absolute top-0 left-0 w-full h-full object-cover -z-10"
                 />
@@ -110,18 +76,18 @@ export const MovieHomePage = () => {
                   <div className="bg-gradient-to-b from-black via-transparent to-transparent absolute w-full h-full top-0 left-0 -z-10" />
                   <div className="max-w-2xl ">
                     <h1 className="mt-4 text-6xl font-extrabold text-balance">
-                      {banner.title}
+                      {film.name}
                     </h1>
                     <p className="mt-2 text-lg">
-                      {banner.year} | {banner.rating}
+                      {film.releaseYear} | {film.age}+
                     </p>
 
-                    <p className="mt-4 text-lg">{banner.description}</p>
+                    <p className="mt-4 text-lg">{film.description}</p>
                   </div>
 
                   <div className="flex mt-8">
                     <Link
-                      to={banner.watchLink}
+                      to={`/watchPage/${film._id}`}
                       className="bg-red-600 hover:bg-red-800 text-white font-bold py-2 px-4 rounded mr-4 flex items-center"
                     >
                       <CaretRightOutlined className="size-6 inline-block mr-2 fill-white mt-2" />
@@ -129,7 +95,7 @@ export const MovieHomePage = () => {
                     </Link>
 
                     <Link
-                      to={banner.infoLink}
+                      to={`/watchPage/${film._id}`}
                       className="bg-gray-500/70 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded mr-4 flex items-center"
                     >
                       <InfoCircleOutlined className="size-6 inline-block mr-2 fill-white mt-2" />

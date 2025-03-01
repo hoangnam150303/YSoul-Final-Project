@@ -116,7 +116,7 @@ exports.getUser = async (req, res) => {
     return res.status(200).json({
       id: user.rows[0].id,
       name: user.rows[0].name,
-      role: user.rows[0].role,
+      is_admin: user.rows[0].is_admin,
       vip: user.rows[0].vip,
     });
   } catch (error) {

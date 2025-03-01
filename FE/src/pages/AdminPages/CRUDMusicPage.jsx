@@ -725,9 +725,20 @@ export const CRUDMusicPage = () => {
                         <Upload
                           name="image"
                           listType="picture"
+                          fileList={
+                            values.image
+                              ? [
+                                  {
+                                    uid: "-1",
+                                    name: values.image.name,
+                                    status: "done",
+                                  },
+                                ]
+                              : []
+                          }
                           beforeUpload={(file) => {
                             setFieldValue("image", file);
-                            return false; // Ngăn chặn upload tự động
+                            return false; // Ngăn upload tự động
                           }}
                         >
                           <Button icon={<UploadOutlined />}>
@@ -787,16 +798,42 @@ export const CRUDMusicPage = () => {
                         <label className="label-input-tnvd">Image:</label>
                         <Upload
                           name="image"
-                          listType="picture"
+                          listType="picture-card"
+                          fileList={
+                            values.image
+                              ? [
+                                  {
+                                    uid: "-1",
+                                    name: values.image.name,
+                                    status: "done",
+                                    url: URL.createObjectURL(values.image), // Tạo URL preview từ file
+                                  },
+                                ]
+                              : []
+                          }
                           beforeUpload={(file) => {
                             setFieldValue("image", file);
-                            return false; // Ngăn chặn upload tự động
+                            return false; // Ngăn upload tự động
+                          }}
+                          onPreview={async (file) => {
+                            let src = file.url;
+                            if (!src) {
+                              src = await new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.readAsDataURL(file.originFileObj);
+                                reader.onload = () => resolve(reader.result);
+                              });
+                            }
+                            // Mở ảnh preview trong một cửa sổ mới
+                            const image = new Image();
+                            image.src = src;
+                            const imgWindow = window.open(src);
+                            imgWindow.document.write(image.outerHTML);
                           }}
                         >
-                          <Button icon={<UploadOutlined />}>
-                            Click to upload
-                          </Button>
+                          {values.image ? null : <div>Click to upload</div>}
                         </Upload>
+
                         <ErrorMessage
                           name="image"
                           component="div"
@@ -860,7 +897,17 @@ export const CRUDMusicPage = () => {
                         <label className="label-input-tnvd">MP3:</label>
                         <Upload
                           accept=".mp3"
-                          
+                          fileList={
+                            values.mp3
+                              ? [
+                                  {
+                                    uid: "-1",
+                                    name: values.mp3.name,
+                                    status: "done",
+                                  },
+                                ]
+                              : []
+                          }
                           onChange={(info) => {
                             if (info.fileList.length > 0) {
                               const file = info.fileList[0];
@@ -878,6 +925,7 @@ export const CRUDMusicPage = () => {
                             <div>Upload</div>
                           </Button>
                         </Upload>
+
                         <ErrorMessage
                           name="mp3"
                           component="div"

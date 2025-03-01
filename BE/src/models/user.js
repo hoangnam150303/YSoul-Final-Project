@@ -13,7 +13,7 @@ const createUserTableQuery = `
     google_id VARCHAR(50),
     avatar VARCHAR(200)
     vip BOOLEAN
-    role VARCHAR(10)
+    is_admin BOOLEAN
 )
 `;
 

@@ -6,7 +6,7 @@ exports.createFilmService = async (
   description,
   small_image,
   large_image,
-  rangeUser,
+  isForAll,
   trailer,
   cast,
   director,
@@ -65,7 +65,7 @@ exports.createFilmService = async (
       director,
       genre,
       releaseYear,
-      rangeUser: rangeUser,
+      isForAllUsers:isForAll,
       isDeleted: false,
       video: resultVideo,
       age: age,
@@ -81,18 +81,18 @@ exports.createFilmService = async (
   }
 };
 
-exports.getAllFilmService = async (type, category, sort, search) => {
+exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
   try {
     let sortOption = {};
     switch (sort) {
       case "Trending":
         sortOption = { views: -1 };
         break;
-      case "Top":
+      case "Top Rated":
         sortOption = { totalRating: -1 };
         break;
       case "Newest":
-        sortOption = { releaseYear: -1 };
+        sortOption = { createdAt: -1 };
         break;
       case "Popular":
         sortOption = { countClick: -1 };
@@ -136,13 +136,16 @@ exports.getAllFilmService = async (type, category, sort, search) => {
         // Không thêm điều kiện nào về video
       } else if (type === "Person") {
         // Đã xử lý phần tìm kiếm cast ở trên
-      } else {
-        // Nếu type không khớp với các giá trị trên, ví dụ mặc định lấy phim active
-        query.isDeleted = false;
-      }
+      } 
+    }
+    let films;
+    if (typeUser === "admin") {
+      films = await Film.find(query).sort(sortOption).sort({ createdAt: -1 });
+    }
+    else{
+      films = await Film.find(query).sort(sortOption).sort({ createdAt: -1 }).where({ isDeleted: false });
     }
 
-    const films = await Film.find(query).sort(sortOption).populate("video","urlVideo");
 
     return {
       success: true,
@@ -153,7 +156,6 @@ exports.getAllFilmService = async (type, category, sort, search) => {
     return { success: false, error: error.message };
   }
 };
-
 
 
 exports.getFilmByIdService = async (filmId) => {
@@ -198,7 +200,7 @@ exports.updateFilmByIdService = async (
   genre,
   releaseYear,
   title,     // Dữ liệu title mới truyền dưới dạng JSON string (ví dụ: '["New Title 1", "New Title 2"]')
-  rangeUser,
+  isForAll,
   video,     // Dữ liệu video mới truyền dưới dạng chuỗi URL, phân cách bằng dấu phẩy
   age
 ) => {
@@ -270,8 +272,7 @@ exports.updateFilmByIdService = async (
         director,
         genre,
         releaseYear,
-        rangeUser,
-     
+        isForAllUsers: isForAll,
         age,
       },
       { new: true }
@@ -290,9 +291,6 @@ exports.updateFilmByIdService = async (
     return { success: false, error: error.message };
   }
 };
-
-
-
 
 
 exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
