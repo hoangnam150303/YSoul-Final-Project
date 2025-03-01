@@ -16,10 +16,10 @@ exports.registerService = async (name, email, password, otp, verifyToken) => {
     console.log(hashPassword);
     
  const success =    await conectPostgresDb.query(
-      "INSERT INTO users (name, email, status, authprovider, password,role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-      [name, email, true, "local", hashPassword, "user"]
+      "INSERT INTO users (name, email, status, authprovider, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [name, email, true, "local", hashPassword]
     );
-    console.log(success);
+
     
     return { success: true };
   } catch (error) {
@@ -72,7 +72,7 @@ exports.loginLocalService = async (email, password) => {
     );
 
     const access_token = jwt.sign(
-      { id: user.rows[0].id, role: user.rows[0].role, name: user.rows[0].name },
+      { id: user.rows[0].id, is_admin: user.rows[0].is_admin, name: user.rows[0].name },
       process.env.ACCESS_TOKEN,
       {
         expiresIn: process.env.TOKEN_EXPIRED,

@@ -16,6 +16,8 @@ import {
   Select,
   Upload,
   message,
+  Radio,
+  Flex,
 } from "antd";
 import { AdminSideBar } from "../../components/SideBar/AdminSideBar";
 import filmApi from "../../hooks/filmApi";
@@ -32,11 +34,12 @@ export const CRUDFilmPage = () => {
   const [video, setVideo] = useState([""]);
   const [title, setTitle] = useState([""]);
   const [kind, setKind] = useState("All");
+  const [filter, setFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const { TextArea } = Input;
   const handleTitleChange = (value, index) => {
     const updatedTitles = [...title];
     updatedTitles[index] = value; // Gán giá trị mới cho tiêu đề
-
     setTitle(updatedTitles); // Cập nhật state
   };
 
@@ -91,12 +94,19 @@ export const CRUDFilmPage = () => {
   };
 
   const fetchFilms = async () => {
+
+
     try {
       const respone = await filmApi.getAllFilm({
-        type: kind,
+        typeFilm: kind,
+        sort: filter,
+        search: searchTerm,
+        typeUser: "admin",
       });
       setFilms(respone.data.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
   const handleDelete = async (id) => {
     try {
@@ -111,7 +121,7 @@ export const CRUDFilmPage = () => {
       setIsSeries(true);
     }
     fetchFilms();
-  }, [filmType]);
+  }, [filmType, kind, searchTerm, filter]);
 
   const alignCenter = {
     align: "center",
@@ -136,6 +146,7 @@ export const CRUDFilmPage = () => {
     movie: Yup.array()
       .min(1, "At least one movie is required")
       .required("Movie URL is required"),
+    age: Yup.string().required("Age is required"),
   });
 
   const data = films.map((film) => ({
@@ -143,15 +154,12 @@ export const CRUDFilmPage = () => {
     small_image: film.small_image,
     name: film.name,
     releaseYear: film.releaseYear,
-    kind: film.movie ? "Movie" : "TV Shows",
+    kind: film.video.length > 1 ? "TV Shows" : "Movie",
     genre: film.genre.replace(/[\[\]]/g, "").split(","),
     isDeleted: film.isDeleted ? "Yes" : "No",
     rating: film.totalRating || "N/A",
     views: film.countClick || "N/A",
-    rangeUser:
-      film.rangeUser.length > 0
-        ? film.rangeUser.join(", ").replace(/[\[\]]/g, "")
-        : "N/A",
+    rangeUser: film.isForAllUsers ? "All Users" : "VIP Users",
   }));
 
   const columns = [
@@ -272,6 +280,55 @@ export const CRUDFilmPage = () => {
           >
             Create Film
           </Button>
+
+          {/* Container Flex cho 2 Select và Input */}
+          <div
+            style={{
+              display: "flex",
+              gap: "16px",
+              marginBottom: "16px",
+              alignItems: "center",
+            }}
+          >
+            <Select
+              className="pl-2"
+              mode="only"
+              placeholder="Select type film"
+              style={{ width: "16%" }}
+              onChange={(value) => setKind(value)}
+            >
+              <Option value="all">All</Option>
+              <Option value="Movie">Movie</Option>
+              <Option value="TV Shows">TV Shows</Option>
+            </Select>
+
+            <Select
+              className="pl-2"
+              mode="only"
+              placeholder="Filter"
+              style={{ width: "16%" }}
+              onChange={(value) => setFilter(value)}
+            >
+              <Option value="all">All</Option>
+              <Option value="Newest">Newest</Option>
+              <Option value="Popular">Popular</Option>
+              <Option value="Top Rated">Top Rated</Option>
+              <Option value="IsDeleted">Deleted</Option>
+              <Option value="Active">Active</Option>
+            </Select>
+
+            <Input
+              placeholder="Search..."
+              variant="borderless"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                color: "black",
+                flex: 1,
+              }}
+              className="bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
           <Table
             columns={columns}
             dataSource={data}
@@ -298,7 +355,7 @@ export const CRUDFilmPage = () => {
             description: "",
             cast: [],
             releaseYear: "",
-            rangeUser: [],
+            isForAllUser: false,
             genre: [],
             small_image: "",
             large_image: "",
@@ -308,6 +365,7 @@ export const CRUDFilmPage = () => {
             // Nếu filmType là TV Shows, sử dụng mảng videos chứa file video và title
             videos: [],
             director: "",
+            age: "",
           }}
           onSubmit={async (values, { setSubmitting, resetForm }) => {
             try {
@@ -316,14 +374,14 @@ export const CRUDFilmPage = () => {
               formData.append("name", values.name);
               formData.append("description", values.description);
               formData.append("cast", JSON.stringify(values.cast));
-              formData.append("rangeUser", JSON.stringify(values.rangeUser));
+              formData.append("isForAll", values.isForAllUser);
               formData.append("releaseYear", values.releaseYear);
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
               formData.append("genre", JSON.stringify(values.genre));
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
-
+              formData.append("age", values.age);
               if (filmType === "TV Shows") {
                 // Lấy mảng title từ values.videos, chỉ lấy những title không rỗng
                 const titles = values.videos
@@ -497,28 +555,33 @@ export const CRUDFilmPage = () => {
                   </div>
                 </div>
 
-                {/* Range User Field */}
+                {/* Age Field */}
                 <div className="flex-input-tnvd">
-                  <label className="label-input-tnvd">Range User:</label>
+                  <label className="label-input-tnvd">Age:</label>
                   <div className="w-full flex flex-col items-start">
-                    <Select
-                      className="w-full"
-                      mode="multiple"
-                      value={values.rangeUser}
-                      placeholder="Select type user"
-                      style={{ flex: 1 }}
-                      onChange={(value) => setFieldValue("rangeUser", value)}
-                    >
-                      <Select.Option value="All">All User</Select.Option>
-                      <Select.Option value="VIP">VIP User</Select.Option>
-                    </Select>
+                    <Field name="age" as={Input} className="w-full py-2" />
                     <div className="h-8 py-1">
-                      {touched.rangeUser && errors.rangeUser && (
+                      {touched.age && errors.age && (
                         <div className="error text-red-500 ml-1">
-                          {errors.rangeUser}
+                          {errors.age}
                         </div>
                       )}
                     </div>
+                  </div>
+                </div>
+                {/* Range User Field */}
+                <div className="flex-input-tnvd">
+                  <label className="label-input-tnvd">User Type:</label>
+                  <div className="w-full flex flex-col items-start">
+                    <Radio.Group
+                      value={values.isForAllUser}
+                      onChange={(e) =>
+                        setFieldValue("isForAllUser", e.target.value)
+                      }
+                    >
+                      <Radio value={true}>For All</Radio>
+                      <Radio value={false}>For VIP</Radio>
+                    </Radio.Group>
                   </div>
                 </div>
 
@@ -534,42 +597,27 @@ export const CRUDFilmPage = () => {
                       style={{ flex: 1 }}
                       onChange={(value) => setFieldValue("genre", value)}
                     >
+                      <Select.Option value="Action">Action</Select.Option>
+                      <Select.Option value="Animation">Animation</Select.Option>
+                      <Select.Option value="Romance">Romance</Select.Option>
+                      <Select.Option value="Horror">Horror</Select.Option>
+                      <Select.Option value="Comedy">Comedy</Select.Option>
                       <Select.Option value="Adventure">Adventure</Select.Option>
-                      <Select.Option value="Fantasy">Fantasy</Select.Option>
-                      <Select.Option value="Educational Curriculum">
-                        Educational Curriculum
-                      </Select.Option>
                       <Select.Option value="Science Fiction">
                         Science Fiction
                       </Select.Option>
-                      <Select.Option value="Mystery & Thriller">
-                        Mystery & Thriller
+                      <Select.Option value="Drama">Drama</Select.Option>
+                      <Select.Option value="Fantasy">Fantasy</Select.Option>
+                      <Select.Option value="Crime">Crime</Select.Option>
+                      <Select.Option value="Documentary">
+                        Documentary
                       </Select.Option>
-                      <Select.Option value="Romance">Romance</Select.Option>
-                      <Select.Option value="Literary Fiction">
-                        Literary Fiction
+                      <Select.Option value="Historical">
+                        Historical
                       </Select.Option>
-                      <Select.Option value="Biography/Autobiography">
-                        Biography/Autobiography
-                      </Select.Option>
-                      <Select.Option value="Children Book">
-                        Children Book
-                      </Select.Option>
-                      <Select.Option value="Self-help">Self-help</Select.Option>
-                      <Select.Option value="Cookbooks">Cookbooks</Select.Option>
-                      <Select.Option value="History">History</Select.Option>
-                      <Select.Option value="Graphic Novels/Comic">
-                        Graphic Novels/Comic
-                      </Select.Option>
-                      <Select.Option value="Poetry">Poetry</Select.Option>
-                      <Select.Option value="Business">Business</Select.Option>
-                      <Select.Option value="Philosophy">
-                        Philosophy
-                      </Select.Option>
-                      <Select.Option value="Travel">Travel</Select.Option>
-                      <Select.Option value="Novel/Light Novel">
-                        Novel/Light Novel
-                      </Select.Option>
+                      <Select.Option value="Mystery">Mystery</Select.Option>
+                      <Select.Option value="Education">Education</Select.Option>
+                      <Select.Option value="Superhero">Superhero</Select.Option>
                     </Select>
                     <div className="h-8 py-1">
                       {touched.genre && errors.genre && (
@@ -794,13 +842,14 @@ export const CRUDFilmPage = () => {
             description: film.description || "",
             cast: film.cast ? JSON.parse(film.cast) : [],
             releaseYear: film.releaseYear || "",
-            rangeUser: film.rangeUser ? JSON.parse(film.rangeUser) : [],
+            isForAllUser: film.isForAllUsers,
             // Giả sử genre được lưu dưới dạng mảng, nếu không thì convert lại
             genre: film.genre ? JSON.parse(film.genre) : [],
             small_image: film.small_image || "",
             large_image: film.large_image || "",
             trailer: film.trailer || "",
             director: film.director || "",
+            age: film.age || "",
             // Với TV Shows, chuyển mảng video thành mảng object chứa title và fileList
             videos:
               isSeries === true && film.video && film.video.length > 0
@@ -832,7 +881,7 @@ export const CRUDFilmPage = () => {
               formData.append("description", values.description);
               // Nếu backend mong đợi chuỗi JSON, gọi stringify một lần:
               formData.append("cast", JSON.stringify(values.cast));
-              formData.append("rangeUser", JSON.stringify(values.rangeUser));
+              formData.append("isForAll", values.isForAllUser);
               formData.append("releaseYear", values.releaseYear);
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
@@ -841,7 +890,7 @@ export const CRUDFilmPage = () => {
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
               formData.append("isSeries", isSeries);
-          
+              formData.append("age", values.age);
               if (isSeries === true) {
                 const filteredVideos = values.videos.filter(
                   (vid) => vid.title && vid.title.trim() !== ""
@@ -864,9 +913,9 @@ export const CRUDFilmPage = () => {
                   formData.append("movie", values.movie);
                 }
               }
-          
+
               const response = await filmApi.postUpdateFilm(film._id, formData);
-          
+
               if (response.status === 200) {
                 message.success("Film updated successfully!");
                 handleCancelEdit();
@@ -879,7 +928,6 @@ export const CRUDFilmPage = () => {
               setSubmitting(false);
             }
           }}
-          
         >
           {({ values, setFieldValue, errors, touched, isSubmitting }) => (
             <Form className="mt-5">
@@ -1006,26 +1054,33 @@ export const CRUDFilmPage = () => {
                     )}
                   </div>
                 </div>
-
+                {/* Age Field */}
+                <div className="flex-input-tnvd">
+                  <label className="label-input-tnvd">Age:</label>
+                  <div className="w-full flex flex-col items-start">
+                    <Field name="age" as={Input} className="w-full py-2" />
+                    <div className="h-8 py-1">
+                      {touched.age && errors.age && (
+                        <div className="error text-red-500 ml-1">
+                          {errors.age}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
                 {/* Range User Field */}
                 <div className="flex-input-tnvd">
-                  <label className="label-input-tnvd">Range User:</label>
+                  <label className="label-input-tnvd">User Access:</label>
                   <div className="w-full flex flex-col items-start">
-                    <Select
-                      className="w-full"
-                      mode="multiple"
-                      placeholder="Select type user"
-                      value={values.rangeUser}
-                      onChange={(value) => setFieldValue("rangeUser", value)}
+                    <Radio.Group
+                      value={values.isForAllUser}
+                      onChange={(e) =>
+                        setFieldValue("isForAllUser", e.target.value)
+                      }
                     >
-                      <Select.Option value="All">All User</Select.Option>
-                      <Select.Option value="VIP">VIP User</Select.Option>
-                    </Select>
-                    {touched.rangeUser && errors.rangeUser && (
-                      <div className="error text-red-500 ml-1">
-                        {errors.rangeUser}
-                      </div>
-                    )}
+                      <Radio value={true}>For All</Radio>
+                      <Radio value={false}>For VIP</Radio>
+                    </Radio.Group>
                   </div>
                 </div>
 
@@ -1040,42 +1095,27 @@ export const CRUDFilmPage = () => {
                       value={values.genre}
                       onChange={(value) => setFieldValue("genre", value)}
                     >
+                      <Select.Option value="Action">Action</Select.Option>
+                      <Select.Option value="Animation">Animation</Select.Option>
+                      <Select.Option value="Romance">Romance</Select.Option>
+                      <Select.Option value="Horror">Horror</Select.Option>
+                      <Select.Option value="Comedy">Comedy</Select.Option>
                       <Select.Option value="Adventure">Adventure</Select.Option>
-                      <Select.Option value="Fantasy">Fantasy</Select.Option>
-                      <Select.Option value="Educational Curriculum">
-                        Educational Curriculum
-                      </Select.Option>
                       <Select.Option value="Science Fiction">
                         Science Fiction
                       </Select.Option>
-                      <Select.Option value="Mystery & Thriller">
-                        Mystery & Thriller
+                      <Select.Option value="Drama">Drama</Select.Option>
+                      <Select.Option value="Fantasy">Fantasy</Select.Option>
+                      <Select.Option value="Crime">Crime</Select.Option>
+                      <Select.Option value="Documentary">
+                        Documentary
                       </Select.Option>
-                      <Select.Option value="Romance">Romance</Select.Option>
-                      <Select.Option value="Literary Fiction">
-                        Literary Fiction
+                      <Select.Option value="Historical">
+                        Historical
                       </Select.Option>
-                      <Select.Option value="Biography/Autobiography">
-                        Biography/Autobiography
-                      </Select.Option>
-                      <Select.Option value="Children Book">
-                        Children Book
-                      </Select.Option>
-                      <Select.Option value="Self-help">Self-help</Select.Option>
-                      <Select.Option value="Cookbooks">Cookbooks</Select.Option>
-                      <Select.Option value="History">History</Select.Option>
-                      <Select.Option value="Graphic Novels/Comic">
-                        Graphic Novels/Comic
-                      </Select.Option>
-                      <Select.Option value="Poetry">Poetry</Select.Option>
-                      <Select.Option value="Business">Business</Select.Option>
-                      <Select.Option value="Philosophy">
-                        Philosophy
-                      </Select.Option>
-                      <Select.Option value="Travel">Travel</Select.Option>
-                      <Select.Option value="Novel/Light Novel">
-                        Novel/Light Novel
-                      </Select.Option>
+                      <Select.Option value="Mystery">Mystery</Select.Option>
+                      <Select.Option value="Education">Education</Select.Option>
+                      <Select.Option value="Superhero">Superhero</Select.Option>
                     </Select>
                     {touched.genre && errors.genre && (
                       <div className="error text-red-500 ml-1">

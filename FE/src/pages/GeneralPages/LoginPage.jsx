@@ -11,8 +11,8 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const role = useSelector((state) => state.user.role);
-  
+  const is_admin = useSelector((state) => state.user.is_admin);
+
   const navigate = useNavigate();
 
   const onLoginSuccess = async (data) => {
@@ -30,14 +30,14 @@ export const LoginPage = () => {
     }
   };
   useEffect(() => {
-    if (role) {
-      if (role === "user") {
+    if (is_admin) {
+      if (is_admin === false) {
         navigate("/");
       } else {
         navigate("/homePageAdmin");
       }
     }
-  }, [role, navigate]);
+  }, [is_admin, navigate]);
   const handleLogin = async (e) => {
     e.preventDefault();
     const value = {

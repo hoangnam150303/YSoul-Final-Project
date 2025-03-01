@@ -13,8 +13,8 @@ exports.isAdmin = async (req, res, next) => {
     }
     const decode = jwt.verify(token, process.env.ACCESS_TOKEN); // Giải mã token
     const adminResult = await conectPostgresDb.query(
-      "SELECT * FROM users WHERE id = $1 AND role = $2",
-      [decode.id, "admin"]
+      "SELECT * FROM users WHERE id = $1 AND is_admin = $2",
+      [decode.id, true]
     );
     if (!adminResult) {
       return res.status(404).json({
@@ -45,8 +45,8 @@ exports.isVip = async (req, res, next) => {
 
     const decode = jwt.verify(token, process.env.ACCESS_TOKEN); // Giải mã token
     const vipUser = await conectPostgresDb.query(
-      "SELECT * FROM users WHERE id = $1 AND role = $2 or role = $3 AND vip = $4",
-      [decode.id, "user", "admin", true]
+      "SELECT * FROM users WHERE id = $1 AND is_admin = $2 or vip = $3",
+      [decode.id, false, true]
     );
 
     if (vipUser.rows[0].status === false) {
@@ -103,5 +103,10 @@ exports.isAuth = async (req, res, next) => {
 
     req.user = userResult.rows[0];
     next();
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+      status: "ERROR",
+    });
+  }
 };

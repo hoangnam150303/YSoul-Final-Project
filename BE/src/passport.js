@@ -32,7 +32,7 @@ passport.use(
         if (!user) {
           // Tạo người dùng mới nếu chưa có
           const insertRes = await conectPostgresDb.query(
-            "INSERT INTO users (name, email, lastlogin, status, authprovider, google_id, avatar,vip,role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+            "INSERT INTO users (name, email, lastlogin, status, authprovider, google_id, avatar,vip) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
             [
               `${familyName} ${givenName}`,
               email,
@@ -42,7 +42,6 @@ passport.use(
               id,
               avatar,
               false,
-              "user",
             ]
           );
           user = insertRes.rows[0];

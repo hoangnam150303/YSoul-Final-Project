@@ -21,7 +21,6 @@ export const SearchPage = () => {
       search: searchTerm,
     });
     setResults(response.data.data.data);
-    setTotalFilm(response.data.data.total);
   };
   const handleTypeChange = (newType) => {
     setType(newType);
@@ -41,7 +40,7 @@ export const SearchPage = () => {
       label: "Newest",
     },
     {
-      value: "Top",
+      value: "Top Rated",
       label: "Top Rated",
     },
     {
@@ -128,8 +127,9 @@ export const SearchPage = () => {
   useEffect(() => {
     fetchFilm();
     handleSearch();
-    onChange(category);
     handleTypeChange(type);
+    console.log(status);
+    
   }, [category, type, searchTerm, status]);
   return (
     <div className="bg-black min-h-screen text-white">

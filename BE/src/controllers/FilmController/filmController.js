@@ -12,7 +12,7 @@ exports.createFilm = async (req, res) => {
       genre,
       releaseYear,
       title,
-      rangeUser,
+      isForAll,
       age,
     } = req.body;
    
@@ -27,7 +27,7 @@ exports.createFilm = async (req, res) => {
         description,
         smallImage,
         largeImage,
-        rangeUser,
+        isForAll,
         trailer,
         cast,
         director,
@@ -57,12 +57,13 @@ exports.createFilm = async (req, res) => {
 // this function can use in many situation, search film, sort film, get all film and Front end can use this function many time with many page.
 exports.getAllFilm = async (req, res) => {
   try {
-    const {typeFilm, category, sort, search } = req.query;
+    const {typeFilm, category, sort, search,typeUser } = req.query;
     const response = await filmService.getAllFilmService(
       typeFilm,
       category,
       sort,
-      search
+      search,
+      typeUser
     );
     if (!response.success) {
       return res.status(400).json({
@@ -124,7 +125,7 @@ exports.updateFilmById = async (req, res) => {
       genre,
       releaseYear,
       title,
-      rangeUser,
+      isForAll,
       age,
     } = req.body;
     const { id } = req.params;
@@ -147,7 +148,7 @@ exports.updateFilmById = async (req, res) => {
         genre,
         releaseYear,
         title,
-        rangeUser,
+        isForAll,
         movieFiles,
         age,
       );

@@ -46,9 +46,7 @@ export const WatchPage = () => {
     await filmApi.postUpdateStatusFilm(id, type, data, userId);
     fetchFilm(id);
   };
-  const handlePageChange = (pageNumber) => {
-    console.log(pageNumber);
-    
+  const handlePageChange = (pageNumber) => {    
     setPage(pageNumber);
   };
   useEffect(() => {
@@ -64,7 +62,7 @@ export const WatchPage = () => {
     if (film) {
       console.log(film);
       
-      if (isVip === false  && film?.rangeUser?.[0] === `["VIP"]`) {
+      if (isVip === false  && film?.isForAllUsers === false) {
         navigate("/payment")
       }
     }
