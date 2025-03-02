@@ -100,6 +100,9 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
+        case "newest":
+          filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
+          break;
       case "Active":
         filterOptions = "is_deleted = false"; // if filter is Active, set filterOptions to is_deleted = false
         break;
@@ -109,10 +112,24 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
     let artists; // create variable artists
     if (typeUser === "admin") {
       // if typeUser is admin
-      artists = await conectPostgresDb.query(
-        `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
-        [searchValue]
-      );
+      if (filter === "isDeleted") {
+        artists = await conectPostgresDb.query(
+          `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      }else if(filter === "Active")
+      {
+        artists = await conectPostgresDb.query(
+          `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      }
+      else{
+        artists = await conectPostgresDb.query(
+          `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      }
     } else if (typeUser === "user") {
       // if typeUser is user
       artists = await conectPostgresDb.query(

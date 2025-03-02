@@ -9,6 +9,7 @@ const createAlbumTableQuery = `
     is_deleted BOOLEAN DEFAULT false,
     artist_id INTEGER REFERENCES artists(id) ON DELETE CASCADE,
     likes INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id_like INTEGER[] DEFAULT '{}'
 )
 `;

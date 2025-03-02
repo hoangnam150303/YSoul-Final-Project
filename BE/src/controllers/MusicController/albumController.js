@@ -79,6 +79,7 @@ exports.activeOrDeactiveAlbum = async (req, res) => {
 exports.getAllAlbums = async (req, res) => {
   try {
     const { filter, search, typeUser } = req.query; // get filter and search from request query
+    
     const response = await albumService.getAllAlbumService(
       filter,
       search,

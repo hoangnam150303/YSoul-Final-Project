@@ -9,8 +9,8 @@ const createArtistTableQuery = `
     likes INTEGER DEFAULT 0,
     follows INTEGER DEFAULT 0,
     user_id_like INTEGER[] DEFAULT '{}',
-    user_id_follow INTEGER[] DEFAULT '{}'
-
+    user_id_follow INTEGER[] DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 )
 `;
 
