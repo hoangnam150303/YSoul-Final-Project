@@ -191,6 +191,9 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
       case "favourite":
         filterOptions = "count_listen"; // if filter is favourite, set filterOptions to count_linsten
         break;
+      case "newest":
+        filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
+        break;
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
@@ -203,10 +206,24 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
     let singles; // create variable singles
     if (typeUser === "admin") {
       // if typeUser is admin
+     if (filter === "isDeleted") {
       singles = await conectPostgresDb.query(
-        `SELECT * FROM singles WHERE title LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+        `SELECT * FROM singles WHERE title LIKE $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
         [searchValue]
       );
+     }
+      else if (filter === "Active") {
+        singles = await conectPostgresDb.query(
+          `SELECT * FROM singles WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      }
+      else {
+        singles = await conectPostgresDb.query(
+          `SELECT * FROM singles WHERE title LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      }
     } else if (typeUser === "user") {
       // if typeUser is user
       singles = await conectPostgresDb.query(

@@ -46,5 +46,9 @@ const filmApi = {
       },
     });
   },
+  postActiveOrDeactive: (id) => {
+    const url = `${FILM_API_ENDPOINT}/activeOrDeactiveFilmById/${id}`; // update album by id
+    return axiosClient.put(url);
+  },
 };
 export default filmApi;

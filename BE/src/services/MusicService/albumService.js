@@ -108,7 +108,7 @@ exports.activeOrDeactiveAlbumService = async (id) => {
 
 // this function is for user, admin, user or admin can get all albums
 exports.getAllAlbumService = async (filter, search, typeUser) => {
-  try {
+  try {    
     let filterOptions = ""; // set filterOptions to empty string
     let sortOrder = "ASC"; // set sortOrder to DESC
     const searchValue = search ? `%${search}%` : "%"; // set searchValue to search or to empty string
@@ -121,6 +121,9 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
+        case "newest":
+          filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
+          break;
       case "newest":
         filterOptions = "release_year"; // if filter is newest, set filterOptions to release_year
         break;
@@ -133,11 +136,27 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
     let albums;
     if (typeUser === "admin") {
       // if typeUser is admin
-      albums = await conectPostgresDb.query(
-        // get all albums from database
-        `SELECT * FROM albums WHERE title LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`,
-        [searchValue]
-      );
+      if (filter === "isDeleted") {
+        albums = await conectPostgresDb.query(
+          // get all albums from database
+          `SELECT * FROM albums WHERE title LIKE $1 AND is_deleted = true ORDER BY ${filterOptions}`,
+          [searchValue]
+        );
+      }
+     else if (filter === "Active") {
+        albums = await conectPostgresDb.query(
+          // get all albums from database
+          `SELECT * FROM albums WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions}`,
+          [searchValue]
+        );
+      }
+      else {
+        albums = await conectPostgresDb.query(
+          // get all albums from database
+          `SELECT * FROM albums WHERE title LIKE $1 ORDER BY ${filterOptions}`,
+          [searchValue]
+        );
+      }
     } else if (typeUser === "user") {
       // if typeUser is user
       albums = await conectPostgresDb.query(

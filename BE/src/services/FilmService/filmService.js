@@ -97,14 +97,8 @@ exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
       case "Popular":
         sortOption = { countClick: -1 };
         break;
-      case "IsDeleted":
-        sortOption = { isDeleted: true };
-        break;
-      case "Active":
-        sortOption = { isDeleted: false };
-        break;
       default:
-        sortOption = {};
+        sortOption = {createdAt: -1};
         break;
     }
     
@@ -140,13 +134,20 @@ exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
     }
     let films;
     if (typeUser === "admin") {
-      films = await Film.find(query).sort(sortOption).sort({ createdAt: -1 });
+    
+      if (sort === "IsDeleted") {
+        films = await Film.find(query).sort( { ...sortOption}).where({ isDeleted: true });
+      }else if (sort === "Active") {
+        films = await Film.find(query).sort( { ...sortOption}).where({ isDeleted: false });
+      }else{
+        films = await Film.find(query).sort( { ...sortOption});
+      }
+
     }
     else{
-      films = await Film.find(query).sort(sortOption).sort({ createdAt: -1 }).where({ isDeleted: false });
+      films = await Film.find(query).sort( { ...sortOption}).where({ isDeleted: false });
+     
     }
-
-
     return {
       success: true,
       data: films,

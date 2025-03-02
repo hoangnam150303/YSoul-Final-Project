@@ -34,6 +34,12 @@ export const CRUDMusicPage = () => {
   const [selectedArtist, setSelectedArtist] = useState({});
   const [selectedAlbum, setSelectedAlbum] = useState({});
   const [selectedSingle, setSelectedSingle] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    Artist: "All",
+    Album: "All",
+    Single: "All",
+  });
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -61,12 +67,14 @@ export const CRUDMusicPage = () => {
   const fetchArtist = async () => {
     try {
       const response = await artistApi.getAllArtist({
-        filter: "",
-        search: "",
+        filter: filters.Artist,
+        search: searchTerm,
         typeUser: "admin",
       });
       setArtist(response.data.artists);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
   const handleStatusChangeArtist = async (id) => {
     try {
@@ -87,8 +95,8 @@ export const CRUDMusicPage = () => {
   const fetchAlbum = async () => {
     try {
       const response = await albumApi.getAllAlbum({
-        filter: "",
-        search: "",
+        filter: filters.Album,
+        search: searchTerm,
         typeUser: "admin",
       });
       setAlbum(response.data.albums);
@@ -116,13 +124,15 @@ export const CRUDMusicPage = () => {
   const fetchSingle = async () => {
     try {
       const response = await singleApi.getAllSingle({
-        filter: "",
-        search: "",
+        filter: filters.Single,
+        search: searchTerm,
         typeUser: "admin",
       });
       setSingle(response.data.singles);
       fetchAlbum();
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleStatusChangeSingle = async (id) => {
@@ -142,6 +152,7 @@ export const CRUDMusicPage = () => {
     showModalEdit();
   };
 
+  // useEffect
   useEffect(() => {
     if (type === "Artist") {
       fetchArtist();
@@ -150,7 +161,7 @@ export const CRUDMusicPage = () => {
     } else if (type === "Single") {
       fetchSingle();
     }
-  }, [type]);
+  }, [type, filters, searchTerm]);
 
   const alignCenter = {
     align: "center",
@@ -504,16 +515,54 @@ export const CRUDMusicPage = () => {
               : "Create Single"}
           </Button>
 
-          <Select
-            value={type}
-            className="ml-10"
-            onChange={handleTypeFilter}
-            style={{ width: 150 }}
+          {/* Bọc 2 Select và Input trong một div với display: flex */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px", // Tạo khoảng cách giữa các phần tử
+              marginBottom: "16px",
+            }}
           >
-            <Option value="Artist">Artist</Option>
-            <Option value="Album">Album</Option>
-            <Option value="Single">Single</Option>
-          </Select>
+            <Select
+              value={type}
+              className="pl-2"
+              onChange={handleTypeFilter}
+              style={{ width: 150 }}
+            >
+              <Option value="Artist">Artist</Option>
+              <Option value="Album">Album</Option>
+              <Option value="Single">Single</Option>
+            </Select>
+            <Select
+              value={filters[type]}
+              onChange={(value) =>
+                setFilters((prev) => ({ ...prev, [type]: value }))
+              }
+              style={{ width: 150 }}
+            >
+              <Option value="All">All</Option>
+              <Option value="popular">Popular</Option>
+              {type === "Single" && (
+                <Option value="favourite">Favourite</Option>
+              )}
+              <Option value="newest">Newest</Option>
+              <Option value="isDeleted">Deleted</Option>
+              <Option value="Active">Active</Option>
+            </Select>
+
+            <Input
+              placeholder="Search..."
+              variant="borderless"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                color: "black",
+                flex: 1,
+              }}
+              className="bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
           <Table
             columns={columns}
             dataSource={data}

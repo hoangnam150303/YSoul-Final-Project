@@ -94,8 +94,6 @@ export const CRUDFilmPage = () => {
   };
 
   const fetchFilms = async () => {
-
-
     try {
       const respone = await filmApi.getAllFilm({
         typeFilm: kind,
@@ -108,11 +106,21 @@ export const CRUDFilmPage = () => {
       console.log(error);
     }
   };
-  const handleDelete = async (id) => {
+
+  const handleStatusChangeFilm = async (id) => {
     try {
-      await filmApi.postDeleteFilm(id);
-      fetchFilms();
-    } catch (error) {}
+      const respone = await filmApi.postActiveOrDeactive(id);
+      if (respone.status === 200) {
+        message.success("Change status success.");
+        fetchFilms();
+      } else {
+        message.error("Change status fail.");
+      }
+    } catch (error) {
+      console.log(error);
+
+      message.error("Change status fail.");
+    }
   };
   useEffect(() => {
     if (filmType === "Movie") {
@@ -156,7 +164,7 @@ export const CRUDFilmPage = () => {
     releaseYear: film.releaseYear,
     kind: film.video.length > 1 ? "TV Shows" : "Movie",
     genre: film.genre.replace(/[\[\]]/g, "").split(","),
-    isDeleted: film.isDeleted ? "Yes" : "No",
+    isDeleted: film.isDeleted,
     rating: film.totalRating || "N/A",
     views: film.countClick || "N/A",
     rangeUser: film.isForAllUsers ? "All Users" : "VIP Users",
@@ -218,13 +226,6 @@ export const CRUDFilmPage = () => {
       ...alignCenter,
     },
     {
-      title: "Is Deleted",
-      width: 175,
-      dataIndex: "isDeleted",
-      key: "isDeleted",
-      ...alignCenter,
-    },
-    {
       title: "Range User",
       width: 175,
       dataIndex: "rangeUser",
@@ -244,16 +245,31 @@ export const CRUDFilmPage = () => {
           >
             <EditOutlined />
           </button>
-          <Popconfirm
-            title="Delete the Product"
-            description="Are you sure to delete this task?"
-            onConfirm={() => handleDelete(record.key)}
-            cancelText="No"
-          >
-            <button className="text-base bg-red-600 text-white px-3 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-red-600 ml-3">
-              <DeleteOutlined />
-            </button>
-          </Popconfirm>
+          <div className="ml-3">
+            {record.isDeleted ? (
+              <Popconfirm
+                title="Active film"
+                description="Are you sure to active this film?"
+                onConfirm={() => handleStatusChangeFilm(record.key)}
+                cancelText="No"
+              >
+                <Button className="text-white bg-green-500 px-2 py-1 rounded-md">
+                  Active
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Popconfirm
+                title="Inactive film"
+                description="Are you sure to inactive this film?"
+                onConfirm={() => handleStatusChangeFilm(record.key)}
+                cancelText="No"
+              >
+                <button className="text-white bg-red-500 px-2 py-1 rounded-md mb-2">
+                  Inactive
+                </button>
+              </Popconfirm>
+            )}
+          </div>
         </div>
       ),
     },
