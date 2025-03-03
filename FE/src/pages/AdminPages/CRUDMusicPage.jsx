@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   EditOutlined,
-  DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
@@ -18,7 +17,6 @@ import {
   message,
 } from "antd";
 import { AdminSideBar } from "../../components/SideBar/AdminSideBar";
-import filmApi from "../../hooks/filmApi";
 import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
 import * as Yup from "yup";
 import artistApi from "../../hooks/artistApi";

@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserRequest } from "../reducers/user";
 import LoadingPage from "../components/Loading/LoadingPage";
 import { Suspense } from "react";
+import { AccountPage } from "../pages/AdminPages/AccountPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -52,6 +53,9 @@ function App() {
               path="/musicAdmin"
               element={is_admin ? <CRUDMusicPage /> : <Navigate to="/" />}
             ></Route>
+            <Route path="/userAccount" element={<AccountPage />}>
+
+            </Route>
           </>
         )}
         {isVip && (

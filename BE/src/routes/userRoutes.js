@@ -13,4 +13,5 @@ userRoute.post("/register", userController.register);
 userRoute.post("/sendCode", userController.sendCode);
 userRoute.post("/loginLocal", userController.loginLocal);
 userRoute.get("/getUser", auth.isAuth, userController.getUser);
+userRoute.get("/getAllUser", auth.isAdmin, userController.getAllUsers);
 module.exports = userRoute;

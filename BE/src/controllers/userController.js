@@ -125,3 +125,16 @@ exports.getUser = async (req, res) => {
 };
 
 exports.forgotPassword = async (req, res) => {};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const {filter,search} = req.query
+    const response = await userService.getAllUsersService(filter,search);
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error });
+    }
+   return res.status(200).json(response);
+  } catch (error) {
+    return res.status(401).json({ message: "Error! Please try again.", error });
+  }
+};
