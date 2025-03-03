@@ -15,7 +15,7 @@ exports.registerService = async (name, email, password, otp, verifyToken) => {
     const hashPassword = await passwordHelpers.hashPassword(password, 10);
     console.log(hashPassword);
     
- const success =    await conectPostgresDb.query(
+  await conectPostgresDb.query(
       "INSERT INTO users (name, email, status, authprovider, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [name, email, true, "local", hashPassword]
     );
@@ -80,4 +80,53 @@ exports.loginLocalService = async (email, password) => {
     );
     return { success: true, access_token };
   } catch (error) {}
+};
+
+exports.getAllUsersService = async (filter, search) => {
+  try {
+    let filterOptions = "";
+    let sortOrder = "DESC"; 
+    const searchValue = search ? `%${search}%` : "%";
+    switch (filter) {
+      case "recent_login":
+        filterOptions = "lastlogin";
+        break;
+      case "isDeleted":
+        filterOptions = "is_deleted = true";
+        break;
+      case "Active":
+        filterOptions = "is_deleted = false";
+        break;
+      default:
+        filterOptions = "id";
+    }
+    
+    let users;
+    if (filter === "isDeleted") {
+      users = await conectPostgresDb.query(
+        `SELECT * FROM users WHERE name LIKE $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`,
+        [searchValue]
+      );
+    } else if (filter === "Active") {
+      users = await conectPostgresDb.query(
+        `SELECT * FROM users WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
+        [searchValue]
+      );
+    } else {
+      users = await conectPostgresDb.query(
+        `SELECT * FROM users WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`,
+        [searchValue]
+      );
+    }
+    
+    // Loại bỏ thuộc tính password khỏi mỗi user
+    const sanitizedUsers = users.rows.map(user => {
+      delete user.password;
+      return user;
+    });
+    
+    return { success: true, users: sanitizedUsers };
+  } catch (error) {
+    console.log(error);
+  }
 };

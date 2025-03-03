@@ -1,5 +1,5 @@
 import {
-  ArrowsAltOutlined,
+
   CaretRightOutlined,
   HeartFilled,
   PauseOutlined,

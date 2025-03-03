@@ -19,6 +19,10 @@ const userApi = {
     const url = "/loginLocal";
     return axiosClient.post(url, value);
   },
+  getAllUsers:() =>{
+    const url = "/getAllUser";
+    return axiosClient.get(url);
+  }
 };
 
 export default userApi;

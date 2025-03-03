@@ -1,9 +1,6 @@
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Button, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
@@ -18,21 +15,27 @@ export const AdminSideBar = () => {
   const items = [
     {
       key: "1",
-      icon: <UserOutlined />,
+      icon: <i className="bi bi-house-fill"></i>,
       label: "Home Page",
       path: "/homePageAdmin",
     },
     {
       key: "2",
-      icon: <VideoCameraOutlined />,
+      icon:<i className="bi bi-film"></i>,
       label: "Film",
       path: "/movieAdmin",
     },
     {
       key: "3",
-      icon: <UploadOutlined />,
+      icon: <i className="bi bi-music-note"></i>,
       label: "Music",
       path: "/musicAdmin",
+    },
+    {
+      key: "4",
+      icon: <i className="bi bi-people-fill"></i>,
+      label: "User",
+      path: "/userAccount",
     },
   ];
 
