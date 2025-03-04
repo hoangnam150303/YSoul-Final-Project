@@ -28,7 +28,7 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
     {
       title: "Search",
       icon: <SearchOutlined className="text-2xl" />,
-      path: `/search`,
+      path: `/searchPageMuscic`,
     },
     {
       title: "Favourite",

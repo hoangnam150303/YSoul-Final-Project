@@ -19,8 +19,24 @@ const userApi = {
     const url = "/loginLocal";
     return axiosClient.post(url, value);
   },
-  getAllUsers:() =>{
-    const url = "/getAllUser";
+  getAllUsers:(filter,search) =>{
+    const url = `/getAllUser?filter=${filter}&search=${search}`;
+    return axiosClient.get(url);
+  },
+  updateStatusUser: (id) => {
+    const url = `/activeOrDeactive/${id}`; // update album by id
+    return axiosClient.put(url);
+  },
+  updateUserProfile:(id,data) =>{
+    const url = `/updateProfile/${id}`; // update album by id
+    return axiosClient.put(url,data,{
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+  getUserProfile:() =>{
+    const url = `/getUserProfile`; // update album by id
     return axiosClient.get(url);
   }
 };

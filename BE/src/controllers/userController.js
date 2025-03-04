@@ -138,3 +138,47 @@ exports.getAllUsers = async (req, res) => {
     return res.status(401).json({ message: "Error! Please try again.", error });
   }
 };
+
+exports.activeOrDeactiveUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const response = await userService.activeOrDeactiveUserService(id);
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error });
+    }
+   return res.status(200).json(response);
+  } catch (error) {
+    return res.status(401).json({ message: "Error! Please try again.", error });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const { id } = req.params;    
+    const { name, email, password, confirmPassword, oldPassword,vip } = req.body;
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: "Password and confirm password do not match." });
+    }
+    const avatar = req.file?.path;
+    const response = await userService.updateUserProfileService(id,name, email, password, oldPassword,vip,avatar);
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error });
+    }
+   return res.status(200).json(response);
+  } catch (error) {
+    return res.status(401).json({ message: "Error! Please try again.", error });
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const response = await userService.getUserProfileService(userId);
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error });
+    }
+   return res.status(200).json(response);
+  } catch (error) {
+    return res.status(401).json({ message: "Error! Please try again.", error });
+  }
+};

@@ -21,6 +21,7 @@ import { getUserRequest } from "../reducers/user";
 import LoadingPage from "../components/Loading/LoadingPage";
 import { Suspense } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
+import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -85,6 +86,9 @@ function App() {
               path="/favouriteMovie"
               element={isVip ? <Navigate to="/" /> : <FavouriteMoviePage />}
             ></Route>
+            <Route path="/searchPageMuscic" element={<MusicSearchPage />}>
+
+            </Route>
           </>
         )}
       </Routes>
