@@ -22,6 +22,7 @@ import LoadingPage from "../components/Loading/LoadingPage";
 import { Suspense } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
 import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
+import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
 
 function App() {
   const dispatch = useDispatch();
@@ -87,8 +88,8 @@ function App() {
               element={isVip ? <Navigate to="/" /> : <FavouriteMoviePage />}
             ></Route>
             <Route path="/searchPageMuscic" element={<MusicSearchPage />}>
-
             </Route>
+            <Route path="/market" element={<HomePageMarket />}></Route>
           </>
         )}
       </Routes>
