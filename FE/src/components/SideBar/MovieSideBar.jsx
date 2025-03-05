@@ -45,7 +45,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
     {
       title: "Market",
       icon: <LineChartOutlined className="text-2xl" />,
-      path: ``,
+      path: `/market`,
     },
     {
       title: "Social",

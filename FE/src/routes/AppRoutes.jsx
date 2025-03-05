@@ -24,6 +24,7 @@ import { AccountPage } from "../pages/AdminPages/AccountPage";
 import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
 
+
 function App() {
   const dispatch = useDispatch();
   dispatch(getUserRequest());
@@ -32,6 +33,7 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingPage />}>
+      {/* <PlayerContext /> */}
       <Routes>
         <Route path="/" element={<MovieHomePage />}></Route>
 
@@ -55,9 +57,7 @@ function App() {
               path="/musicAdmin"
               element={is_admin ? <CRUDMusicPage /> : <Navigate to="/" />}
             ></Route>
-            <Route path="/userAccount" element={<AccountPage />}>
-
-            </Route>
+            <Route path="/userAccount" element={<AccountPage />}></Route>
           </>
         )}
         {isVip && (
@@ -87,8 +87,10 @@ function App() {
               path="/favouriteMovie"
               element={isVip ? <Navigate to="/" /> : <FavouriteMoviePage />}
             ></Route>
-            <Route path="/searchPageMuscic" element={<MusicSearchPage />}>
-            </Route>
+            <Route
+              path="/searchPageMuscic"
+              element={<MusicSearchPage />}
+            ></Route>
             <Route path="/market" element={<HomePageMarket />}></Route>
           </>
         )}
