@@ -12,6 +12,7 @@ const invoiceRoute = require("./routes/invoiceRoutes");
 const artistRoute = require("./routes/artistRoutes");
 const albumRoute = require("./routes/albumRoutes");
 const singleRoute = require("./routes/singleRoutes");
+const artistNFTRoute = require("./routes/artistNFTRoutes")
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -43,6 +44,7 @@ app.use("/invoice", invoiceRoute);
 app.use("/artist", artistRoute);
 app.use("/album", albumRoute);
 app.use("/single", singleRoute);
+app.use("/artistNFT",artistNFTRoute)
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
