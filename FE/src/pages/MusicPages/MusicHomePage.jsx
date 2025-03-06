@@ -11,8 +11,7 @@ export const MusicHomePage = () => {
   const { audioRef, track } = useContext(PlayerContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedType, setSelectedType] = useState("All"); // <-- State được quản lý ở đây
-  useEffect(() => {
-  }, [selectedType]);
+  useEffect(() => {}, [selectedType]);
   const category = [
     { id: 1, name: "Newest" },
     { id: 2, name: "Popular" },
@@ -24,7 +23,7 @@ export const MusicHomePage = () => {
 
   return (
     <>
-      <div className="relative min-h-screen bg-black text-white flex">
+      <div className="relative min-h-screen gradient-bg-hero text-white flex">
         {/* Sidebar */}
         <div className="z-50">
           <MusicSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />

@@ -23,6 +23,7 @@ import { Suspense } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
 import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
+import StoreProfile from "../pages/NFTMarketPlacePage/StoreProfile";
 
 
 function App() {
@@ -92,6 +93,7 @@ function App() {
               element={<MusicSearchPage />}
             ></Route>
             <Route path="/market" element={<HomePageMarket />}></Route>
+            <Route path="/yourStore" element={<StoreProfile />}></Route>
           </>
         )}
       </Routes>
