@@ -2,7 +2,7 @@ const ArtistNFT = require("../../models/artistNFT")
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 exports.createArtistNFT = async (userId,addressWallet,avatar,name) =>{
     try {
-        const validArtist = await ArtistNFT.findOne({user_id:userId},{addressWallet:addressWallet});
+        const validArtist = await ArtistNFT.findOne({addressWallet:addressWallet});
         if (validArtist) {
             return {success:false,message:"artist is valid"}
         }
@@ -49,7 +49,7 @@ exports.getArtistNFT = async (addressWallet) =>{
         if (!validArtist) {
             return {success:false,message:"Artist not found"};
         }
-        return {success:true,data:validArtist}
+        return {success:true,validArtist}
     } catch (error) {
         console.log(error);
         
