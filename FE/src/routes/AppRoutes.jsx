@@ -25,7 +25,6 @@ import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
 import StoreProfile from "../pages/NFTMarketPlacePage/StoreProfile";
 
-
 function App() {
   const dispatch = useDispatch();
   dispatch(getUserRequest());
@@ -93,7 +92,7 @@ function App() {
               element={<MusicSearchPage />}
             ></Route>
             <Route path="/market" element={<HomePageMarket />}></Route>
-            <Route path="/yourStore" element={<StoreProfile />}></Route>
+            <Route path="/store/:id?" element={<StoreProfile />}></Route>
           </>
         )}
       </Routes>

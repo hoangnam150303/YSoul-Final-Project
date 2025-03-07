@@ -1,17 +1,26 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Transactions from "../../components/Transactions/Transactions";
 import MarketHeader from "../../components/Header/MarketHeader";
 import { ArtistNFTContext } from "../../context/ArtistNFTContext";
 import artistNFTApi from "../../hooks/artistNFTApi";
 import { TransactionContext } from "../../context/TransactionContext";
-import { message } from "antd";
+import { message, Pagination, Select } from "antd";
+import nftApi from "../../hooks/nftApi";
+import { useParams } from "react-router-dom";
 const CreateNFTModal = ({ onClose, onSubmit }) => {
+  const { currentAccount } = useContext(TransactionContext);
   const [nftData, setNftData] = useState({
     image: null,
     price: "",
     description: "",
+    addressWallet: "", // ban đầu là chuỗi rỗng
     name: "",
   });
+
+  // useEffect này sẽ chạy mỗi khi currentAccount thay đổi
+  useEffect(() => {
+    setNftData((prev) => ({ ...prev, addressWallet: currentAccount }));
+  }, [currentAccount]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -87,11 +96,19 @@ const CreateNFTModal = ({ onClose, onSubmit }) => {
   );
 };
 const StoreProfile = () => {
-  const { isArtist } = useContext(ArtistNFTContext);
+  const { isArtist, artist } = useContext(ArtistNFTContext);
   const { currentAccount } = useContext(TransactionContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNFTModalOpen, setIsNFTModalOpen] = useState(false);
-  // Lưu avatar dưới dạng file và name dưới dạng text
+  const [nftData, setNftData] = useState([]);
+  const [totalNFT, setTotalNFT] = useState(0); // Tổng số NFT
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(2);
+  const id = useParams().id;
+
+  // State cho form đăng ký artist
   const [formData, setFormData] = useState({
     avatar: null,
     name: "",
@@ -104,66 +121,71 @@ const StoreProfile = () => {
   };
 
   const handleFileChange = (e) => {
-    // Lấy file đầu tiên được chọn
     setFormData((prev) => ({ ...prev, avatar: e.target.files[0] }));
   };
 
   const handleRegister = async () => {
-    // Ví dụ sử dụng FormData để gửi file cùng dữ liệu
-
     setFormData((prev) => ({ ...prev, addressWallet: currentAccount }));
-
-    const data = new FormData();
-    data.append("avatar", formData.avatar);
-    data.append("name", formData.name);
-    data.append("addressWallet", formData.addressWallet); // Gọi API để đăng ký artist (ví dụ: artistNFTApi.registerArtist(data))
     const response = await artistNFTApi.postRegisterArtist(formData);
     if (response.status === 200) {
       message.success("Register Success!");
     } else {
       message.error("Register fail!", response.data);
     }
-
-    // Sau khi đăng ký thành công, có thể đóng modal
     setIsModalOpen(false);
   };
 
-  const storeData = {
-    avatar:
-      "https://cdn.i-scmp.com/sites/default/files/styles/768x768/public/d8/images/canvas/2024/04/24/a94e2d09-2f19-4bd2-a13f-6d6eff58684c_eadcc3b5.jpg?itok=X0MrjxZs&v=1713940582",
-    name: "Store Name",
-    nfts: [
-      {
-        id: 1,
-        image:
-          "https://miro.medium.com/v2/resize:fit:628/1*xm2-adeU3YD4MsZikpc5UQ.png",
-        title: "NFT 1",
-      },
-      {
-        id: 2,
-        image:
-          "https://miro.medium.com/v2/resize:fit:628/1*xm2-adeU3YD4MsZikpc5UQ.png",
-        title: "NFT 2",
-      },
-      {
-        id: 3,
-        image:
-          "https://miro.medium.com/v2/resize:fit:628/1*xm2-adeU3YD4MsZikpc5UQ.png",
-        title: "NFT 3",
-      },
-    ],
-    transactions: [
-      { id: 1, detail: "Transaction 1 - 0.5 ETH" },
-      { id: 2, detail: "Transaction 2 - 1.0 ETH" },
-      { id: 3, detail: "Transaction 3 - 0.75 ETH" },
-    ],
-  };
+  useEffect(() => {
+    const fetchNFTs = async () => {
+      try {
+        let response;
+        if (id !== undefined) {
+          if (id) {
+            response = await nftApi.getNFTByArtist(
+              id,
+              searchTerm,
+              filter,
+              "customer",
+              page,
+              limit
+            );
+          }
+        } else {
+          if (artist) {
+            response = await nftApi.getNFTByArtist(
+              artist._id,
+              searchTerm,
+              filter,
+              "artist",
+              page,
+              limit
+            );
+          }
+        }
+        if (response) {
+          // Giả sử API trả về response.data có cấu trúc { data: [...], page, limit, total }
+          setNftData(response.data.data);
+          setTotalNFT(response.data.totalNft);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchNFTs();
+  }, [id, artist, page, limit, searchTerm, filter]);
+
   const handleCreateNFT = async (nftData) => {
-    // Xử lý dữ liệu tạo NFT (có thể gọi API, upload file, v.v.)
-    console.log("Create NFT with data:", nftData);
-    message.success("NFT created successfully!");
-    setIsNFTModalOpen(false);
+    try {
+      const response = await nftApi.postCreateNFT(nftData);
+      if (response.status === 200) {
+        message.success("NFT created successfully!");
+        setIsNFTModalOpen(false);
+      }
+    } catch (error) {
+      message.error("Failed to create NFT!");
+    }
   };
+
   return (
     <div className="gradient-bg-hero min-h-screen">
       <MarketHeader />
@@ -172,11 +194,11 @@ const StoreProfile = () => {
           {/* Thông tin cửa hàng */}
           <div className="mb-6">
             <img
-              src={storeData.avatar}
+              src="https://cassette.sphdigital.com.sg/image/thepeak/864211938788f543b65acc5de1c6dd8ca89953a2a1ebecb0da57e43e13a6de4e?w=1000&q=85"
               alt="Avatar"
               className="rounded-full w-32 h-32"
             />
-            <h2 className="text-2xl font-bold text-center">{storeData.name}</h2>
+            <h2 className="text-2xl font-bold text-center">"Your Store"</h2>
           </div>
           <button
             onClick={() => setIsNFTModalOpen(true)}
@@ -187,21 +209,59 @@ const StoreProfile = () => {
           {/* Danh sách NFT */}
           <div className="w-full mb-6">
             <h3 className="text-xl font-semibold mb-2">NFTs</h3>
-            <div className="grid grid-cols-3 gap-4">
-              {storeData.nfts.map((nft) => (
-                <div key={nft.id} className="border rounded-lg p-2">
-                  <div className="w-full aspect-square relative">
-                    <img
-                      src={nft.image}
-                      alt={nft.title}
-                      className="absolute inset-0 w-full h-full object-cover rounded-lg"
-                    />
+            <Select
+              onChange={(value) => setLimit(value)}
+              defaultValue={"Filter"}
+            >
+              <option value="2">2</option>
+              <option value="8">8</option>
+              <option value="16">16</option>
+            </Select>
+            <div className="grid grid-cols-4 gap-4">
+              {nftData.map((nft) => (
+                <div
+                  key={nft._id}
+                  className="w-full shadow-xl shadow-black rounded-md overflow-hidden bg-gray-800 my-2 p-3"
+                >
+                  <img
+                    className="h-60 w-full object-cover shadow-lg shadow-black rounded-lg mb-3"
+                    src={
+                      nft.image ||
+                      "https://cassette.sphdigital.com.sg/image/thepeak/864211938788f543b65acc5de1c6dd8ca89953a2a1ebecb0da57e43e13a6de4e?w=1000&q=85"
+                    }
+                    alt={nft.name || "NFT Image"}
+                  />
+                  <h4 className="text-white font-semibold">
+                    {nft.name || `NFT #${nft._id}`}
+                  </h4>
+                  <p className="text-gray-400 text-sm my-1">
+                    {nft.description || "No description provided."}
+                  </p>
+                  <div className="flex justify-between items-center mt-3 text-white">
+                    <div className="flex flex-col">
+                      <small className="text-xs">Current Price</small>
+                      <p className="text-sm font-semibold">
+                        {nft.price || "0"} ETH
+                      </p>
+                    </div>
+                    <button className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1">
+                      View Details
+                    </button>
                   </div>
-                  <h3 className="text-lg font-semibold text-center">
-                    {nft.title}
-                  </h3>
                 </div>
               ))}
+            </div>
+            {/* Điều chỉnh Pagination */}
+            <div className="flex justify-end mt-4">
+              <Pagination
+                current={page}
+                pageSize={limit}
+                total={totalNFT}
+                onChange={(newPage, newPageSize) => {
+                  setPage(newPage);
+                  setLimit(newPageSize);
+                }}
+              />
             </div>
           </div>
 
@@ -210,8 +270,6 @@ const StoreProfile = () => {
             <h3 className="text-xl font-semibold mb-2">Transactions</h3>
             <Transactions />
           </div>
-
-          {/* Nút Create NFTs */}
 
           {/* Modal tạo NFT */}
           {isNFTModalOpen && (

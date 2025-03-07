@@ -146,7 +146,6 @@ exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
     }
     else{
       films = await Film.find(query).sort( { ...sortOption}).where({ isDeleted: false });
-     
     }
     return {
       success: true,
