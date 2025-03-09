@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
-
+import "hardhat/console.sol";
 contract Transactions {
     uint256 transactionCount;
 
     event Transfer(
-        address indexed from,
-        address indexed receiver,
-        string nftId,
+        address from,
+        address receiver,
+        string nftName,
+        string urlImage,
         uint amount,
         uint256 timeStamp,
         string keyword
@@ -16,7 +17,8 @@ contract Transactions {
     struct TransferStruct {
         address sender;
         address receiver;
-        string nftId;
+        string nftName;
+        string urlImag;
         uint amount;
         uint256 timeStamp;
         string keyword;
@@ -27,7 +29,8 @@ contract Transactions {
     function addToBlockchain(
         address payable receiver,
         uint amount,
-        string memory nftid,
+        string memory nftName,
+        string memory urlImage,
         string memory keyword
     ) public {
         transactionCount += 1;
@@ -35,7 +38,8 @@ contract Transactions {
             TransferStruct(
                 msg.sender,
                 receiver,
-                nftid,
+                nftName,
+                urlImage,
                 amount,
                 block.timestamp,
                 keyword
@@ -45,7 +49,8 @@ contract Transactions {
         emit Transfer(
             msg.sender,
             receiver,
-            nftid,
+            nftName,
+            urlImage,
             amount,
             block.timestamp,
             keyword

@@ -47,3 +47,52 @@ exports.getNFTByArtist = async (req, res) => {
         return res.status(500).json({ message: "Error", error });
     }
 };
+
+exports.updateNFT = async (req,res)=>{
+    try {
+        const { id } = req.params; // get id from params
+        const { name, description, price } = req.body; // get addressWallet, name, description, price from body
+        const image = req.file?.path; // get image from file
+        const response = await nftService.updateNFTService(id, image, name, description, price); // call updateNFTService from nftService
+        if (!response.success) { // if response is not success
+            return res.status(400).json("Fail to update NFT");
+        }
+        return res.status(200).json(response); // return response
+    } catch (error) {
+        
+    }
+}
+
+exports.updateStatusNFt = async (req,res)=>{
+    try {
+        const { id } = req.params; // get id from params
+        if (!id) {
+            return res.status(401).json({ message: "NFT id is required." });
+        }
+        const response = await nftService.updateStatusNFtService(id); // call updateStatusNFtService from nftService
+        if (!response.success) { // if response is not success
+            return res.status(401).json({ message: "Error! Please try again." });
+        }
+        return res.status(200).json(response); // return response
+        
+    } catch (error) {
+        return res.status(500).json({ message: "Error! Please try again." });
+    }
+}
+
+exports.getNFTById = async (req, res) => {
+    try {
+        const id = req.params.id; // get id from request params
+        if (!id) {
+            return res.status(401).json({ message: "NFT id is required." });
+        }
+        const response = await nftService.getNFTByIdService(id); // call getNFTByIdService from nftService
+        if (!response.success) {
+            // if response is not success, return error message
+            return res.status(401).json({ message: "Error! Please try again." });
+        }
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({ message: "Error! Please try again." });
+    }
+};

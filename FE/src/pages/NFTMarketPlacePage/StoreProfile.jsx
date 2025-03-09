@@ -4,9 +4,8 @@ import MarketHeader from "../../components/Header/MarketHeader";
 import { ArtistNFTContext } from "../../context/ArtistNFTContext";
 import artistNFTApi from "../../hooks/artistNFTApi";
 import { TransactionContext } from "../../context/TransactionContext";
-import { message, Pagination, Select } from "antd";
+import { Input, message, Pagination, Popconfirm, Select } from "antd";
 import nftApi from "../../hooks/nftApi";
-import { useParams } from "react-router-dom";
 const CreateNFTModal = ({ onClose, onSubmit }) => {
   const { currentAccount } = useContext(TransactionContext);
   const [nftData, setNftData] = useState({
@@ -95,6 +94,104 @@ const CreateNFTModal = ({ onClose, onSubmit }) => {
     </div>
   );
 };
+
+const EditNFTModal = ({ nft, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    image: nft.image || null,
+    price: nft.price || "",
+    description: nft.description || "",
+    name: nft.name || "",
+  });
+
+  // Tạo state cho image preview
+  const [previewImage, setPreviewImage] = useState(nft.image || null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData((prev) => ({ ...prev, image: file }));
+    if (file) {
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = () => {
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded shadow-lg w-96">
+        <h2 className="text-xl font-bold mb-4">Edit NFT</h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Image:</label>
+          {/* Hiển thị preview image nếu có */}
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="NFT Preview"
+              className="mb-2 w-full h-60 object-cover rounded"
+            />
+          )}
+          <input
+            type="file"
+            name="image"
+            onChange={handleFileChange}
+            className="w-full"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Price:</label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            className="w-full border rounded px-2 py-1"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Description:</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="w-full border rounded px-2 py-1"
+          ></textarea>
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Name:</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full border rounded px-2 py-1"
+          />
+        </div>
+        <div className="flex justify-end">
+          <button
+            onClick={onClose}
+            className="mr-4 px-4 py-2 bg-gray-300 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-green-500 text-white rounded"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const StoreProfile = () => {
   const { isArtist, artist } = useContext(ArtistNFTContext);
   const { currentAccount } = useContext(TransactionContext);
@@ -106,8 +203,7 @@ const StoreProfile = () => {
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(2);
-  const id = useParams().id;
-
+  const [editingNft, setEditingNft] = useState(null);
   // State cho form đăng ký artist
   const [formData, setFormData] = useState({
     avatar: null,
@@ -123,56 +219,55 @@ const StoreProfile = () => {
   const handleFileChange = (e) => {
     setFormData((prev) => ({ ...prev, avatar: e.target.files[0] }));
   };
-
+  const handleEditNFT = async (updatedData) => {
+    try {
+      // Giả sử bạn có hàm updateNFT trong nftApi, truyền vào id và dữ liệu cập nhật
+      const response = await nftApi.updateNFT(editingNft._id, updatedData);
+      if (response.status === 200) {
+        message.success("NFT updated successfully!");
+        setEditingNft(null);
+        fetchNFTs();
+      }
+    } catch (error) {
+      message.error("Failed to update NFT!");
+    }
+  };
   const handleRegister = async () => {
     setFormData((prev) => ({ ...prev, addressWallet: currentAccount }));
+    console.log(formData);
+    
     const response = await artistNFTApi.postRegisterArtist(formData);
     if (response.status === 200) {
       message.success("Register Success!");
+      setIsModalOpen(false);
     } else {
       message.error("Register fail!", response.data);
     }
-    setIsModalOpen(false);
   };
-
-  useEffect(() => {
-    const fetchNFTs = async () => {
-      try {
-        let response;
-        if (id !== undefined) {
-          if (id) {
-            response = await nftApi.getNFTByArtist(
-              id,
-              searchTerm,
-              filter,
-              "customer",
-              page,
-              limit
-            );
-          }
-        } else {
-          if (artist) {
-            response = await nftApi.getNFTByArtist(
-              artist._id,
-              searchTerm,
-              filter,
-              "artist",
-              page,
-              limit
-            );
-          }
-        }
-        if (response) {
+  const fetchNFTs = async () => {
+    try {
+      if (artist) {
+        const response = await nftApi.getNFTByArtist(
+          artist._id,
+          searchTerm,
+          filter,
+          "artist",
+          page,
+          limit
+        );
+        if (response.status === 200) {
           // Giả sử API trả về response.data có cấu trúc { data: [...], page, limit, total }
           setNftData(response.data.data);
           setTotalNFT(response.data.totalNft);
         }
-      } catch (error) {
-        console.log(error);
       }
-    };
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
     fetchNFTs();
-  }, [id, artist, page, limit, searchTerm, filter]);
+  }, [artist, page, limit, searchTerm, filter]);
 
   const handleCreateNFT = async (nftData) => {
     try {
@@ -180,9 +275,21 @@ const StoreProfile = () => {
       if (response.status === 200) {
         message.success("NFT created successfully!");
         setIsNFTModalOpen(false);
+        fetchNFTs();
       }
     } catch (error) {
       message.error("Failed to create NFT!");
+    }
+  };
+  const handleUpdateStatusNFt = async (id, status) => {
+    try {
+      const response = await nftApi.updateStatusNFT(id);
+      if (response.status === 200) {
+        message.success("NFT updated successfully!");
+        fetchNFTs();
+      }
+    } catch (error) {
+      message.error("Failed to update NFT!");
     }
   };
 
@@ -208,15 +315,40 @@ const StoreProfile = () => {
           </button>
           {/* Danh sách NFT */}
           <div className="w-full mb-6">
-            <h3 className="text-xl font-semibold mb-2">NFTs</h3>
-            <Select
-              onChange={(value) => setLimit(value)}
-              defaultValue={"Filter"}
-            >
-              <option value="2">2</option>
-              <option value="8">8</option>
-              <option value="16">16</option>
-            </Select>
+            <h4 className="text-white text-3xl font-bold uppercase text-gradient">
+              Artworks
+            </h4>
+            <div className="flex justify-end">
+              <Select
+                onChange={(value) => setLimit(value)}
+                defaultValue={"Filter"}
+                className="mr-2"
+              >
+                <option value="2">2</option>
+                <option value="8">8</option>
+                <option value="16">16</option>
+              </Select>
+              <Select
+                onChange={(value) => setFilter(value)}
+                defaultValue={"Filter"}
+                style={{ width: 200 }}
+                className="mr-2"
+              >
+                <option value="all">All</option>
+                <option value="popular">Popular</option>
+                <option value="priceDesc">Price: High to Low</option>
+                <option value="priceAsc">Price: Low to High</option>
+                <option value="isDeleted">Deleted</option>
+                <option value="Active">Active</option>
+              </Select>
+              <Input
+                placeholder="Search NFTs"
+                onChange={(event) => setSearchTerm(event.target.value)}
+                style={{ width: 200 }}
+                className="ml-2"
+              />
+            </div>
+
             <div className="grid grid-cols-4 gap-4">
               {nftData.map((nft) => (
                 <div
@@ -244,9 +376,28 @@ const StoreProfile = () => {
                         {nft.price || "0"} ETH
                       </p>
                     </div>
-                    <button className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1">
-                      View Details
+                    <button
+                      onClick={() => setEditingNft(nft)}
+                      className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1"
+                    >
+                      Edit NFT
                     </button>
+                    <Popconfirm
+                      title="Do you want to change status?"
+                      onConfirm={() => handleUpdateStatusNFt(nft._id)}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      {nft.status ? (
+                        <button className="shadow-lg shadow-black text-sm bg-red-500 hover:bg-red-800 rounded-full px-1.5 py-1">
+                          Inactive
+                        </button>
+                      ) : (
+                        <button className="shadow-lg shadow-black text-sm bg-green-500 hover:bg-green-800 rounded-full px-1.5 py-1">
+                          Active
+                        </button>
+                      )}
+                    </Popconfirm>
                   </div>
                 </div>
               ))}
@@ -276,6 +427,14 @@ const StoreProfile = () => {
             <CreateNFTModal
               onClose={() => setIsNFTModalOpen(false)}
               onSubmit={handleCreateNFT}
+            />
+          )}
+
+          {editingNft && (
+            <EditNFTModal
+              nft={editingNft}
+              onClose={() => setEditingNft(null)}
+              onSubmit={handleEditNFT}
             />
           )}
         </div>

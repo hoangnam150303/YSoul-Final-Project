@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { SwapOutlined } from "@ant-design/icons";
+import { TransactionContext } from "../../context/TransactionContext";
 const Transactions = () => {
+  const {currentAccount} = useContext(TransactionContext)
   const Transactions = ({ tx }) => (
     <div
       className="flex justify-between items-center border border-pink-500

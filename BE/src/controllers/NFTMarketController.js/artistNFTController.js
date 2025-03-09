@@ -5,6 +5,9 @@ exports.createArtistNFT = async (req, res) => {
     const userId = req.user.id;
     const avatar = req.file.path;
 
+    if (!userId || !addressWallet || !avatar || !name) {
+      return res.status(400).json("All fields are required");
+    } ;
     
     const response = await artistNFTService.createArtistNFT(userId, addressWallet, avatar, name);
     if (!response.success) {

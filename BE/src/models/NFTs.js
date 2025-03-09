@@ -4,7 +4,6 @@ const NFTsSchema = new mongoose.Schema(
   {
     artistId:{type: mongoose.Schema.Types.ObjectId, ref: "ArtistNFT"},
     name:{type:String},
-    addressWallet:{type:String},
     image:{type:String},
     price:{type:Number},
     description:{type:String},
