@@ -1,5 +1,6 @@
 const ArtistNFT = require("../../models/artistNFT");
 const NFTs = require("../../models/NFTs");
+const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is for artist NFTs, artist can create new NFT
 exports.createNFTService = async (userId, addressWallet, image, name, description, price)=>{
     try {
@@ -9,7 +10,6 @@ exports.createNFTService = async (userId, addressWallet, image, name, descriptio
         }
         const nft = await NFTs.create({ // create NFT
             artistId:validArtist._id,
-            addressWallet:addressWallet,
             image:image,
             price:price,
             description:description,
@@ -126,5 +126,59 @@ exports.getNFTByArtistService = async (filter, search, typeUser, artistId, page,
       return { success: false, message: error.toString() };
     }
   };
-      
+
+exports.updateNFTService = async (id, image, name, description, price) => {
+  try {
+    const validNFT = await NFTs.findById(id);
+    if (!validNFT) {
+      return { success: false, message: "NFT not found" };
+    }
+   if (image) {
+    if (image !== validNFT.image) {
+      const result = await cloudinaryHelpers.removeFile(validNFT.image);
+      if (!result.success) {
+        throw new Error("Error removing old image");
+      } else {
+        validNFT.image = image;
+      }
+    }
+  }
+  validNFT.name = name;
+  validNFT.description = description;
+  validNFT.price = price;
+  validNFT.save();
+  return { success: true, data: validNFT };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: error.toString() };
+    
+  }
+}
+
+exports.updateStatusNFtService = async (id) => {
+  try {
+    const validNFT  =  await NFTs.findById(id);
+    if (!validNFT) {
+      return { success: false, message: "NFT not found" };
+    }
+    validNFT.status = !validNFT.status;
+    validNFT.save();
+    return { success: true, data: validNFT };
+  } catch (error) {
+    return { success: false, message: error.toString() };
+  }
+}
+
+exports.getNFTByIdService = async (id) => {
+  try {
+    const validNFT = await NFTs.findById(id).populate("artistId","addressWallet name avatar");
+    if (!validNFT) {
+      return { success: false, message: "NFT not found" };
+    }
+    return { success: true, data: validNFT };
+  } catch (error) {
+   console.log(error);
+    
+  }
+}
   

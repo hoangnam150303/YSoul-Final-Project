@@ -1,12 +1,16 @@
-import React, { useEffect } from "react";
+import React, {useEffect, useState } from "react";
 import nftApi from "../../hooks/nftApi";
+import { BuyNFT } from "../BuyNFT/BuyNFT";
+
 
 const Artwork = () => {
-  const [nfts, setNFTs] = React.useState([]);
-
+  const [nfts, setNFTs] = useState([]);
+  const [selectedNFTId, setSelectedNFTId] = useState(null);
+  const [isBuyModalVisible, setIsBuyModalVisible] = useState(false);
+  
   const fetchNFTs = async () => {
     try {
-      const response = await nftApi.getAllNFTs("", "newest");
+      const response = await nftApi.getAllNFTs("", "newest");      
       if (response.status === 200) {
         setNFTs(response.data.data);
       }
@@ -19,7 +23,7 @@ const Artwork = () => {
     fetchNFTs();
   }, []);
 
-  // Component Card được cập nhật để hiển thị thông tin từ đối tượng nft
+  // Component Card hiển thị thông tin NFT
   const Card = ({ nft }) => (
     <div className="w-full shadow-xl shadow-black rounded-md overflow-hidden bg-gray-800 my-2 p-3">
       <img
@@ -41,7 +45,13 @@ const Artwork = () => {
           <small className="text-xs">Current Price</small>
           <p className="text-sm font-semibold">{nft.price || "0"} ETH</p>
         </div>
-        <button className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1">
+        <button
+          className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1"
+          onClick={() => {
+            setSelectedNFTId(nft._id);
+            setIsBuyModalVisible(true);
+          }}
+        >
           View Details
         </button>
       </div>
@@ -67,6 +77,14 @@ const Artwork = () => {
           </button>
         </div>
       </div>
+      {/* Render modal BuyNFT khi isBuyModalVisible là true */}
+      {isBuyModalVisible && (
+        <BuyNFT
+          id={selectedNFTId}
+          visible={isBuyModalVisible}
+          onClose={() => setIsBuyModalVisible(false)}
+        />
+      )}
     </div>
   );
 };

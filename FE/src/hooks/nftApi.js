@@ -22,6 +22,25 @@ const nftApi = {
 getNFTByArtist: (id,search,filter,typeUser,page,limit) => {
     const url = `${NFT_ENDPOINT}/getNFTByArtist/?search=${search}&filter=${filter}&typeUser=${typeUser}&artistId=${id}&page=${page}&limit=${limit}`
     return axiosClient.get(url)
+},
+
+updateNFT: (id,value) => {
+    const url = `${NFT_ENDPOINT}/updateNFT/${id}`
+    return axiosClient.put(url,value,{
+        headers: {
+            "Content-Type": "multipart/form-data",
+          },
+    })
+},
+
+updateStatusNFT: (id) => {
+    const url = `${NFT_ENDPOINT}/updateStatus/${id}`
+    return axiosClient.put(url)
+},
+
+getNFTById:(id) => {
+    const url = `${NFT_ENDPOINT}/getNFTById/${id}`
+    return axiosClient.get(url)
 }
 };
 
