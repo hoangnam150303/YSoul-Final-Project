@@ -50,11 +50,9 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
     {
       title: "Social",
       icon: <WechatWorkOutlined className="text-2xl" />,
-      path: ``,
+      path: `/socialHomePage`,
     },
   ];
-
-
 
   // Tablet - Mobile - Ipad
   const [openDrawer, setOpenDrawer] = useState(false);

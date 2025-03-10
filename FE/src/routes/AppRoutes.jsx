@@ -94,7 +94,7 @@ function App() {
             ></Route>
             <Route path="/market" element={<HomePageMarket />}></Route>
             <Route path="/store/:id?" element={<StoreProfile />}></Route>
-            <Route path="/SocialHomePage" element={<SocialHomePage />}></Route>
+            <Route path="/socialHomePage" element={<SocialHomePage />}></Route>
           </>
         )}
       </Routes>
