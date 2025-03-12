@@ -19,7 +19,9 @@ export const SocialHomePage = () => {
             <div className="col-span-1 lg:col-span-1 hidden lg:block mt-5">
               <div className="bg-gray-200 rounded-lg shadow p-4">
                 <h2 className="font-semibold mb-4">Top reviewers</h2>
-                <RecommendedSideBar />
+                {recommendedUsers.map((user) => (
+                  <RecommendedSideBar key={user?._id} user={user?.name} />
+                ))}
               </div>
             </div>
           )}

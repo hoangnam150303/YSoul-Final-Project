@@ -29,14 +29,14 @@ export const PostCreation = ({ file }) => {
         </div>
       )}
       <div className="flex justify-between items-center mt-4">
-        <label className="flex items-center text-info hover:text-info-dark transition-colors duration-200 cursor-pointer text-white">
+        <label className="flex items-center  transition-colors duration-200 cursor-pointer text-white">
           <i className="bi bi-card-image mr-2" style={{ fontSize: "20px" }}></i>
           <span>Photo</span>
           <input type="file" accept="image/*" className="hidden" />
         </label>
 
         <button
-          className="flex items-center text-info hover:text-info-dark transition-colors duration-200 cursor-pointer text-white"
+          className="flex items-center  transition-colors duration-200 cursor-pointer text-white"
           onClick={() => setShowPopup(true)}
         >
           <i className="bi bi-film mr-2" style={{ fontSize: "20px" }}></i>
