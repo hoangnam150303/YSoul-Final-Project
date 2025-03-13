@@ -8,6 +8,7 @@ const { ethereum } = window;
 const getEthereumContract = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
   const signer = provider.getSigner();
+
   const transactionContract = new ethers.Contract(
     contractAddress,
     contractABI,
@@ -56,7 +57,7 @@ export const TransactionProvider = ({ children }) => {
     try {
       if (!ethereum) return alert("Please install metamask");
       const { addressTo, amount, keyword, nftName, urlImage } = formData;
-      const transactionContract = getEthereumContract();
+      const transactionContract = await getEthereumContract();
       const parsedAmount = ethers.utils.parseEther(amount.toString());
 
       ethereum.request({
@@ -106,8 +107,7 @@ export const TransactionProvider = ({ children }) => {
   };
   const getAllTransactions = async () => {
     try {
-      const transactionsContract = getEthereumContract();
-      console.log(111111);
+      const transactionsContract = await getEthereumContract();
 
       const result = await transactionsContract.getAllTransactions();
       console.log(result);
