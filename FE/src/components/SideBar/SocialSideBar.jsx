@@ -33,7 +33,7 @@ export const SocialSideBar = ({ User }) => {
         <ul className="space-y-1">
           <li>
             <Link
-              to="/"
+              to="/socialHomePage"
               className="flex items-center py-3 px-6 hover:bg-gray-100 transition"
             >
               <HomeOutlined className="text-gray-600 mr-3 text-lg" /> Home
@@ -50,7 +50,7 @@ export const SocialSideBar = ({ User }) => {
           </li>
           <li>
             <Link
-              to="/Notification"
+              to="/notificationPage"
               className="flex items-center py-3 px-6 hover:bg-gray-100 transition relative"
             >
               <BellOutlined className="text-gray-600 mr-3 text-lg" />{" "}

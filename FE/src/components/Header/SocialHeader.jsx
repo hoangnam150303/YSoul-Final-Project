@@ -19,7 +19,10 @@ export const SocialHeader = () => {
           {/* Navigation Icons */}
           <div className="flex items-center gap-5 md:gap-6">
             {/* Home */}
-            <Link to="/" className="flex flex-col items-center text-white">
+            <Link
+              to="/socialHomePage"
+              className="flex flex-col items-center text-white"
+            >
               <HomeOutlined style={{ fontSize: "20px" }} />
               <span className="text-xs hidden md:block">Home</span>
             </Link>
@@ -38,7 +41,7 @@ export const SocialHeader = () => {
 
             {/* Notifications */}
             <Link
-              to="/Notification"
+              to="/notificationPage"
               className="flex flex-col items-center text-white relative"
             >
               <BellOutlined style={{ fontSize: "20px" }} />
