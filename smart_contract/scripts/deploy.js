@@ -1,20 +1,13 @@
-const main = async () => {
-  const transactionsFactory = await hre.ethers.getContractFactory("Transactions");
-  const transactionsContract = await transactionsFactory.deploy();
+async function main(){
+    const message = "Hello World";
+      const HelloWorld = await ethers.getContractFactory("HelloWorld");
+        const helloWorld = await HelloWorld.deploy(message);
+    await helloWorld.waitForDeployment();
+    console.log("HelloWorld deployed to:", await helloWorld.getAddress());
+       
 
-  await transactionsContract.deployed();
-
-  console.log("Transactions address: ", transactionsContract.address);
-};
-
-const runMain = async () => {
-  try {
-    await main();
-    process.exit(0);
-  } catch (error) {
-    console.error(error);
-    process.exit(1);
-  }
-};
-
-runMain();
+}
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
