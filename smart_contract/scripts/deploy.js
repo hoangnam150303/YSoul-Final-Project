@@ -1,13 +1,10 @@
 async function main(){
-    const message = "Hello World";
-      const HelloWorld = await ethers.getContractFactory("HelloWorld");
-        const helloWorld = await HelloWorld.deploy(message);
-    await helloWorld.waitForDeployment();
-    console.log("HelloWorld deployed to:", await helloWorld.getAddress());
-       
-
+  const YS_Token = await ethers.getContractFactory("YS_Token");
+  const ys_token = await YS_Token.deploy();
+  await ys_token.waitForDeployment();
+  console.log("YSoul token deployed to:",await ys_token.getAddress());
 }
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+console.error(error);
+process.exitCode = 1;
 });
