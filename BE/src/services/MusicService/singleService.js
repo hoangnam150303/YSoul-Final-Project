@@ -208,19 +208,19 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
       // if typeUser is admin
      if (filter === "isDeleted") {
       singles = await conectPostgresDb.query(
-        `SELECT * FROM singles WHERE title LIKE $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+        `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
         [searchValue]
       );
      }
       else if (filter === "Active") {
         singles = await conectPostgresDb.query(
-          `SELECT * FROM singles WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }
       else {
         singles = await conectPostgresDb.query(
-          `SELECT * FROM singles WHERE title LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          `SELECT * FROM singles WHERE title ILIKE  $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }
@@ -228,7 +228,7 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
       // if typeUser is user
       singles = await conectPostgresDb.query(
         // get all singles from database where is_deleted is false
-        `SELECT * FROM singles WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     }

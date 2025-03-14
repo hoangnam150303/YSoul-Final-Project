@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
+
 import "hardhat/console.sol";
+
 contract Transactions {
     uint256 transactionCount;
 
@@ -33,6 +35,11 @@ contract Transactions {
         string memory urlImage,
         string memory keyword
     ) public {
+        require(receiver != address(0), "Receiver address cannot be zero");
+        require(amount > 0, "Amount must be greater than zero");
+        require(bytes(nftName).length > 0, "NFT name cannot be empty");
+        require(bytes(urlImage).length > 0, "Image URL cannot be empty");
+
         transactionCount += 1;
         transactions.push(
             TransferStruct(

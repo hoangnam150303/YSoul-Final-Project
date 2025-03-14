@@ -128,8 +128,8 @@ exports.forgotPassword = async (req, res) => {};
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const {filter,search} = req.query
-    const response = await userService.getAllUsersService(filter,search);
+    const {filter,search,typeUser} = req.query
+    const response = await userService.getAllUsersService(filter,search,typeUser);
     if (!response.success) {
       return res.status(401).json({ message: "Error! Please try again.", error });
     }

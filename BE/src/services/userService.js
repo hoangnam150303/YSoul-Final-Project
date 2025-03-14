@@ -91,7 +91,7 @@ exports.loginLocalService = async (email, password) => {
   }
 };
 
-exports.getAllUsersService = async (filter, search) => {
+exports.getAllUsersService = async (filter, search,typeUser) => {
   try {
     let filterOptions = "";
     let sortOrder = "DESC"; 
@@ -111,19 +111,21 @@ exports.getAllUsersService = async (filter, search) => {
     }
     
     let users;
+  if (typeUser === "admin") {
     if (filter === "Active") {
       users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name LIKE $1 AND status = true ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM users WHERE name ILIKE  $1 AND status = true ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     } else if (filter === "unactive") {
       users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name LIKE $1 AND status = false ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM users WHERE name ILIKE  $1 AND status = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
+  }
     } else {
       users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM users WHERE name LIKE $1 AND status = true ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     }
@@ -236,6 +238,7 @@ exports.getUserProfileService = async (id) => {
     }
     return { success: true, user: user.rows[0] };
   } catch (error) {
+    console.log(error);
     
   }
 }
