@@ -59,8 +59,7 @@ export const TransactionProvider = ({ children }) => {
       const { addressTo, amount, keyword, nftName, urlImage } = formData;
       const transactionContract = await getEthereumContract();
       const parsedAmount = ethers.utils.parseEther(amount.toString());
-
-      ethereum.request({
+      await ethereum.request({
         method: "eth_sendTransaction",
         params: [
           {
@@ -72,13 +71,17 @@ export const TransactionProvider = ({ children }) => {
         ],
       });
 
-      transactionContract.addToBlockchain(
-        addressTo,
-        parsedAmount,
-        nftName,
-        urlImage,
-        keyword
-      );
+      try {
+        await transactionContract.callStatic.addToBlockchain(
+          addressTo,
+          parsedAmount,
+          nftName,
+          urlImage,
+          keyword
+        );
+      } catch (error) {
+        console.log("Lỗi từ contract:", error);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -90,7 +93,7 @@ export const TransactionProvider = ({ children }) => {
         return;
       }
 
-      const transactionsContract = getEthereumContract();
+      const transactionsContract = await getEthereumContract();
 
       if (!transactionsContract) {
         console.error("Contract instance not found!");

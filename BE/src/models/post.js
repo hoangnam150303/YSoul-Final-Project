@@ -28,6 +28,7 @@ const postSchema = new mongoose.Schema(
     ],
     film_id: { type: mongoose.Schema.Types.ObjectId, ref: "Film" },
     single_id: { type:String },
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,

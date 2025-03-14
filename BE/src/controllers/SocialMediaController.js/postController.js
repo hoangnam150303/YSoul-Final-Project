@@ -37,3 +37,70 @@ exports.updatePost = async(req,res) => {
         
     }
 };
+
+// this function is active or deactive post
+exports.activeOrDeactivePost = async(req,res) => {
+    try {
+        const {id} = req.params; // get id from params
+        if (!id) { // check if id is empty
+            return res.status(400).json({message: "Id field is required."});
+        }
+        const response = await postService.activeOrDeactivePostService(id); // call activeOrDeactivePostService from postService
+        if (!response.success) {
+            return res.status(400).json({message: response.message}); // return error message
+        }
+            return res.status(200).json({message: "Post updated successfully"}); // return success message
+        
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"});
+    }
+};
+
+// this function is get all post
+exports.getAllPost = async (req,res)=>{
+    try {
+        const {search} = req.query; // get search  from query
+        const response = await postService.getAllPostService(search); // call getAllPostService from postService
+        if (!response.success) {
+            return res.status(400).json({message: response.message}); // return error message
+        }
+        return res.status(200).json(response); // return success message
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"}); // return error message
+    }
+}
+
+// this function is get post by id
+exports.getPostById = async (req,res)=>{
+    try {
+        const {id} = req.params; // get id from params
+        if (!id) {
+            return res.status(400).json({message: "Id field is required."});
+        }
+        const response = await postService.getPostByIdService(id); // call getPostByIdService from postService
+        if (!response.success) {
+            return res.status(400).json({message: response.message}); // return error message
+        }
+        return res.status(200).json(response); // return success message
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"}); // return error message
+    }
+}
+
+// this function is like post
+exports.likePost = async (req,res)=>{
+    try {
+        const {id} = req.params; // get id from params
+        const userId = req.user.id; // get userId from user
+        if (!id) {
+            return res.status(400).json({message: "Id field is required."}); // return error message
+        }
+        const reponse = await postService.likePostService(id,userId); // call likePostService from postService
+        if (!reponse.success) {
+            return res.status(400).json({message: reponse.message}); // return error message
+        }
+        return res.status(200).json(reponse); // return success message
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"});
+    }
+}

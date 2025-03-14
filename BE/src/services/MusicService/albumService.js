@@ -139,21 +139,21 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
       if (filter === "isDeleted") {
         albums = await conectPostgresDb.query(
           // get all albums from database
-          `SELECT * FROM albums WHERE title LIKE $1 AND is_deleted = true ORDER BY ${filterOptions}`,
+          `SELECT * FROM albums WHERE title ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions}`,
           [searchValue]
         );
       }
      else if (filter === "Active") {
         albums = await conectPostgresDb.query(
           // get all albums from database
-          `SELECT * FROM albums WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions}`,
+          `SELECT * FROM albums WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions}`,
           [searchValue]
         );
       }
       else {
         albums = await conectPostgresDb.query(
           // get all albums from database
-          `SELECT * FROM albums WHERE title LIKE $1 ORDER BY ${filterOptions}`,
+          `SELECT * FROM albums WHERE title ILIKE  $1 ORDER BY ${filterOptions}`,
           [searchValue]
         );
       }
@@ -161,7 +161,7 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
       // if typeUser is user
       albums = await conectPostgresDb.query(
         // get all albums from database where is_deleted is false
-        `SELECT * FROM albums WHERE title LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM albums WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     }

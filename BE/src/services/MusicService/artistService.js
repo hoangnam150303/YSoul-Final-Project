@@ -114,19 +114,19 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
       // if typeUser is admin
       if (filter === "isDeleted") {
         artists = await conectPostgresDb.query(
-          `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          `SELECT * FROM artists WHERE name ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }else if(filter === "Active")
       {
         artists = await conectPostgresDb.query(
-          `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          `SELECT * FROM artists WHERE name ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }
       else{
         artists = await conectPostgresDb.query(
-          `SELECT * FROM artists WHERE name LIKE $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          `SELECT * FROM artists WHERE name ILIKE  $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }
@@ -134,7 +134,7 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
       // if typeUser is user
       artists = await conectPostgresDb.query(
         // get all artists from database where is_deleted is false
-        `SELECT * FROM artists WHERE name LIKE $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
+        `SELECT * FROM artists WHERE name ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
     }
