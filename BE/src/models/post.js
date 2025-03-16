@@ -8,18 +8,21 @@ const postSchema = new mongoose.Schema(
     likes:[{
         user_id: { type: String },
         username: { type: String },
+        avatar: { type: String },
         createdAt: { type: Date, default: Date.now }
     }],
     comments: [
       {
         user_id: { type: String },
         username: { type: String },
+        avatar: { type: String },
         content: { type: String },
         createdAt: { type: Date, default: Date.now },
         commentReplied: [
             {
                 user_id: { type: String },
                 username: { type: String },
+                avatar: { type: String },
                 content: { type: String },
                 createdAt: { type: Date, default: Date.now }
             }

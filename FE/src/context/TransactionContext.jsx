@@ -72,7 +72,7 @@ export const TransactionProvider = ({ children }) => {
       });
 
       try {
-        await transactionContract.callStatic.addToBlockchain(
+        await transactionContract.addToBlockchain(
           addressTo,
           parsedAmount,
           nftName,
@@ -106,14 +106,20 @@ export const TransactionProvider = ({ children }) => {
       console.log("Transaction Count:", currentTransactionCount);
 
       window.localStorage.setItem("transactionCount", currentTransactionCount);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
   const getAllTransactions = async () => {
     try {
       const transactionsContract = await getEthereumContract();
 
-      const result = await transactionsContract.getAllTransactions();
-      console.log(result);
+      try {
+        const result = await transactionsContract.getAllTransactions();
+        console.log(result);
+      } catch (error) {
+        console.log(error);
+      }
     } catch (error) {
       console.log(error);
     }
