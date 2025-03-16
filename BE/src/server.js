@@ -15,6 +15,7 @@ const singleRoute = require("./routes/singleRoutes");
 const artistNFTRoute = require("./routes/artistNFTRoutes");
 const nftRoute = require("./routes/nftRoutes");
 const postRoute = require("./routes/postRoutes");
+const commentRoute = require("./routes/commentRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 
@@ -49,6 +50,7 @@ app.use("/single", singleRoute);
 app.use("/artistNFT",artistNFTRoute);
 app.use("/nft",nftRoute);
 app.use("/post",postRoute);
+app.use("/comment",commentRoute);
 // Start server
 app.listen(port, () => {
   console.log(`Server is working on port: ${port}`);

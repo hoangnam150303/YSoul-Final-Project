@@ -1,6 +1,6 @@
 const { conectPostgresDb } = require("../../configs/database");
 const Film = require("../../models/film");
-const Post = require("../../models/Post");
+const Post = require("../../models/post");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is create post
 exports.createPostService = async (content, film_id, single_id, image, user_id) => {
@@ -201,7 +201,7 @@ exports.likePostService = async (id,userId) => {
             return {success:true,message: "Like removed"};  // return success
         }
         else{
-            validPost.likes.push({user_id:userId,username:validUser.rows[0].name}); // add user to likes
+            validPost.likes.push({user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}); // add user to likes
             await validPost.save(); // save post
             return {success:true,message: "Like added"}; // return success   
         }
