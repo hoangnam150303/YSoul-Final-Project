@@ -49,7 +49,6 @@ exports.register = async (req, res) => {
       });
     }
     
-    
     const respone = await userService.registerService(
       name,
       email,
