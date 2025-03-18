@@ -34,7 +34,7 @@ exports.updatePost = async(req,res) => {
         }
         return res.status(200).json({message: "Post updated successfully"}); // return success message
     } catch (error) {
-        
+        return res.status(500).json({message: "Internal server error"});
     }
 };
 

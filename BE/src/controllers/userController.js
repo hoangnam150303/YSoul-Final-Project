@@ -43,13 +43,11 @@ exports.register = async (req, res) => {
     }
     
     if (password !== confirmPassword) {
-      console.log(password !== confirmPassword);
       return res.status(401).json({
         message: "Password and confirm password do not match.",
         error,
       });
     }
-    
     
     const respone = await userService.registerService(
       name,

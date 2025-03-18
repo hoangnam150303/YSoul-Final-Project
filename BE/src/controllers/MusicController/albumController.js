@@ -24,7 +24,6 @@ exports.createAlbum = async (req, res) => {
     }
     return res.status(200).json(response); // return response
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Error! Please try again.", error });
   }
 };
@@ -53,7 +52,7 @@ exports.updateAlbum = async (req, res) => {
     }
     return res.status(200).json(response); // return response
   } catch (error) {
-    console.log(error);
+     return res.status(500).json({ message: "Error! Please try again." });
   }
 };
 

@@ -4,7 +4,6 @@ exports.removeFile = async (imageUrl) => {
   try {
     const publicId = imageUrl.split("/").pop().split(".")[0];
     // Xóa hình ảnh trên Cloudinary
-    console.log(publicId);
     
     const result = await cloudinary.uploader.destroy(`YSoul/${publicId}`);
     
@@ -15,7 +14,6 @@ exports.removeFile = async (imageUrl) => {
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     return { success: false };
   }
 };

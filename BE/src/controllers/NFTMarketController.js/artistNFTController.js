@@ -11,8 +11,6 @@ exports.createArtistNFT = async (req, res) => {
     
     const response = await artistNFTService.createArtistNFT(userId, addressWallet, avatar, name);
     if (!response.success) {
-      console.log(response.message);
-      
       return res.status(400).json("Fail to create artistNFT");
     }
     return res.status(200).json(response);
