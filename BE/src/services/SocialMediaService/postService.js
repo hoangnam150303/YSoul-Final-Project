@@ -38,9 +38,7 @@ exports.createPostService = async (content, film_id, single_id, image, user_id) 
       }
       return {success:false,message: "Post not created"};
     } catch (error) {
-        console.log(error);
         return {success:false,message: "Internal server error"};
-        
     }
 };
 

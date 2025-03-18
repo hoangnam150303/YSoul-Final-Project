@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SocialHeader } from "../../components/Header/SocialHeader";
 import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { PostCreation } from "../../components/Post/PostCreation";
 import { UserOutlined } from "@ant-design/icons";
 import { RecommendedSideBar } from "../../components/SideBar/RecommendedSideBar";
 import { ListPost } from "../../components/Post/ListPost";
+import postApi from "../../hooks/postApi";
 
 export const SocialHomePage = () => {
-  const [posts, setPosts] = useState([1]);
+  const [data, setData] = useState([]);
   const [recommendedUsers, setRecommendedUsers] = useState([1]);
+  const [search, setSearch] = useState("");
+  const fetchPosts = async () => {
+    try {
+      const response = await postApi.getAllPost(search);
+      setData(response.data.data);
+      console.log(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchPosts();
+  }, []);
   return (
     <>
       <SocialHeader />
@@ -29,8 +43,8 @@ export const SocialHomePage = () => {
         <div className="lg:col-span-3 p-6 bg-gray-50 rounded-lg shadow">
           {/* Main Content Here */}
           <PostCreation />
-          <ListPost />
-          {posts?.length === 0 && (
+          <ListPost data={data} />
+          {data.length === 0 && (
             <div className="gradient-bg-hero rounded-lg shadow p-8 text-center">
               <div className="mb-6">
                 <UserOutlined

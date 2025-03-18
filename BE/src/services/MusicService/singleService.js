@@ -225,12 +225,15 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
         );
       }
     } else if (typeUser === "user") {
+      console.log(filterOptions);
+      
       // if typeUser is user
       singles = await conectPostgresDb.query(
         // get all singles from database where is_deleted is false
         `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
+      
     }
     if (!singles) {
       // if artists not found, return error message

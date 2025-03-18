@@ -1,12 +1,81 @@
 import { LoadingOutlined, ShareAltOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
-
-export const PostCreation = ({ file }) => {
+import React, { useEffect, useState } from "react";
+import filmApi from "../../hooks/filmApi";
+import singleApi from "../../hooks/singleApi";
+import postApi from "../../hooks/postApi";
+import { message } from "antd";
+export const PostCreation = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [contentType, setContentType] = useState(null);
   const [isPending, setIsPending] = useState(false);
-  const films = ["Inception", "Interstellar", "The Dark Knight"];
-  const musics = ["Blinding Lights", "Shape of You", "Levitating"];
+  const [films, setFilms] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [musics, setMusics] = useState([]);
+  const [file, setFile] = useState(null);
+  const fetchFilms = async () => {
+    try {
+      const response = await filmApi.getAllFilm({
+        typeUser: "user",
+      });
+      setFilms(response.data.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const fetchMusics = async () => {
+    try {
+      const response = await singleApi.getAllSingle({
+        filter: "",
+        search: "",
+        typeUser: "user",
+      });
+      setMusics(response.data.singles);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleFileChange = (e) => {
+    try {
+      const file = e.target.files[0];
+      setFile(file); // Lưu file thật
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      console.log(11111);
+
+      const formData = new FormData();
+      formData.append("content", document.getElementById("content").value);
+      if (contentType === "films") {
+        formData.append("film_id", selectedItem);
+      } else if (contentType === "musics") {
+        formData.append("single_id", selectedItem);
+      }
+      if (file) {
+        formData.append("image", file);
+      }
+      console.log(111111);
+
+      const response = await postApi.postCreatePost(formData);
+      if (response.status === 200) {
+        message.success("Post created successfully!");
+        setIsPending(false);
+        document.getElementById("content").value = "";
+        setFile(null);
+        setSelectedItem(null);
+      }
+    } catch (error) {
+      console.error("Error creating post", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilms();
+    fetchMusics();
+  }, []);
 
   return (
     <div className="gradient-bg-hero rounded-lg shadow mb-4 p-4">
@@ -25,14 +94,52 @@ export const PostCreation = ({ file }) => {
       </div>
       {file && (
         <div className="mt-4">
-          <img src={file} alt="Uploaded file" className="w-full rounded-lg" />
+          <img
+            src={URL.createObjectURL(file)}
+            alt="Uploaded file"
+            className="w-full rounded-lg"
+          />
         </div>
       )}
+      {selectedItem && (
+        <div className="mt-4 flex items-center p-3 border rounded-lg bg-gray-100">
+          {(() => {
+            const isFilm = contentType === "films";
+            const selectedContent = (isFilm ? films : musics).find(
+              (item) => item._id === selectedItem || item.id === selectedItem
+            );
+
+            return (
+              <>
+                <span className="font-semibold mr-2">
+                  {isFilm ? "Film:" : "Music:"}
+                </span>
+                <img
+                  src={
+                    selectedContent?.small_image || selectedContent?.image || ""
+                  }
+                  alt="Selected"
+                  className="w-12 h-12 rounded-full object-cover mx-3"
+                />
+                <span>
+                  {selectedContent?.name || selectedContent?.title || "Unknown"}
+                </span>
+              </>
+            );
+          })()}
+        </div>
+      )}
+
       <div className="flex justify-between items-center mt-4">
         <label className="flex items-center  transition-colors duration-200 cursor-pointer text-white">
           <i className="bi bi-card-image mr-2" style={{ fontSize: "20px" }}></i>
           <span>Photo</span>
-          <input type="file" accept="image/*" className="hidden" />
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleFileChange(e)}
+          />
         </label>
 
         <button
@@ -51,7 +158,7 @@ export const PostCreation = ({ file }) => {
             <LoadingOutlined className="size-5" />
           ) : (
             <>
-              Share <ShareAltOutlined />
+              Share <ShareAltOutlined onClick={handleSubmit} />
             </>
           )}
         </button>
@@ -80,17 +187,21 @@ export const PostCreation = ({ file }) => {
                 <h3 className="text-md font-semibold">
                   Select {contentType === "films" ? "a Film" : "a Music"}
                 </h3>
-                <ul className="mt-2">
-                  {(contentType === "films" ? films : musics).map(
-                    (item, index) => (
-                      <li
-                        key={index}
-                        className="cursor-pointer hover:bg-gray-200 p-2 rounded-md"
-                      >
-                        {item}
-                      </li>
-                    )
-                  )}
+                <ul className="mt-2 overflow-y-scroll max-h-48">
+                  {(contentType === "films" ? films : musics).map((item) => (
+                    <li
+                      key={item._id || item.id}
+                      className="cursor-pointer hover:bg-gray-200 p-2 rounded-md flex items-center gap-3"
+                      onClick={() => setSelectedItem(item._id || item.id)}
+                    >
+                      <img
+                        src={item.small_image || item.image}
+                        alt=""
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                      <span>{item.name || item.title}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}

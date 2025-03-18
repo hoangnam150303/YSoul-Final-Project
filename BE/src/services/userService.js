@@ -13,7 +13,6 @@ exports.registerService = async (name, email, password, otp, verifyToken) => {
 
     
     const hashPassword = await passwordHelpers.hashPassword(password, 10);
-    console.log(hashPassword);
     
   await conectPostgresDb.query(
       "INSERT INTO users (name, email, status, authprovider, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
@@ -23,7 +22,7 @@ exports.registerService = async (name, email, password, otp, verifyToken) => {
     
     return { success: true };
   } catch (error) {
-    console.log(error);
+
     
     return { success: false, error };
   }

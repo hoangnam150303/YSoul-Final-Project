@@ -215,7 +215,7 @@ exports.createMomoInvoiceService = async (id, totalPrice) => {
     let result;
 
     result = await axios(options);
-    console.log("MoMo response:", result.data);
+
 
     return {
       requestBody,
