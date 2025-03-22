@@ -22,6 +22,7 @@ exports.postComment = async (req,res)=>{
 exports.updateComment = async(req,res)=>{
     try {
         const {commentId,postId} = req.params; // get commentId and postId from params
+        
         const {content} = req.body; // get content from body
         if (!commentId || !postId) {
             return res.status(400).json({message: "Please fill in all fields"});
@@ -60,6 +61,7 @@ exports.updateCommentReply = async(req,res)=>{
     try {
         const {commentId,postId,replyId} = req.params; // get commentId and postId and replyId from params
         const {content} = req.body; // get content from body
+        
         if (!commentId || !postId || !replyId) { // check if commentId and postId and replyId is empty
             return res.status(400).json({message: "Please fill in all fields"});
         }
