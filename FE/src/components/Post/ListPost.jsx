@@ -8,28 +8,365 @@ import {
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, Dropdown, Button } from "antd";
+import {
+  Menu,
+  Dropdown,
+  Button,
+  message,
+  Modal,
+  Input,
+  Select,
+  Upload,
+} from "antd";
 import { PostAction } from "./PostAction";
 import { formatDistanceToNow } from "date-fns";
 import commentApi from "../../hooks/commentApi";
-export const ListPost = ({ data }) => {
+import { useSelector } from "react-redux";
+import postApi from "../../hooks/postApi";
+import { UploadOutlined } from "@ant-design/icons";
+import filmApi from "../../hooks/filmApi";
+import singleApi from "../../hooks/singleApi";
+export const ListPost = () => {
   const [showComments, setShowComments] = useState({});
+  const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
   const [newComment, setNewComment] = useState("");
   const [newReplyComment, setNewReplyComment] = useState("");
   const [showReplyComments, setShowReplyComments] = useState({});
-
   const [isPending, setIsPending] = useState(false);
+  const userId = useSelector((state) => state.user.id);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [postSelected, setPostSelected] = useState(null);
+  const [image, setImage] = useState(null);
+  const [postType, setPostType] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [films, setFilms] = useState([]);
+  const [musics, setMusics] = useState([]);
+  const [content, setContent] = useState("");
+  const [filePreview, setFilePreview] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [commentEdit, setCommentEdit] = useState(null);
+  const [editingReplyCommentId, setEditingReplyCommentId] = useState(null);
+  const [replyCommentEdit, setReplyCommentEdit] = useState(null);
   // Menu khi bấm vào nút More
-  const menu = (
+  const getMenu = (user_id, post_id) => (
     <Menu>
-      <Menu.Item key="1">🚩 Báo cáo</Menu.Item>
-      <Menu.Item key="2">🙈 Ẩn bài viết</Menu.Item>
-      <Menu.Item key="3" danger>
-        🗑️ Xóa bài viết
+      <Menu.Item key="1" onClick={() => handleReport(post_id)}>
+        🚩 Báo cáo
       </Menu.Item>
-      <Menu.Item key="4">✏️ Sửa bài viết</Menu.Item>
+      <Menu.Item key="2" onClick={() => handleHide(post_id)}>
+        🙈 Ẩn bài viết
+      </Menu.Item>
+      {user_id === userId.toString() ? (
+        <>
+          <Menu.Item key="3" danger onClick={() => handleDelete(post_id)}>
+            🗑️ Xóa bài viết
+          </Menu.Item>
+          <Menu.Item key="4" onClick={() => handleEditPost(post_id)}>
+            ✏️ Sửa bài viết
+          </Menu.Item>
+        </>
+      ) : null}
     </Menu>
   );
+
+  // Menu for comment
+  const getCommentMenu = (user_id, commentId, post_id, content) => (
+    <Menu>
+      <Menu.Item key="1" onClick={() => handleReport(post_id, commentId)}>
+        🚩 Báo cáo
+      </Menu.Item>
+      <Menu.Item key="2" onClick={() => handleHide(post_id, commentId)}>
+        🙈 Ẩn Comment
+      </Menu.Item>
+      {user_id === userId.toString() ? (
+        <>
+          <Menu.Item
+            key="3"
+            danger
+            onClick={() => handleDeleteComment(post_id, commentId)}
+          >
+            🗑️ Xóa Comment
+          </Menu.Item>
+          <Menu.Item
+            key="4"
+            onClick={() => handleEditComment(commentId, content)}
+          >
+            ✏️ Sửa Comment
+          </Menu.Item>
+        </>
+      ) : null}
+    </Menu>
+  );
+
+  // Menu for reply comment
+  const getCommentReplyMenu = (
+    user_id,
+    commentId,
+    post_id,
+    replyId,
+    content
+  ) => (
+    <Menu>
+      <Menu.Item
+        key="1"
+        onClick={() => handleReport(post_id, commentId, replyId)}
+      >
+        🚩 Báo cáo
+      </Menu.Item>
+      <Menu.Item
+        key="2"
+        onClick={() => handleHide(post_id, commentId, replyId)}
+      >
+        🙈 Ẩn Comment
+      </Menu.Item>
+      {user_id === userId.toString() ? (
+        <>
+          <Menu.Item
+            key="3"
+            danger
+            onClick={() =>
+              handleDeleteReplyComment(post_id, commentId, replyId)
+            }
+          >
+            🗑️ Xóa Comment
+          </Menu.Item>
+          <Menu.Item
+            key="4"
+            onClick={() => handleEditReplyComment(replyId, content)}
+          >
+            ✏️ Sửa Comment
+          </Menu.Item>
+        </>
+      ) : null}
+    </Menu>
+  );
+  const fetchPosts = async () => {
+    try {
+      const response = await postApi.getAllPost(search);
+
+      setData(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    fetchPosts();
+  }, [search]);
+
+  useEffect(() => {
+    if (postSelected) {
+      setPostType(postSelected.film_id != undefined ? "Film" : "Music");
+      setContent(postSelected.content);
+      setImage(postSelected.image);
+    }
+  }, [postSelected]); // Chỉ chạy khi postSelected thay đổi
+
+  useEffect(() => {
+    let isMounted = true; // Giúp tránh setState sau khi component đã unmount
+
+    const fetchData = async () => {
+      try {
+        if (postType === "Film") {
+          const response = await filmApi.getAllFilm({ typeUser: "user" });
+
+          if (isMounted) {
+            setFilms(response.data.data.data);
+            if (response.data.data.data.length > 0) {
+              setSelectedOption(
+                response.data.data.data.find(
+                  (film) => film._id === postSelected.film_id
+                )
+              );
+            }
+          }
+        } else {
+          const response = await singleApi.getAllSingle({
+            filter: "",
+            search: "",
+            typeUser: "user",
+          });
+          if (isMounted) {
+            setMusics(response.data.singles);
+            if (response.data.singles.length > 0) {
+              setSelectedOption(
+                response.data.singles.find(
+                  (music) => music.id === parseInt(postSelected?.single_id)
+                )
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false; // Cleanup function tránh memory leak
+    };
+  }, [postType, postSelected]); // useEffect này chỉ chạy khi postType hoặc postSelected thay đổi
+  const handleImageChange = (info) => {
+    const file = info.file.originFileObj || info.file;
+
+    if (file) {
+      setImage(file); // Lưu file thay vì URL blob
+      setFilePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCancel = () => {
+    setModalOpen(false);
+    setPostType(null);
+    setPostSelected(null);
+  };
+  const handleSubmit = async () => {
+    let formData = new FormData();
+    if (postType === "Film") {
+      console.log(selectedOption);
+      formData.append("film_id", selectedOption._id);
+    } else {
+      formData.append("single_id", selectedOption.id || selectedOption);
+    }
+    formData.append("content", content);
+    formData.append("image", image);
+    try {
+      const response = await postApi.updatePost(postSelected._id, formData);
+      if (response.status === 200) {
+        message.success("Post updated successfully!");
+        setModalOpen(false);
+        fetchPosts();
+      }
+    } catch (error) {
+      console.error("Error updating post:", error);
+    }
+  };
+  // Function for post
+  const handleReport = (postId) => {
+    console.log("Báo cáo bài viết:", postId);
+  };
+
+  const handleHide = (postId) => {
+    console.log("Ẩn bài viết:", postId);
+  };
+
+  const handleDelete = async (postId) => {
+    try {
+      const response = await postApi.activeOrDeactivePost(postId);
+      if (response.status === 200) {
+        message.success("Delete Success!");
+        fetchPosts();
+      }
+    } catch (error) {
+      message.error("Delete Failed!");
+      console.log(error);
+    }
+  };
+  const handleEditPost = async (postId) => {
+    try {
+      try {
+        const response = await postApi.getPostById(postId);
+        if (response.status === 200) {
+          setPostSelected(response.data.result.post);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+
+      setModalOpen(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // function for comment
+  const handleDeleteComment = async (post_id, commentId) => {
+    try {
+      const response = await commentApi.deleteComment(post_id, commentId);
+      if (response.status === 200) {
+        message.success("Delete Success!");
+        fetchPosts();
+      }
+    } catch (error) {
+      message.error("Delete Failed!");
+      console.log(error);
+    }
+  };
+  const handleEditComment = async (id, content) => {
+    try {
+      setIsEdit(true);
+      setEditingCommentId(id);
+      setCommentEdit(content);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleSubmitEditComment = async (postId) => {
+    try {
+      const response = await commentApi.updateComment(
+        editingCommentId,
+        postId,
+        commentEdit
+      );
+      if (response.status === 200) {
+        message.success("Update Success!");
+        fetchPosts();
+        setIsEdit(false);
+        setEditingCommentId(null);
+        setCommentEdit("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  // Function for reply comment
+  const handleDeleteReplyComment = async (post_id, commentId, replyId) => {
+    try {
+      const response = await commentApi.deleteReplyComment(
+        post_id,
+        commentId,
+        replyId
+      );
+      if (response.status === 200) {
+        message.success("Delete Success!");
+        fetchPosts();
+      }
+    } catch (error) {
+      message.error("Delete Failed!");
+      console.log(error);
+    }
+  };
+  const handleEditReplyComment = async (id, content) => {
+    try {
+      setIsEdit(true);
+      setEditingReplyCommentId(id);
+      setReplyCommentEdit(content);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleSubmitEditReplyComment = async (postId, commentId) => {
+    try {
+      const response = await commentApi.updateCommentReply(
+        commentId,
+        postId,
+        editingReplyCommentId,
+        replyCommentEdit
+      );
+      if (response.status === 200) {
+        message.success("Update Success!");
+        fetchPosts();
+        setIsEdit(false);
+        setEditingReplyCommentId(null);
+        setReplyCommentEdit("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Link phim hoặc nhạc (Có thể lấy từ props nếu cần)
   const mediaLink = {
@@ -59,12 +396,15 @@ export const ListPost = ({ data }) => {
     try {
       const comment = { content: newComment };
       const response = await commentApi.postCreateComment(comment, postId);
-
+      if (response.status === 200) {
+        message.success("Comment added successfully!");
+        setNewComment("");
+        setIsPending(false);
+        fetchPosts();
+      }
       // Cập nhật state để hiển thị comment mới ngay lập tức
 
       // Reset input comment
-      setNewComment("");
-      setIsPending(false);
     } catch (error) {
       console.log(error);
     }
@@ -79,7 +419,12 @@ export const ListPost = ({ data }) => {
         postId,
         commentId
       );
-      console.log(response);
+      if (response.status === 200) {
+        message.success("Comment added successfully!");
+        setNewReplyComment("");
+        setIsPending(false);
+        fetchPosts();
+      }
     } catch (error) {
       console.log(error);
     }
@@ -110,7 +455,10 @@ export const ListPost = ({ data }) => {
                 </div>
               </div>
               {/* Nút More với dropdown */}
-              <Dropdown overlay={menu} trigger={["click"]}>
+              <Dropdown
+                overlay={getMenu(post.user_id, post._id)}
+                trigger={["click"]}
+              >
                 <MoreOutlined className="text-white cursor-pointer text-xl" />
               </Dropdown>
             </div>
@@ -182,6 +530,7 @@ export const ListPost = ({ data }) => {
                           <span className="font-semibold mr-2">
                             {comment.username}
                           </span>
+
                           {comment && (
                             <span className="text-xs text-gray-500">
                               {formatDistanceToNow(
@@ -192,9 +541,43 @@ export const ListPost = ({ data }) => {
                               ).replace("about ", "")}
                             </span>
                           )}
+                          <Dropdown
+                            overlay={getCommentMenu(
+                              comment.user_id,
+                              comment._id,
+                              post._id,
+                              comment.content
+                            )}
+                            trigger={["click"]}
+                            className="justify-end"
+                          >
+                            <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
+                          </Dropdown>
                         </div>
+
                         <div className="flex flex-col">
-                          <p>{comment.content}</p>
+                          {isEdit &&
+                          isEdit &&
+                          editingCommentId === comment._id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={commentEdit}
+                                onChange={(e) => setCommentEdit(e.target.value)}
+                                className="flex-1 border p-2 rounded"
+                              />
+                              <Button
+                                onClick={() =>
+                                  handleSubmitEditComment(post._id)
+                                }
+                                className="size-10"
+                              >
+                                Save
+                              </Button>
+                            </div>
+                          ) : (
+                            <p>{comment.content}</p>
+                          )}
                           {/* Nút show reply comments */}
                           <div
                             className="text-sm text-gray-500 cursor-pointer ml-auto mt-1 hover:underline"
@@ -219,13 +602,62 @@ export const ListPost = ({ data }) => {
                                         alt="avatar"
                                         className="w-6 h-6 rounded-full mr-2"
                                       />
-                                      <span className="font-semibold text-sm">
+                                      <span className="font-semibold text-sm mr-2">
                                         {reply.username}
                                       </span>
+                                      {reply && (
+                                        <span className="text-xs text-gray-500">
+                                          {formatDistanceToNow(
+                                            new Date(reply?.createdAt),
+                                            {
+                                              addSuffix: true,
+                                            }
+                                          ).replace("about ", "")}
+                                        </span>
+                                      )}
+                                      <Dropdown
+                                        overlay={getCommentReplyMenu(
+                                          reply.user_id,
+                                          comment._id,
+                                          post._id,
+                                          reply._id,
+                                          reply.content
+                                        )}
+                                        trigger={["click"]}
+                                        className="justify-end"
+                                      >
+                                        <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
+                                      </Dropdown>
                                     </div>
-                                    <p className="text-sm mt-1">
-                                      {reply.content}
-                                    </p>
+                                    {isEdit &&
+                                    isEdit &&
+                                    editingReplyCommentId === reply._id ? (
+                                      <div className="flex items-center gap-2">
+                                        <input
+                                          type="text"
+                                          value={replyCommentEdit}
+                                          onChange={(e) =>
+                                            setReplyCommentEdit(e.target.value)
+                                          }
+                                          className="flex-1 border p-2 rounded"
+                                        />
+                                        <Button
+                                          onClick={() =>
+                                            handleSubmitEditReplyComment(
+                                              post._id,
+                                              comment._id
+                                            )
+                                          }
+                                          className="size-10"
+                                        >
+                                          Save
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm mt-1">
+                                        {reply.content}
+                                      </p>
+                                    )}
                                   </div>
                                 ))}
                                 <form
@@ -289,6 +721,69 @@ export const ListPost = ({ data }) => {
             )}
           </div>
         ))
+      )}
+      {postSelected && (
+        <Modal
+          title="Edit Post"
+          visible={modalOpen}
+          onCancel={handleCancel}
+          onOk={handleSubmit}
+        >
+          <div className="flex flex-col gap-4">
+            <Input.TextArea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Edit content..."
+            />
+
+            <Upload beforeUpload={() => false} onChange={handleImageChange}>
+              <Button icon={<UploadOutlined />}>Upload Image</Button>
+            </Upload>
+
+            {image && (
+              <img
+                src={filePreview || image}
+                alt="Preview"
+                className="w-full h-40 object-cover mt-2"
+              />
+            )}
+
+            {postType && (
+              <Select value={postType} onChange={setPostType}>
+                <Select.Option value="Film">Film</Select.Option>
+                <Select.Option value="Music">Music</Select.Option>
+              </Select>
+            )}
+
+            {postType === "Film" && (
+              <Select
+                value={selectedOption?.name}
+                onChange={setSelectedOption}
+                placeholder="Select a film"
+              >
+                {films.map((film) => (
+                  <Select.Option key={film._id} value={film._id}>
+                    {film.name}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+
+            {postType === "Music" && (
+              <Select
+                value={selectedOption?.title}
+                onChange={setSelectedOption}
+                placeholder="Select a single"
+              >
+                {musics.map((music) => (
+                  <Select.Option key={music.id} value={music.id}>
+                    {music.title}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );

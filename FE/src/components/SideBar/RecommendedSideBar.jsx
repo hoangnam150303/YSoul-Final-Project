@@ -35,7 +35,7 @@ export const RecommendedSideBar = ({ user }) => {
     }
   };
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between mb-4 ">
       <Link className="flex items-center flex-grow" to="/profile">
         <img
           src="https://media.licdn.com/dms/image/v2/D5603AQHqFkGID_VAfQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1704300367200?e=1747267200&v=beta&t=m74QfO9g0462KKxTjXu5EBsy__Vu_9oa62u4eBYyPTs"

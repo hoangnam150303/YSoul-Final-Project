@@ -137,12 +137,12 @@ exports.getAllPostService = async (search) => {
           });
           
         for (let i = 0; i < users.rows.length; i++) { 
-            const post = await Post.find()
+            const post = await Post.find({ isActive: true })
                 .where("user_id").equals(users.rows[i].id)
                 .sort({ createdAt: -1 }); // find post by user_id   
             result = [...result, { user: sanitizedUsers[i], post: post }];
         }
-
+        
         return { success: true, data: result }; // return success
     } catch (error) {
         console.error("Error fetching posts:", error);

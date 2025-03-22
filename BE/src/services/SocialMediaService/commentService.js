@@ -24,6 +24,7 @@ exports.postCommentService = async (postId,content,userId) => {
 // this function is update comment
 exports.updateCommentService = async (commentId,postId,content) => {
     try {
+        
         const validPost = await Post.findById(postId); // check if post is valid
         if (!validPost) { // check if post is not valid
             return {success:false,message: "Post not found"}; // return error message
@@ -90,6 +91,8 @@ exports.updateCommentReplyService = async (commentId,postId,replyId,content) => 
 // this function is delete comment
 exports.deleteCommentService = async (postId,commentId,userId) => {
     try {
+
+        
         const validPost = await Post.findById(postId); // check if post is valid
         if (!validPost) { // check if post is not valid
             return {success:false,message: "Post not found"}; // return error message
