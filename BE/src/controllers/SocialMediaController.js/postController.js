@@ -104,3 +104,18 @@ exports.likePost = async (req,res)=>{
         return res.status(500).json({message: "Internal server error"});
     }
 }
+
+// this function is get top post
+exports.getTopPost = async(req,res)=>{
+    try {
+
+        const response = await postService.getTopPostService(); // call getTopPostService from postService
+        if (!response.success) { // check if response is not success
+            return res.status(400).json({message: response.message}); // return error message
+        }
+        
+        return res.status(200).json(response); // return success message
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"}); // return error message
+    }
+}

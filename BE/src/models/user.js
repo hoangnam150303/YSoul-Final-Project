@@ -11,9 +11,11 @@ const createUserTableQuery = `
     lastLogin DATE,
     status BOOLEAN,
     google_id VARCHAR(50),
-    avatar VARCHAR(200)
-    vip BOOLEAN
-    is_admin BOOLEAN
+    avatar VARCHAR(200),
+    vip BOOLEAN,
+    is_admin BOOLEAN,
+    user_follow INTEGER[] DEFAULT '{}',
+    user_followed INTEGER[] DEFAULT '{}',
 )
 `;
 

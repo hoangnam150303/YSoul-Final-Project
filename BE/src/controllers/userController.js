@@ -14,9 +14,15 @@ exports.loginGoogle = async (req, res) => {
       return res.status(401).json({ message: "Your account is not active" });
     }
     // Tạo access token
-    const access_token = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN, {
-      expiresIn: process.env.TOKEN_EXPIRED,
-    });
+
+    
+    const access_token = jwt.sign( // Generate access token
+         { id: userIsValid.rows[0].id, is_admin: userIsValid.rows[0].is_admin, name: userIsValid.rows[0].name },
+         process.env.ACCESS_TOKEN,
+         {
+           expiresIn: process.env.TOKEN_EXPIRED,
+         }
+       );       
     res.status(200).json({ access_token, success: true });
   } catch (error) {
     return res.status(401).json({ message: "Lỗi! Vui lòng thử lại.", error });
@@ -180,3 +186,34 @@ exports.getUserProfile = async (req, res) => {
     return res.status(401).json({ message: "Error! Please try again.", error });
   }
 };
+
+// this function is follow user
+exports.followUser = async(req,res)=>{
+  try{
+    const userFollowId = req.params.id; // get userFollowId from request params
+    const userId = req.user.id; // get userId from request user
+    const response = await userService.followUserService(userId,userFollowId); // call followUserService from userService
+    if (!response.success) { // if response is not success
+      return res.status(401).json({ message: "Error! Please try again.", error }); // 
+    }
+   return res.status(200).json(response); // return response
+  }catch(error){
+    return res.status(401).json({ message: "Error! Please try again.", error }); // return error
+  }
+}
+
+exports.getAllReviewer = async(req,res)=>{
+  try{
+    const userId = req.user.id; // get userId from request user
+
+    
+    const {filter,search} = req.query
+    const response = await userService.getAllReviewersService(userId,filter,search); // call getAllFollowersService from userService
+    if (!response.success) { // if response is not success
+      return res.status(401).json({ message: "Error! Please try again.", error }); // return error
+    }
+   return res.status(200).json(response); // return response
+  }catch(error){
+    return res.status(401).json({ message: "Error! Please try again.", error }); // return error
+  }
+}

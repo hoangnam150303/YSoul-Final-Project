@@ -213,3 +213,16 @@ exports.likePostService = async (id,userId) => {
         return {success:false,message: "Internal server error"};
     }
 }
+
+// this function is get top post
+exports.getTopPostService = async () => {
+    try {
+        const validPost = await Post.find({ isActive: true }).sort({ likes: -1 }); // find post by is_active
+        if (!validPost) { // check if post is not valid
+            return {success:false,message: "Post not found"}; // return error message
+        }
+        return {success:true,validPost}; // return success
+    } catch (error) {
+        return {success:false,message: "Internal server error"}; // return error message
+    }
+}
