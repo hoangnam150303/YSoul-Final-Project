@@ -17,5 +17,8 @@ userRoute.put("/activeOrDeactive/:id", auth.isAdmin, userController.activeOrDeac
 userRoute.put("/updateProfile/:id",upload.single("avatar"), auth.isAuth, userController.updateUserProfile);
 userRoute.get("/getUserProfile", auth.isAuth, userController.getUserProfile);
 userRoute.get("/getUser", auth.isAuth, userController.getUser);
+userRoute.get("/getAllReviewer", auth.isVip, userController.getAllReviewer);
 userRoute.get("/getAllUser", auth.isAdmin, userController.getAllUsers);
+userRoute.put("/followUser/:id", auth.isVip, userController.followUser);
+
 module.exports = userRoute;

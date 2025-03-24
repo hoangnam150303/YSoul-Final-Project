@@ -58,6 +58,7 @@ export const LoginPage = () => {
         const response = await userApi.postLoginWithGoogle({
           access_token: tokenResponse.access_token,
         });
+
         const { status, data } = response;
 
         if (status === 200) {
@@ -66,6 +67,8 @@ export const LoginPage = () => {
           message.error("Đăng nhập thất bại, thử lại");
         }
       } catch (error) {
+        console.log(error);
+
         if (error.response) {
           message.error(error.response.data.message);
         } else {
