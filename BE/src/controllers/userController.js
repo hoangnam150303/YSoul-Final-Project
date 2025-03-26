@@ -122,6 +122,7 @@ exports.getUser = async (req, res) => {
       name: user.rows[0].name,
       is_admin: user.rows[0].is_admin,
       vip: user.rows[0].vip,
+      avatar:user.rows[0].avatar
     });
   } catch (error) {
     return res.status(401).json({ message: "Error! Please try again.", error });
@@ -205,9 +206,7 @@ exports.followUser = async(req,res)=>{
 exports.getAllReviewer = async(req,res)=>{
   try{
     const userId = req.user.id; // get userId from request user
-
-    
-    const {filter,search} = req.query
+    const {filter,search} = req.query    
     const response = await userService.getAllReviewersService(userId,filter,search); // call getAllFollowersService from userService
     if (!response.success) { // if response is not success
       return res.status(401).json({ message: "Error! Please try again.", error }); // return error

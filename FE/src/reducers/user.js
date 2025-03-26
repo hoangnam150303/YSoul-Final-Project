@@ -29,7 +29,7 @@ const getUser = (user) => {
   };
 };
 
-const initialState = { is_admin: false, name: "", id: 0, vip: false };
+const initialState = { is_admin: false, name: "", id: 0, vip: false,avatar:"" };
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {

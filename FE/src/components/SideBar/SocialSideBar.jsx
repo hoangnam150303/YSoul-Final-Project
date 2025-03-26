@@ -1,8 +1,12 @@
 import { BellOutlined, HomeOutlined, UserAddOutlined } from "@ant-design/icons";
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-export const SocialSideBar = ({ User }) => {
+export const SocialSideBar = () => {
+  const userId = useSelector((state) => state.user.id);
+  const userAvatar = useSelector((state) => state.user.avatar);
+  const userName = useSelector((state) => state.user.name);
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Cover Image */}
@@ -18,13 +22,12 @@ export const SocialSideBar = ({ User }) => {
       <div className="flex flex-col items-center p-4">
         <Link to="/profile">
           <img
-            src="https://media.licdn.com/dms/image/v2/D5603AQHqFkGID_VAfQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1704300367200?e=1747267200&v=beta&t=m74QfO9g0462KKxTjXu5EBsy__Vu_9oa62u4eBYyPTs"
+            src={userAvatar}
             alt="avatar"
             className="w-20 h-20 rounded-full border-4 border-white -mt-10 shadow-md"
           />
         </Link>
-        <h2 className="text-lg font-semibold mt-2">Hoang Nam</h2>
-        <p className="text-gray-500 text-sm">Hello, I'm a Software Engineer</p>
+        <h2 className="text-lg font-semibold mt-2">{userName}</h2>
         <p className="text-gray-500 text-xs">12 connections</p>
       </div>
 
