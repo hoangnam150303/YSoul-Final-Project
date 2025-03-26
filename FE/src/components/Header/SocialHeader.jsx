@@ -10,7 +10,7 @@ export const SocialHeader = () => {
           {/* Logo */}
           <Link to="/">
             <img
-              className="h-8 rounded"
+              className="h-16 w-full rounded"
               src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
               alt="logo"
             />

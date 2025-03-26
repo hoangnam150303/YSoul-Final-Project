@@ -4,6 +4,7 @@ import filmApi from "../../hooks/filmApi";
 import singleApi from "../../hooks/singleApi";
 import postApi from "../../hooks/postApi";
 import { message } from "antd";
+import { useSelector } from "react-redux";
 export const PostCreation = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [contentType, setContentType] = useState(null);
@@ -12,6 +13,7 @@ export const PostCreation = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [musics, setMusics] = useState([]);
   const [file, setFile] = useState(null);
+  const userAvatar = useSelector((state) => state.user.avatar);
   const fetchFilms = async () => {
     try {
       const response = await filmApi.getAllFilm({
@@ -80,11 +82,7 @@ export const PostCreation = () => {
   return (
     <div className="gradient-bg-hero rounded-lg shadow mb-4 p-4">
       <div className="flex space-x-3">
-        <img
-          className="size-12 rounded-full"
-          src="https://media.licdn.com/dms/image/v2/D5603AQHqFkGID_VAfQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1704300367200?e=1747267200&v=beta&t=m74QfO9g0462KKxTjXu5EBsy__Vu_9oa62u4eBYyPTs"
-          alt="avatar"
-        />
+        <img className="size-12 rounded-full" src={userAvatar} alt="avatar" />
         <textarea
           name="content"
           id="content"

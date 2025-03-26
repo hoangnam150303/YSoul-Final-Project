@@ -38,6 +38,15 @@ const userApi = {
   getUserProfile:() =>{
     const url = `/getUserProfile`; // update album by id
     return axiosClient.get(url);
+  },
+
+  getAllReviewer:(filter,search)=>{
+    const url = `/getAllReviewer?filter=${filter}&search=${search}`;
+    return axiosClient.get(url);
+  },
+  followUser:(id)=>{
+    const url = `/followUser/${id}`;
+    return axiosClient.put(url)
   }
 };
 
