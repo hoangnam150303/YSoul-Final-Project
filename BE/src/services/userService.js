@@ -1,6 +1,7 @@
 const { conectPostgresDb } = require("../configs/database");
 const passwordHelpers = require("../helpers/passWordHelpers");
 const mailHelpers = require("../helpers/mailHelpers");
+const Notification = require("../models/notification");
 const jwt = require("jsonwebtoken");
 // this function is register account with email, password and user name.
 exports.registerService = async (name, email, password, otp, verifyToken) => {
@@ -284,8 +285,9 @@ exports.followUserService = async (userId, userFollowId) => {
       "UPDATE users SET user_followed = array_append(user_followed, $1) WHERE id = $2", // Append user
       [userId, userFollowId]
     );
+    await Notification.create({user_id:userFollowId,type:"follow",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
    }
-   
+  
     return { success: true }; // Return success
   } catch (error) {
     return { success: false, error: error.message };

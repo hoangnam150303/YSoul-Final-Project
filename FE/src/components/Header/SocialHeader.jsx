@@ -29,7 +29,7 @@ export const SocialHeader = () => {
 
             {/* My Network */}
             <Link
-              to="/user"
+              to="/network"
               className="flex flex-col items-center text-white relative"
             >
               <i className="bi bi-people" style={{ fontSize: "20px" }}></i>
