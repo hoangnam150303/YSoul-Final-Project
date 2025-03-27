@@ -2,6 +2,7 @@ const { conectPostgresDb } = require("../../configs/database");
 const Film = require("../../models/film");
 const Post = require("../../models/post");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
+const Notification = require("../../models/notification");
 // this function is create post
 exports.createPostService = async (content, film_id, single_id, image, user_id) => {
     try {
@@ -196,19 +197,22 @@ exports.likePostService = async (id,userId) => {
         if (index !== -1) { // check if user is in likes
             validPost.likes.splice(index, 1); // remove user from likes
             await validPost.save(); // save post
-            return {success:true,message: "Like removed"};  // return success
+            return {success:true,message: "Success"};
         }
         else{
             validPost.likes.push({user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}); // add user to likes
             await validPost.save(); // save post
-            return {success:true,message: "Like added"}; // return success   
         }
      }
     else{
         validPost.likes.push({user_id:userId,username:validUser.rows[0].name}); // add user to likes
         await validPost.save(); // save post
-        return {success:true,message: "Like added"}; // return success
     }
+    if (validPost.user_id !== userId.toString()) { // check if user is not post owner
+        await Notification.create({user_id:validPost.user_id,type:"like",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+
+    }
+    return {success:true,message: "Success"}; 
     } catch (error) {
         return {success:false,message: "Internal server error"};
     }

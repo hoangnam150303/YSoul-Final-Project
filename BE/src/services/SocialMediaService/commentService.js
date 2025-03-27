@@ -1,6 +1,6 @@
 const Post = require("../../models/post");
 const {conectPostgresDb} = require("../../configs/database");
-
+const Notification = require("../../models/notification");
 // this function is post comment
 exports.postCommentService = async (postId,content,userId) => {
     try {
@@ -15,6 +15,10 @@ exports.postCommentService = async (postId,content,userId) => {
         // add comment, user_id and username,avatar to post
         validPost.comments.push({content:content,user_id:validUser.rows[0].id,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}); 
         await validPost.save(); // save post
+        
+        if (userId.toString() !== validPost.user_id) { // check if user is post owner
+            await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+        }
         return {success:true,message: "Comment created successfully"};
     } catch (error) {
         return {success:false,message: "Internal server error"};
@@ -59,6 +63,11 @@ exports.postReplyCommentService = async (postId,commentId,content,userId) => {
         }        
         comment.commentReplied.push({content:content,user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}); // add reply to comment
         await validPost.save(); // save post
+        if (validPost.user_id !== userId.toString() && comment.user_id !== userId.toString()) { // check if user is not post owner
+            await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+            await Notification.create({user_id:comment.user_id,type:"reply",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+
+        }
         return {success:true,message: "Reply comment created successfully"};
     } catch (error) {
         return {success:false,message: error.toString()};

@@ -26,6 +26,7 @@ import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
 import StoreProfile from "../pages/NFTMarketPlacePage/StoreProfile";
 import { SocialHomePage } from "../pages/SocialMediaPage/SocialHomePage";
 import { NotificationPage } from "../pages/SocialMediaPage/NottificationPage";
+import { NetworkPage } from "../pages/SocialMediaPage/NetworkPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -35,72 +36,48 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingPage />}>
-      {/* <PlayerContext /> */}
       <Routes>
-        <Route path="/" element={<MovieHomePage />}></Route>
+        <Route path="/" element={<MovieHomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/watchPage/:movieId" element={<WatchPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/*" element={<NotFoundPage />} />
 
-        <Route path="/login" element={<LoginPage />}></Route>
-        <Route path="/signup" element={<SignUpPage />}></Route>
-        <Route path="/watchPage/:movieId" element={<WatchPage />}></Route>
-        <Route path="/search" element={<SearchPage />}></Route>
-        <Route path="/*" element={<NotFoundPage />}></Route>
+        <Route
+          path="/payment"
+          element={isVip ? <Navigate to="/" /> : <PaymentPage />}
+        />
 
         {is_admin && (
           <>
-            <Route
-              path="/homePageAdmin"
-              element={is_admin ? <AdminHomePage /> : <Navigate to="/" />}
-            ></Route>
-            <Route
-              path="/movieAdmin"
-              element={is_admin ? <CRUDFilmPage /> : <Navigate to="/" />}
-            ></Route>
-            <Route
-              path="/musicAdmin"
-              element={is_admin ? <CRUDMusicPage /> : <Navigate to="/" />}
-            ></Route>
-            <Route path="/userAccount" element={<AccountPage />}></Route>
+            <Route path="/homePageAdmin" element={<AdminHomePage />} />
+            <Route path="/movieAdmin" element={<CRUDFilmPage />} />
+            <Route path="/musicAdmin" element={<CRUDMusicPage />} />
+            <Route path="/userAccount" element={<AccountPage />} />
           </>
         )}
-        {isVip && (
+
+        {isVip ? (
           <>
-            <Route
-              path="/musicHomePage"
-              element={isVip ? <MusicHomePage /> : <Navigate to="/payment" />}
-            ></Route>
-            <Route
-              path="/payment"
-              element={isVip ? <Navigate to="/" /> : <PaymentPage />}
-            ></Route>
-            <Route path="/userProfile" element={<UserProfilePage />}></Route>
+            <Route path="/musicHomePage" element={<MusicHomePage />} />
+            <Route path="/userProfile" element={<UserProfilePage />} />
             <Route
               path="/paymentSuccess/:invoice_id"
-              element={isVip ? <Navigate to="/" /> : <PaymentSuccess />}
-            ></Route>
-            <Route
-              path="/album/:id"
-              element={isVip ? <AlbumPage /> : <Navigate to="/payment" />}
-            ></Route>
-            <Route
-              path="/artist/:id"
-              element={isVip ? <ArtistPage /> : <Navigate to="/payment" />}
-            ></Route>
-            <Route
-              path="/favouriteMovie"
-              element={isVip ? <Navigate to="/" /> : <FavouriteMoviePage />}
-            ></Route>
-            <Route
-              path="/searchPageMuscic"
-              element={<MusicSearchPage />}
-            ></Route>
-            <Route path="/market" element={<HomePageMarket />}></Route>
-            <Route path="/store/:id?" element={<StoreProfile />}></Route>
-            <Route path="/socialHomePage" element={<SocialHomePage />}></Route>
-            <Route
-              path="/notificationPage"
-              element={<NotificationPage />}
-            ></Route>
+              element={<Navigate to="/" />}
+            />
+            <Route path="/album/:id" element={<AlbumPage />} />
+            <Route path="/artist/:id" element={<ArtistPage />} />
+            <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
+            <Route path="/searchPageMuscic" element={<MusicSearchPage />} />
+            <Route path="/market" element={<HomePageMarket />} />
+            <Route path="/store/:id?" element={<StoreProfile />} />
+            <Route path="/socialHomePage" element={<SocialHomePage />} />
+            <Route path="/notificationPage" element={<NotificationPage />} />
+            <Route path="/network" element={<NetworkPage />} />
           </>
+        ) : (
+          <Route path="*" element={<Navigate to="/payment" />} />
         )}
       </Routes>
       <Footer />

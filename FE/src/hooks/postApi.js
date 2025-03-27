@@ -30,6 +30,10 @@ const postApi = {
         "Content-Type": "multipart/form-data",
       },
     })
+  },
+  likePost:(id)=>{
+    const url = `${POST_ENDPOINT}/likePost/${id}`
+    return axiosClient.put(url)
   }
 };
 

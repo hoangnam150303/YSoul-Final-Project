@@ -374,7 +374,14 @@ export const ListPost = () => {
     url: "https://www.imdb.com/title/tt0816692/", // Ví dụ link phim Interstellar
     title: "Interstellar",
   };
-  const handleLikePost = async () => {};
+  const handleLikePost = async (id) => {
+    try {
+      await postApi.likePost(id);
+      fetchPosts();
+    } catch (error) {
+      message.error(error);
+    }
+  };
   const handleCommentPost = (postId) => {
     setShowComments((prev) => ({
       ...prev,
@@ -491,7 +498,7 @@ export const ListPost = () => {
               <PostAction
                 icon={<LikeOutlined size={18} />}
                 text={`Like (${post.likes?.length})`}
-                onClick={handleLikePost}
+                onClick={() => handleLikePost(post._id)}
               />
 
               <PostAction
