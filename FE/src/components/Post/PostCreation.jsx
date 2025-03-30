@@ -46,9 +46,9 @@ export const PostCreation = () => {
   };
 
   const handleSubmit = async () => {
-    try {
-      console.log(11111);
+    console.log(11111);
 
+    try {
       const formData = new FormData();
       formData.append("content", document.getElementById("content").value);
       if (contentType === "films") {
@@ -59,7 +59,6 @@ export const PostCreation = () => {
       if (file) {
         formData.append("image", file);
       }
-      console.log(111111);
 
       const response = await postApi.postCreatePost(formData);
       if (response.status === 200) {

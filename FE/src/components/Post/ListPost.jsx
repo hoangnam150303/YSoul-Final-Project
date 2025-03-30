@@ -377,6 +377,7 @@ export const ListPost = () => {
   const handleLikePost = async (id) => {
     try {
       await postApi.likePost(id);
+
       fetchPosts();
     } catch (error) {
       message.error(error);

@@ -3,6 +3,7 @@ const passwordHelpers = require("../helpers/passWordHelpers");
 const mailHelpers = require("../helpers/mailHelpers");
 const Notification = require("../models/notification");
 const jwt = require("jsonwebtoken");
+const { getReceiverSocketId, io } = require("../utils/socket");
 // this function is register account with email, password and user name.
 exports.registerService = async (name, email, password, otp, verifyToken) => {
   try {
@@ -285,7 +286,10 @@ exports.followUserService = async (userId, userFollowId) => {
       "UPDATE users SET user_followed = array_append(user_followed, $1) WHERE id = $2", // Append user
       [userId, userFollowId]
     );
-    await Notification.create({user_id:userFollowId,type:"follow",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+   const newNotification = await Notification.create({user_id:userFollowId,type:"follow",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+    const receiverSocketId = getReceiverSocketId(userFollowId); // get receiver socket id
+    io.to(receiverSocketId).emit("new-notification", newNotification);
+
    }
   
     return { success: true }; // Return success

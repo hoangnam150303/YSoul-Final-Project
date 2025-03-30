@@ -3,6 +3,7 @@ const Film = require("../../models/film");
 const Post = require("../../models/post");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 const Notification = require("../../models/notification");
+const { getReceiverSocketId, io } = require("../../utils/socket");
 // this function is create post
 exports.createPostService = async (content, film_id, single_id, image, user_id) => {
     try {
@@ -209,8 +210,9 @@ exports.likePostService = async (id,userId) => {
         await validPost.save(); // save post
     }
     if (validPost.user_id !== userId.toString()) { // check if user is not post owner
-        await Notification.create({user_id:validPost.user_id,type:"like",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
-
+      const newNotification =   await Notification.create({user_id:validPost.user_id,type:"like",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+        const receiverSocketId = getReceiverSocketId(validPost.user_id); // get receiver socket id
+        io.to(receiverSocketId).emit("new-notification", newNotification);
     }
     return {success:true,message: "Success"}; 
     } catch (error) {

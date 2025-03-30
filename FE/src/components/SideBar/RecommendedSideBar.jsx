@@ -10,8 +10,6 @@ export const RecommendedSideBar = () => {
   const fetchTopReviewers = async () => {
     try {
       const response = await userApi.getAllReviewer("popular", "");
-      console.log(response);
-
       setTopReviewers(response.data.reviewers);
     } catch (error) {
       console.log(error);
@@ -24,9 +22,7 @@ export const RecommendedSideBar = () => {
 
   const toggleFollow = async (id) => {
     try {
-      const response = await userApi.followUser(id);
-      console.log(response);
-
+      await userApi.followUser(id);
       fetchTopReviewers();
     } catch (error) {
       console.log(error);
@@ -37,7 +33,6 @@ export const RecommendedSideBar = () => {
     <div className="flex flex-col space-y-4 gap-2">
       {topReviewers.length > 0 ? (
         topReviewers.slice(0, 10).map((reviewer) => {
-          console.log("11111", reviewer.id === userId);
           const isFollowed = reviewer.user_followed?.some(
             (user) => user === userId
           );

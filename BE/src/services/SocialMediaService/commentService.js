@@ -1,6 +1,7 @@
 const Post = require("../../models/post");
 const {conectPostgresDb} = require("../../configs/database");
 const Notification = require("../../models/notification");
+const { getReceiverSocketId, io } = require("../../utils/socket");
 // this function is post comment
 exports.postCommentService = async (postId,content,userId) => {
     try {
@@ -17,7 +18,9 @@ exports.postCommentService = async (postId,content,userId) => {
         await validPost.save(); // save post
         
         if (userId.toString() !== validPost.user_id) { // check if user is post owner
-            await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+          const newNotification =  await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+          const receiverSocketId = getReceiverSocketId(validPost.user_id); // get receiver socket id
+          io.to(receiverSocketId).emit("new-notification", newNotification);
         }
         return {success:true,message: "Comment created successfully"};
     } catch (error) {
@@ -62,12 +65,67 @@ exports.postReplyCommentService = async (postId,commentId,content,userId) => {
             return {success:false,message: "Comment not found"}; // return error message
         }        
         comment.commentReplied.push({content:content,user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}); // add reply to comment
-        await validPost.save(); // save post
-        if (validPost.user_id !== userId.toString() && comment.user_id !== userId.toString()) { // check if user is not post owner
-            await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
-            await Notification.create({user_id:comment.user_id,type:"reply",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
-
+        await validPost.save(); // save post        
+        if (validPost.user_id !== userId.toString() && comment.user_id !== userId.toString()) {
+            // Nếu cả chủ bài viết và chủ comment đều khác user hiện tại → gửi thông báo cho cả hai
+            const newNotification = await Notification.create({
+                user_id: validPost.user_id,
+                type: "comment",
+                content: {
+                    user_id: userId,
+                    username: validUser.rows[0].name,
+                    avatar: validUser.rows[0].avatar,
+                },
+            });
+        
+            const newReplyNotification = await Notification.create({
+                user_id: comment.user_id,
+                type: "reply",
+                content: {
+                    user_id: userId,
+                    username: validUser.rows[0].name,
+                    avatar: validUser.rows[0].avatar,
+                },
+            });
+        
+            const receiverSocketId = getReceiverSocketId(validPost.user_id);
+            const receiverReplySocketId = getReceiverSocketId(comment.user_id);
+        
+            io.to(receiverSocketId).emit("new-notification", newNotification);
+            io.to(receiverReplySocketId).emit("new-notification", newReplyNotification);
+        } else {
+            // Nếu chỉ có một người khác user hiện tại, gửi thông báo cho đúng người đó
+            if (validPost.user_id !== userId.toString()) {
+                const newNotification = await Notification.create({
+                    user_id: validPost.user_id,
+                    type: "comment",
+                    content: {
+                        user_id: userId,
+                        username: validUser.rows[0].name,
+                        avatar: validUser.rows[0].avatar,
+                    },
+                });
+        
+                const receiverSocketId = getReceiverSocketId(validPost.user_id);
+                io.to(receiverSocketId).emit("new-notification", newNotification);
+            }
+        
+            if (comment.user_id !== userId.toString()) {
+                const newReplyNotification = await Notification.create({
+                    user_id: comment.user_id,
+                    type: "reply",
+                    content: {
+                        user_id: userId,
+                        username: validUser.rows[0].name,
+                        avatar: validUser.rows[0].avatar,
+                    },
+                });
+        
+                const receiverReplySocketId = getReceiverSocketId(comment.user_id);
+                io.to(receiverReplySocketId).emit("new-notification", newReplyNotification);
+            }
         }
+        
         return {success:true,message: "Reply comment created successfully"};
     } catch (error) {
         return {success:false,message: error.toString()};
