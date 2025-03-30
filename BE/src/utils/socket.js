@@ -7,9 +7,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: [process.env.CLIENT_URL],
   },
 });
+console.log(process.env.CLIENT_URL);
+
 function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
@@ -19,6 +21,8 @@ io.on("connection", (socket) => {
 
   if (userId) {
     userSocketMap[userId] = socket.id;
+    console.log(`✅ Người dùng ${userId} đã kết nối với socket ID: ${socket.id}`);
+    
   }
 
   socket.on("callUser", (data) => {

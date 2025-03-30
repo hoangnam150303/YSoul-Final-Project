@@ -1,8 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BellOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
+import notificationApi from "../../hooks/notificationApi";
+import { useSocket } from "../../context/SocketContext";
 
 export const SocialHeader = () => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notification, setNotification] = useState([]);
+  const [newNotification, setNewNotification] = useState("");
+  const socket = useSocket();
+  const getNotification = async () => {
+    try {
+      const response = await notificationApi.getNotification("");
+      setNotification(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    if (socket) {
+      socket.on("new-notification", (notification) => {
+        console.log("🔔 Nhận thông báo mới:", notification);
+        setNewNotification(notification);
+      });
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    getNotification();
+  }, [newNotification]);
+
   return (
     <nav className="gradient-bg-hero shadow-md sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4">
@@ -40,16 +67,52 @@ export const SocialHeader = () => {
             </Link>
 
             {/* Notifications */}
-            <Link
-              to="/notificationPage"
-              className="flex flex-col items-center text-white relative"
+            <div
+              className="relative"
+              onMouseEnter={() => setShowNotifications(true)}
+              onMouseLeave={() => setShowNotifications(false)}
             >
-              <BellOutlined style={{ fontSize: "20px" }} />
-              <span className="text-xs hidden md:block">Notifications</span>
-              <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                12
-              </span>
-            </Link>
+              <Link
+                to="/notification"
+                className="flex flex-col items-center text-white relative"
+              >
+                <BellOutlined style={{ fontSize: "20px" }} />
+                <span className="text-xs hidden md:block">Notifications</span>
+                <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {notification.length}
+                </span>
+              </Link>
+
+              {/* Submenu hiển thị khi hover */}
+              {showNotifications && notification.length > 0 && (
+                <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg p-2 z-20">
+                  <ul className="text-gray-700">
+                    {notification.slice(0, 5).map((item) => (
+                      <li
+                        key={item._id}
+                        className="p-2 border-b hover:bg-gray-200 cursor-pointer flex items-center gap-2"
+                      >
+                        <img
+                          src={item.content.avatar}
+                          alt="avatar"
+                          className="w-8 h-8 rounded-full"
+                        />
+                        <span className="text-sm font-semibold">
+                          {item.type === "follow" &&
+                            `${item.content.username} is now following you.`}
+                          {item.type === "reply" &&
+                            `${item.content.username} replied to your comment.`}
+                          {item.type === "comment" &&
+                            `${item.content.username} commented on your post.`}
+                          {item.type === "like" &&
+                            `${item.content.username} liked your post.`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
 
             {/* Profile */}
             <Link

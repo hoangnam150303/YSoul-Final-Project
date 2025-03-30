@@ -16,10 +16,10 @@ const artistNFTRoute = require("./routes/artistNFTRoutes");
 const nftRoute = require("./routes/nftRoutes");
 const postRoute = require("./routes/postRoutes");
 const commentRoute = require("./routes/commentRoutes");
+const notificationRoute = require("./routes/notificationRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
-
-const app = express();
+const { app, server } = require("./utils/socket");
 const port = process.env.PORT || 8080;
 
 // Middleware
@@ -51,8 +51,9 @@ app.use("/artistNFT",artistNFTRoute);
 app.use("/nft",nftRoute);
 app.use("/post",postRoute);
 app.use("/comment",commentRoute);
+app.use("/notification",notificationRoute);
 // Start server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
   connectMongoDb();
   conectPostgresDb.connect((err, client, release) => {

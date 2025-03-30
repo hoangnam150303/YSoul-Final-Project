@@ -10,6 +10,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import PlayerContextProvider from "./context/PlayerContext";
 import { TransactionProvider } from "./context/TransactionContext";
 import { ArtistNFTProvier } from "./context/ArtistNFTContext";
+import { SocketProvider } from "./context/SocketContext";
 const store = configStore();
 
 const clientId = import.meta.env.VITE_CLIENT_ID;
@@ -17,6 +18,7 @@ const clientId = import.meta.env.VITE_CLIENT_ID;
 ReactDOM.createRoot(document.getElementById("root")).render(
   <GoogleOAuthProvider clientId={clientId}>
     <Provider store={store}>
+    <SocketProvider>
       <BrowserRouter>
         <PlayerContextProvider>
           <TransactionProvider>
@@ -26,6 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           </TransactionProvider>
         </PlayerContextProvider>
       </BrowserRouter>
+      </SocketProvider>
     </Provider>
   </GoogleOAuthProvider>
 );

@@ -27,6 +27,7 @@ import StoreProfile from "../pages/NFTMarketPlacePage/StoreProfile";
 import { SocialHomePage } from "../pages/SocialMediaPage/SocialHomePage";
 import { NotificationPage } from "../pages/SocialMediaPage/NottificationPage";
 import { NetworkPage } from "../pages/SocialMediaPage/NetworkPage";
+import { ProfileSocialPage } from "../pages/SocialMediaPage/ProfileSocialPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -48,6 +49,10 @@ function App() {
           path="/payment"
           element={isVip ? <Navigate to="/" /> : <PaymentPage />}
         />
+        <Route
+          path="/paymentSuccess/:invoice_id"
+          element={<PaymentSuccess />}
+        />
 
         {is_admin && (
           <>
@@ -62,10 +67,7 @@ function App() {
           <>
             <Route path="/musicHomePage" element={<MusicHomePage />} />
             <Route path="/userProfile" element={<UserProfilePage />} />
-            <Route
-              path="/paymentSuccess/:invoice_id"
-              element={<Navigate to="/" />}
-            />
+
             <Route path="/album/:id" element={<AlbumPage />} />
             <Route path="/artist/:id" element={<ArtistPage />} />
             <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
@@ -73,8 +75,9 @@ function App() {
             <Route path="/market" element={<HomePageMarket />} />
             <Route path="/store/:id?" element={<StoreProfile />} />
             <Route path="/socialHomePage" element={<SocialHomePage />} />
-            <Route path="/notificationPage" element={<NotificationPage />} />
+            <Route path="/notification" element={<NotificationPage />} />
             <Route path="/network" element={<NetworkPage />} />
+            <Route path="/profile" element={<ProfileSocialPage />} />
           </>
         ) : (
           <Route path="*" element={<Navigate to="/payment" />} />
