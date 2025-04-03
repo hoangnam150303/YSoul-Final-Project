@@ -9,7 +9,9 @@ export const RecommendedSideBar = () => {
   const userId = useSelector((state) => state.user.id);
   const fetchTopReviewers = async () => {
     try {
-      const response = await userApi.getAllReviewer("popular", "");
+      const response = await userApi.getAllReviewer("popular", " ", 10, 1);
+      console.log(response.data.reviewers);
+
       setTopReviewers(response.data.reviewers);
     } catch (error) {
       console.log(error);

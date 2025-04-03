@@ -299,68 +299,120 @@ exports.followUserService = async (userId, userFollowId) => {
 }
 
 // get all reviewers with filter and search
-exports.getAllReviewersService = async (userId, filter, search) => {
+exports.getAllReviewersService = async (userId, filter, search, pageSize = 10, currentPage = 1) => {
   try {
-    const validUser = await conectPostgresDb.query( // find user is exist
-      "SELECT * FROM users WHERE id = $1",
-      [userId]
-    );
-    if (validUser.rows.length === 0) { // If user is not exist
-      return { success: false, error: "User not found" }; // Return error
+    const validUser = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]);
+    if (validUser.rows.length === 0) {
+      return { success: false, error: "User not found" };
     }
+
     let result = [];
-    let sortOrder = "DESC"; // set sortOrder to DESC
-    const searchValue = search ? `%${search}%` : "%"; //  set searchValue to search or to empty string
+    const sortOrder = "DESC";
+    const searchValue = search ? `%${search}%` : "%";
+    const limit = parseInt(pageSize);
+    const offset = (parseInt(currentPage) - 1) * limit;
+
     if (filter === "popular") {
-    const userPopular =  await conectPostgresDb.query(
-        `SELECT * FROM users where name ILIKE $1 ORDER BY array_length(user_followed, 1) ${sortOrder} NULLS LAST`, 
+      const countQuery = await conectPostgresDb.query(
+        `SELECT COUNT(*) FROM users WHERE name ILIKE $1`,
         [searchValue]
       );
-      result.push(userPopular.rows) // pushing userPopular to result
-    }
-    else if(filter === "followers"){
-     if (validUser.rows[0].user_followed.length > 0) {
 
-      for(const userId of validUser.rows[0].user_followed){ // loop through user_followed         
-        const userFollowed = await conectPostgresDb.query( // find user is exist
-          "SELECT * FROM users WHERE id = $1 and name ILIKE $2",
-          [userId,searchValue]
-        );
-        if (userFollowed.rows.length === 0) { // If user is not exist
-          return { success: false, error: "User not found" }; // Return error
-        }
-        
-        result.push(userFollowed.rows); // pushing userFollowed to result
-      }
-     }
-    }else if(filter === "following"){
-      if (validUser.rows[0].user_follow.length > 0) {
-        for(const userId of validUser.rows[0].user_follow){ // loop through user_followed        
-          const userFollowing = await conectPostgresDb.query( // find user is exist
-            "SELECT * FROM users WHERE id = $1 and name ILIKE $2",
-            [userId,searchValue]
-          );
-          if (userFollowing.rows.length === 0) { // If user is not exist
-            return { success: false, error: "User not found" }; // Return error
-          }
-          
-          result.push(userFollowing.rows); // pushing userFollowing to result
-        }
-      }
+      const userPopular = await conectPostgresDb.query(
+        `SELECT * FROM users WHERE name ILIKE $1 
+         ORDER BY array_length(user_followed, 1) ${sortOrder} NULLS LAST 
+         LIMIT $2 OFFSET $3`,
+        [searchValue, limit, offset]
+      );
+
+      result = userPopular.rows;
+
+      return {
+        success: true,
+        reviewers: result.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          user_follow: user.user_follow,
+          user_followed: user.user_followed
+        })),
+        total: parseInt(countQuery.rows[0].count),
+        currentPage: parseInt(currentPage),
+        pageSize: limit
+      };
     }
-    const sanitizedResult = result.flat().map(user => ({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      avatar: user.avatar,
-      user_follow: user.user_follow,
-      user_followed: user.user_followed
-    }));
-    return { 
-      success: true, 
-      reviewers: sanitizedResult
-    };
-  } catch (error) {    
+
+    // followers
+    if (filter === "followers") {
+      const followers = validUser.rows[0].user_followed || [];
+      const filteredUsers = [];
+
+      for (const followedId of followers) {
+        const foundUser = await conectPostgresDb.query(
+          "SELECT * FROM users WHERE id = $1 AND name ILIKE $2",
+          [followedId, searchValue]
+        );
+        if (foundUser.rows.length > 0) {
+          filteredUsers.push(foundUser.rows[0]);
+        }
+      }
+
+      const total = filteredUsers.length;
+      const paginated = filteredUsers.slice(offset, offset + limit);
+
+      return {
+        success: true,
+        reviewers: paginated.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          user_follow: user.user_follow,
+          user_followed: user.user_followed
+        })),
+        total,
+        currentPage: parseInt(currentPage),
+        pageSize: limit
+      };
+    }
+
+    // following
+    if (filter === "following") {
+      const followings = validUser.rows[0].user_follow || [];
+      const filteredUsers = [];
+
+      for (const followingId of followings) {
+        const foundUser = await conectPostgresDb.query(
+          "SELECT * FROM users WHERE id = $1 AND name ILIKE $2",
+          [followingId, searchValue]
+        );
+        if (foundUser.rows.length > 0) {
+          filteredUsers.push(foundUser.rows[0]);
+        }
+      }
+
+      const total = filteredUsers.length;
+      const paginated = filteredUsers.slice(offset, offset + limit);
+
+      return {
+        success: true,
+        reviewers: paginated.map(user => ({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          user_follow: user.user_follow,
+          user_followed: user.user_followed
+        })),
+        total,
+        currentPage: parseInt(currentPage),
+        pageSize: limit
+      };
+    }
+
+    return { success: false, error: "Invalid filter type" };
+  } catch (error) {
     return { success: false, error: error.message };
   }
-}
+};

@@ -4,14 +4,52 @@ import {
   ShareAltOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { message, Pagination } from "antd";
 import { Link } from "react-router-dom";
 import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { formatDistanceToNow } from "date-fns";
-
+import notificationApi from "../../hooks/notificationApi";
+import { useSocket } from "../../context/SocketContext";
+import { SocialHeader } from "../../components/Header/SocialHeader";
 export const NotificationPage = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [notifications, setNotifications] = useState([1]);
+  const [notifications, setNotifications] = useState([]);
+  const [fiter, setFilter] = useState("");
+  const [newNotification, setNewNotification] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Mặc định 10 item/trang
+  const [totalItems, setTotalItems] = useState(0);
+
+  const socket = useSocket();
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const response = await notificationApi.getNotification(
+        fiter,
+        currentPage,
+        pageSize
+      );
+      setNotifications(response.data.data);
+      setTotalItems(response.data.total || 0);
+    } catch (error) {
+      message.error("Error fetching notifications.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("new-notification", (notification) => {
+        setNewNotification(notification);
+      });
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fiter, newNotification, currentPage, pageSize]);
 
   const renderNotificationIcon = (type) => {
     switch (type) {
@@ -33,14 +71,14 @@ export const NotificationPage = () => {
       case "like":
         return (
           <span>
-            <strong>{notification?.user}</strong> liked your post
+            <strong>{notification.content?.username}</strong> liked your post
           </span>
         );
       case "comment":
         return (
           <span>
             <Link to={`/post/${notification?.postId}`} className="font-bold">
-              {notification?.user}
+              {notification.content?.username}
             </Link>{" "}
             commented on your post
           </span>
@@ -49,7 +87,7 @@ export const NotificationPage = () => {
         return (
           <span>
             <Link to={`/post/${notification?.postId}`} className="font-bold">
-              <strong>{notification?.user}</strong> shared your post
+              <strong>{notification.content?.username}</strong> shared your post
             </Link>
           </span>
         );
@@ -91,75 +129,90 @@ export const NotificationPage = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="col-span-1 lg:col-span-1">
-        <SocialSideBar />
-      </div>
-      <div className="col-span-1 lg:col-span-3">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h1 className="text-2xl font-bold mb-6">Notifications</h1>
-          {isLoading ? (
-            <p>Loading...</p>
-          ) : notifications && notifications.length > 0 ? (
-            <ul>
-              {notifications.map((notification) => (
-                <li
-                  key={notification?._id}
-                  className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
-                    !notification.read ? "border-blue-500" : "border-gray-200"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Link to={`/profile/${notification?.user}`}>
-                        <img
-                          src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
-                          alt="hoangnam"
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      </Link>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <div className="p-1 bg-gray-100 rounded-full">
-                            {renderNotificationIcon(notification?.type)}
+    <>
+      <SocialHeader />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="col-span-1 lg:col-span-1">
+          <SocialSideBar />
+        </div>
+        <div className="col-span-1 lg:col-span-3">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h1 className="text-2xl font-bold mb-6">Notifications</h1>
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : notifications && notifications.length > 0 ? (
+              <ul>
+                {notifications.map((notification) => (
+                  <li
+                    key={notification?._id}
+                    className={`bg-white border rounded-lg p-4 transition-all hover:shadow-md ${
+                      !notification.read ? "border-blue-500" : "border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Link to={`/profile/${notification?.user}`}>
+                          <img
+                            src={notification.content.avatar}
+                            alt="hoangnam"
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        </Link>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1 bg-gray-100 rounded-full">
+                              {renderNotificationIcon(notification?.type)}
+                            </div>
+                            <p className="text-sm">
+                              {renderNotificationContent(notification)}
+                            </p>
                           </div>
-                          <p className="text-sm">
-                            {renderNotificationContent(notification)}
+                          <p className="text-xs text-gray-500 mt-1">
+                            {formatDistanceToNow(
+                              new Date(notification?.createdAt),
+                              {
+                                addSuffix: true,
+                              }
+                            ).replace("about ", "")}
                           </p>
+                          {renderRelatedPost(notification?.relatedPost)}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formatDistanceToNow(new Date("03/12/2025"), {
-                            addSuffix: true,
-                          }).replace("about ", "")}
-                        </p>
-                        {renderRelatedPost(notification?.relatedPost)}
+                      </div>
+                      <div className="flex gap-2">
+                        {!notification.read && (
+                          <button
+                            className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
+                            aria-label="Mark as read"
+                          >
+                            <i className="bi bi-eye"></i>
+                          </button>
+                        )}
+                        <button
+                          className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                          aria-label="Delete notification"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {!notification.read && (
-                        <button
-                          className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
-                          aria-label="Mark as read"
-                        >
-                          <i className="bi bi-eye"></i>
-                        </button>
-                      )}
-                      <button
-                        className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                        aria-label="Delete notification"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div>No notifications found</div>
-          )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div>No notifications found</div>
+            )}
+          </div>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalItems}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size); // nếu muốn giữ 10 cố định, có thể bỏ dòng này
+            }}
+          />
         </div>
       </div>
-    </div>
+    </>
   );
 };

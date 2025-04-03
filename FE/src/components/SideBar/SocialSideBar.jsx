@@ -51,18 +51,6 @@ export const SocialSideBar = () => {
               Network
             </Link>
           </li>
-          <li>
-            <Link
-              to="/notificationPage"
-              className="flex items-center py-3 px-6 hover:bg-gray-100 transition relative"
-            >
-              <BellOutlined className="text-gray-600 mr-3 text-lg" />{" "}
-              Notifications
-              <span className="absolute right-6 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                12
-              </span>
-            </Link>
-          </li>
         </ul>
       </nav>
 

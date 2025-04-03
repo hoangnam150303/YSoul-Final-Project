@@ -1,29 +1,63 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { UserAddOutlined } from "@ant-design/icons";
-import { Radio, Input } from "antd";
+import { Radio, Input, Pagination } from "antd";
 import { SocialHeader } from "../../components/Header/SocialHeader";
+import userApi from "../../hooks/useUser";
+import { useSelector } from "react-redux";
 
 export const NetworkPage = () => {
-  const [reviewers, setReviewers] = useState([
-    { id: 1, name: "Alice", description: "Top Reviewer", img: "" },
-    { id: 2, name: "Bob", description: "Tech Enthusiast", img: "" },
-    { id: 3, name: "Charlie", description: "Gadget Lover", img: "" },
-  ]);
+  const [reviewers, setReviewers] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("popular");
+  const [search, setSearch] = useState(" ");
+  const userId = useSelector((state) => state.user.id);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const fetchRevierwers = async () => {
+    try {
+      const response = await userApi.getAllReviewer(
+        filter,
+        search,
+        pageSize,
+        currentPage
+      );
+      setReviewers(response.data.reviewers);
+      setTotalItems(response.data.total || 0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRevierwers();
+  }, [filter, search, currentPage, pageSize]);
 
   const handleRadioChange = (e) => {
-    setSelectedFilter(e.target.value);
+    const selected = e.target.value;
+    setSelectedFilter(selected);
+    if (selected === "All") setFilter("popular");
+    else if (selected === "Followers") setFilter("followers");
+    else if (selected === "Following") setFilter("following");
+    setCurrentPage(1); // reset về trang đầu khi đổi filter
   };
-
+  const handleUpdateStatus = async (id) => {
+    try {
+      const response = await userApi.followUser(id);
+      fetchRevierwers();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+    setSearch(e.target.value);
+    setCurrentPage(1); // reset về trang đầu khi search
   };
-
-  const filteredReviewers = reviewers.filter((reviewer) =>
-    reviewer.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <>
@@ -62,28 +96,53 @@ export const NetworkPage = () => {
             </div>
 
             {/* Danh sách reviewers */}
-            {filteredReviewers.length > 0 ? (
+            {reviewers.length > 0 ? (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-2">Top Reviewers</h2>
                 <div className="space-y-4">
-                  {filteredReviewers.map((reviewer) => (
-                    <div
-                      key={reviewer.id}
-                      className="bg-white rounded-lg shadow p-4 flex items-center"
-                    >
-                      <img
-                        src={reviewer.img || "https://via.placeholder.com/48"}
-                        alt={reviewer.name}
-                        className="w-12 h-12 rounded-full mr-4"
-                      />
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          {reviewer.name}
-                        </h3>
-                        <p className="text-gray-600">{reviewer.description}</p>
+                  {reviewers.map((reviewer) => {
+                    const isFollowed = reviewer.user_followed?.some(
+                      (user) => user === userId
+                    );
+                    console.log(reviewer);
+
+                    return (
+                      <div
+                        key={reviewer.id}
+                        className="bg-white rounded-lg shadow p-4 flex items-center"
+                      >
+                        <img
+                          src={
+                            reviewer.avatar || "https://via.placeholder.com/48"
+                          }
+                          alt={reviewer.name}
+                          className="w-12 h-12 rounded-full mr-4"
+                        />
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            {reviewer.name}
+                          </h3>
+                        </div>
+                        <div className="ml-auto">
+                          {reviewer.id !== userId && (
+                            <button
+                              className={`px-3 py-1 rounded-full text-sm ${
+                                isFollowed ? "bg-green-600" : "bg-blue-600"
+                              } text-white flex items-center`}
+                              onClick={() => handleUpdateStatus(reviewer.id)}
+                            >
+                              {isFollowed ? "Followed" : "Follow"}
+                              {isFollowed ? (
+                                <i className="bi bi-check-circle ml-1"></i>
+                              ) : (
+                                <UserAddOutlined className="ml-1" />
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -97,6 +156,19 @@ export const NetworkPage = () => {
                 </h3>
               </div>
             )}
+
+            {/* Pagination */}
+            <div className="flex justify-center mt-6">
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={totalItems}
+                onChange={(page, size) => {
+                  setCurrentPage(page);
+                  setPageSize(size); // nếu muốn giữ 10 cố định, có thể bỏ dòng này
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
