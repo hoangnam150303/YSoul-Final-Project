@@ -67,7 +67,6 @@ function App() {
           <>
             <Route path="/musicHomePage" element={<MusicHomePage />} />
             <Route path="/userProfile" element={<UserProfilePage />} />
-
             <Route path="/album/:id" element={<AlbumPage />} />
             <Route path="/artist/:id" element={<ArtistPage />} />
             <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />

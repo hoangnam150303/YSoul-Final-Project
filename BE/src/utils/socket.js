@@ -10,7 +10,7 @@ const io = new Server(server, {
     origin: [process.env.CLIENT_URL],
   },
 });
-console.log(process.env.CLIENT_URL);
+
 
 function getReceiverSocketId(userId) {
   return userSocketMap[userId];

@@ -20,7 +20,6 @@ export const SocialHeader = () => {
   useEffect(() => {
     if (socket) {
       socket.on("new-notification", (notification) => {
-        console.log("🔔 Nhận thông báo mới:", notification);
         setNewNotification(notification);
       });
     }
@@ -61,9 +60,6 @@ export const SocialHeader = () => {
             >
               <i className="bi bi-people" style={{ fontSize: "20px" }}></i>
               <span className="text-xs hidden md:block">My Network</span>
-              <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                12
-              </span>
             </Link>
 
             {/* Notifications */}

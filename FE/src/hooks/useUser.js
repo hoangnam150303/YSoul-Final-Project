@@ -40,8 +40,8 @@ const userApi = {
     return axiosClient.get(url);
   },
 
-  getAllReviewer:(filter,search)=>{
-    const url = `/getAllReviewer?filter=${filter}&search=${search}`;
+  getAllReviewer:(filter,search,pageSize,currentPage)=>{
+    const url = `/getAllReviewer?filter=${filter}&search=${search}&pageSize=${pageSize}&currentPage=${currentPage}`;
     return axiosClient.get(url);
   },
   followUser:(id)=>{

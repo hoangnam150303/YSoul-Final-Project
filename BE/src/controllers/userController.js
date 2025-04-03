@@ -206,8 +206,8 @@ exports.followUser = async(req,res)=>{
 exports.getAllReviewer = async(req,res)=>{
   try{
     const userId = req.user.id; // get userId from request user
-    const {filter,search} = req.query    
-    const response = await userService.getAllReviewersService(userId,filter,search); // call getAllFollowersService from userService
+    const {filter,search,pageSize,currentPage} = req.query    
+    const response = await userService.getAllReviewersService(userId,filter,search,pageSize,currentPage); // call getAllFollowersService from userService
     if (!response.success) { // if response is not success
       return res.status(401).json({ message: "Error! Please try again.", error }); // return error
     }

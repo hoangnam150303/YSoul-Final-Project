@@ -7,8 +7,7 @@ const notificationSchema = new mongoose.Schema(
     content: { 
         user_id: { type: String },
         username: { type: String },
-        avatar: { type: String },
-        
+        avatar: { type: String },    
      },
     isRead: { type: Boolean, default: false },
   },
