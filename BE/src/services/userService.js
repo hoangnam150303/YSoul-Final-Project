@@ -299,7 +299,7 @@ exports.followUserService = async (userId, userFollowId) => {
 }
 
 // get all reviewers with filter and search
-exports.getAllReviewersService = async (userId, filter, search, pageSize = 10, currentPage = 1) => {
+exports.getAllReviewersService = async (userId, filter, search, pageSize, currentPage) => {
   try {
     const validUser = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]);
     if (validUser.rows.length === 0) {
