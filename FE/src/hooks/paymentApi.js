@@ -1,7 +1,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const PAYMENT_API_ENDPOINT = "/invoice";
+const PAYMENT_API_ENDPOINT = "/api/v1/invoice";
 const paymentApi = {
   postPayment: (totalPrice, userId, paymentMethod) => {
     const url = `${PAYMENT_API_ENDPOINT}/createInvoice/${userId}/${paymentMethod}`;

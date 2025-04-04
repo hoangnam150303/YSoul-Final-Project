@@ -4,7 +4,8 @@ const { conectPostgresDb } = require("../configs/database");
 // Check role, only admin can use function belong in admin
 exports.isAdmin = async (req, res, next) => {
   try {
-    const token = req.headers.token?.split(" ")[1]; // Trích xuất token từ headers
+    const token = req.headers.authorization.split(" ")[1]; // Trích xuất token từ headers
+
     if (!token) {
       return res.status(401).json({
         message: "Token not provided",
@@ -35,7 +36,7 @@ exports.isAdmin = async (req, res, next) => {
 // Check role, only shop, seller can use function belong in shop
 exports.isVip = async (req, res, next) => {
   try {
-    const token = req.headers.token?.split(" ")[1]; // Trích xuất token từ headers
+    const token = req.headers.authorization.split(" ")[1]; // Trích xuất token từ headers
     
     if (!token) {
       return res.status(401).json({
@@ -78,7 +79,7 @@ exports.isVip = async (req, res, next) => {
 // Compare when users use website without login, they can see homepage but can not use any function in website
 exports.isAuth = async (req, res, next) => {
   try {
-    const token = req.headers.token.split(" ")[1];
+    const token = req.headers.authorization.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({

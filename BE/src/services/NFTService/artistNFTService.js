@@ -1,4 +1,4 @@
-const ArtistNFT = require("../../models/artistNFT")
+const ArtistNFT = require("../../models/MarketModel/artistNFT")
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 exports.createArtistNFT = async (userId,addressWallet,avatar,name) =>{
     try {

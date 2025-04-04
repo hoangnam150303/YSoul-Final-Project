@@ -1,6 +1,6 @@
-const { conectPostgresDb } = require("../configs/database");
+const { conectPostgresDb } = require("../../configs/database");
 const stripeLoad = require("stripe")(process.env.STRIPE_SECRET_KEY);
-const Invoice = require("../models/invoice");
+const Invoice = require("../../models/PaymentModel/invoice");
 const moment = require("moment");
 const crypto = require("crypto");
 const querystring = require("qs");

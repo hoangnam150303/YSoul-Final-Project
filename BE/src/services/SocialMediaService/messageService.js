@@ -1,5 +1,4 @@
-const Message = require("../models/message");
-const users = require("../models/users");
+const Message = require("../../models/SocialModel/message");
 const { getReceiverSocketId, io } = require("../utils/socket");
 //
 exports.getAllConversationService = async (userId) => {

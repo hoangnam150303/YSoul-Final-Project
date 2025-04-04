@@ -1,6 +1,6 @@
-const Film = require("../../models/film");
+const Film = require("../../models/FilmModel/film");
 const wishList = require("../../models/wishList");
-const Episode = require("../../models/episode");
+const Episode = require("../../models/FilmModel/episode");
 exports.createFilmService = async (
   name,
   description,

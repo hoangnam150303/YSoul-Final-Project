@@ -1,7 +1,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const SINGLE_API_ENDPOINT = "/single";
+const SINGLE_API_ENDPOINT = "/api/v1/single";
 const singleApi = {
   getAllSingle: ({ filter, search, typeUser }) => {
     const url = `${SINGLE_API_ENDPOINT}/getAllSingle?filter=${filter}&search=${search}&typeUser=${typeUser}`;

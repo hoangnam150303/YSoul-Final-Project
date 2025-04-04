@@ -1,8 +1,8 @@
 const express = require("express");
 const artistRoute = express.Router();
-const auth = require("../middlewares/auth");
-const upload = require("../utils/multer");
-const artistController = require("../controllers/MusicController/artistController");
+const auth = require("../../middlewares/auth");
+const upload = require("../../utils/multer");
+const artistController = require("../../controllers/MusicController/artistController");
 
 artistRoute.post(
   "/createArtist",

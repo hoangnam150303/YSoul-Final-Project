@@ -1,8 +1,8 @@
 const { conectPostgresDb } = require("../../configs/database");
-const Film = require("../../models/film");
-const Post = require("../../models/post");
+const Film = require("../../models/FilmModel/film");
+const Post = require("../../models/SocialModel/post");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
-const Notification = require("../../models/notification");
+const Notification = require("../../models/SocialModel/notification");
 const { getReceiverSocketId, io } = require("../../utils/socket");
 // this function is create post
 exports.createPostService = async (content, film_id, single_id, image, user_id) => {

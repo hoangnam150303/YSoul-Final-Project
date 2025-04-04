@@ -1,8 +1,8 @@
 const express = require("express");
 const singleRoute = express.Router();
-const auth = require("../middlewares/auth");
-const upload = require("../utils/multer");
-const singleController = require("../controllers/MusicController/singleController");
+const auth = require("../../middlewares/auth");
+const upload = require("../../utils/multer");
+const singleController = require("../../controllers/MusicController/singleController");
 singleRoute.post(
   "/createSingle",
   auth.isAdmin,

@@ -1,8 +1,8 @@
 const express = require("express");
 const albumRoute = express.Router();
-const auth = require("../middlewares/auth");
-const upload = require("../utils/multer");
-const albumController = require("../controllers/MusicController/albumController");
+const auth = require("../../middlewares/auth");
+const upload = require("../../utils/multer");
+const albumController = require("../../controllers/MusicController/albumController");
 albumRoute.post(
   "/createAlbum",
   auth.isAdmin,

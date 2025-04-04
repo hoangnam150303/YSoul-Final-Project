@@ -1,7 +1,7 @@
 import { UserAddOutlined } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import userApi from "../../hooks/useUser";
+import reviewerApi from "../../hooks/reviewerApi";
 import { useSelector } from "react-redux";
 
 export const RecommendedSideBar = () => {
@@ -9,9 +9,7 @@ export const RecommendedSideBar = () => {
   const userId = useSelector((state) => state.user.id);
   const fetchTopReviewers = async () => {
     try {
-      const response = await userApi.getAllReviewer("popular", " ", 10, 1);
-      console.log(response.data.reviewers);
-
+      const response = await reviewerApi.getAllReviewer("popular", " ", 10, 1);
       setTopReviewers(response.data.reviewers);
     } catch (error) {
       console.log(error);
@@ -24,7 +22,7 @@ export const RecommendedSideBar = () => {
 
   const toggleFollow = async (id) => {
     try {
-      await userApi.followUser(id);
+      await reviewerApi.followUser(id);
       fetchTopReviewers();
     } catch (error) {
       console.log(error);

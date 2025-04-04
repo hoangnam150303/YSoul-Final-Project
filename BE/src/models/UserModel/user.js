@@ -1,4 +1,4 @@
-const { connectPostgresDb } = require("../configs/database");
+const { connectPostgresDb } = require("../../configs/database");
 
 const createUserTableQuery = `
  CREATE TABLE IF NOT EXISTS users  (

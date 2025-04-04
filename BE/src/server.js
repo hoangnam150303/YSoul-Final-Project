@@ -6,17 +6,21 @@ dotenv.config();
 const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
-const userRoute = require("./routes/userRoutes");
-const filmRoute = require("./routes/filmRoutes");
-const invoiceRoute = require("./routes/invoiceRoutes");
-const artistRoute = require("./routes/artistRoutes");
-const albumRoute = require("./routes/albumRoutes");
-const singleRoute = require("./routes/singleRoutes");
-const artistNFTRoute = require("./routes/artistNFTRoutes");
-const nftRoute = require("./routes/nftRoutes");
-const postRoute = require("./routes/postRoutes");
-const commentRoute = require("./routes/commentRoutes");
-const notificationRoute = require("./routes/notificationRoutes");
+
+// Import routes
+const userRoute = require("./routes/UserRoute/userRoutes");
+const filmRoute = require("./routes/FilmRoute/filmRoutes");
+const invoiceRoute = require("./routes/PaymentRoute/invoiceRoutes");
+const artistRoute = require("./routes/MusicRoute/artistRoutes");
+const albumRoute = require("./routes/MusicRoute/albumRoutes");
+const singleRoute = require("./routes/MusicRoute/singleRoutes");
+const artistNFTRoute = require("./routes/MarketRoute/artistNFTRoutes");
+const nftRoute = require("./routes/MarketRoute/nftRoutes");
+const postRoute = require("./routes/SocialRoute/postRoutes");
+const commentRoute = require("./routes/SocialRoute/commentRoutes");
+const notificationRoute = require("./routes/SocialRoute/notificationRoutes");
+const authRoute = require("./routes/AuthenticateRoute/authenticateRoutes");
+const reviewerRoute = require("./routes/SocialRoute/reviewrRoutes");
 // Routes
 const corsConfig = require("./configs/corsConfig");
 const { app, server } = require("./utils/socket");
@@ -32,26 +36,31 @@ app.use(
     cookie: { secure: false }, // Nếu bạn dùng HTTPS, hãy set `secure: true`
   })
 );
-
+// Middleware để sử dụng passport-local
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
+// config CORS
 app.use(cors(corsConfig));
-
+// config body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/", userRoute);
-app.use("/film", filmRoute);
-app.use("/invoice", invoiceRoute);
-app.use("/artist", artistRoute);
-app.use("/album", albumRoute);
-app.use("/single", singleRoute);
-app.use("/artistNFT",artistNFTRoute);
-app.use("/nft",nftRoute);
-app.use("/post",postRoute);
-app.use("/comment",commentRoute);
-app.use("/notification",notificationRoute);
+
+// use routes
+app.use("/api/v1/auth", authRoute);
+app.use("/api/v1/reviewer", reviewerRoute);
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/film", filmRoute);
+app.use("/api/v1/invoice", invoiceRoute);
+app.use("/api/v1/artist", artistRoute);
+app.use("/api/v1/album", albumRoute);
+app.use("/api/v1/single", singleRoute);
+app.use("/api/v1/artistNFT",artistNFTRoute);
+app.use("/api/v1/nft",nftRoute);
+app.use("/api/v1/post",postRoute);
+app.use("/api/v1/comment",commentRoute);
+app.use("/api/v1/notification",notificationRoute);
 // Start server
 server.listen(port, () => {
   console.log(`Server is working on port: ${port}`);

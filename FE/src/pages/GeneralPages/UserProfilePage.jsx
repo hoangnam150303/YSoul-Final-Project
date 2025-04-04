@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, Input, Button, Modal, message } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
-import userApi from "../../hooks/useUser";
+import userApi from "../../hooks/userApi";
 import { MovieSideBar } from "../../components/SideBar/MovieSideBar";
 
 const UserProfilePage = () => {

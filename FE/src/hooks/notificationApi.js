@@ -1,7 +1,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const NOTIFICATION_API_ENDPOINT = "/notification";
+const NOTIFICATION_API_ENDPOINT = "/api/v1/notification";
 const notificationApi = {
 
     getNotification:(filter,page,limit) => {

@@ -20,9 +20,7 @@ io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
-    userSocketMap[userId] = socket.id;
-    console.log(`✅ Người dùng ${userId} đã kết nối với socket ID: ${socket.id}`);
-    
+    userSocketMap[userId] = socket.id;    
   }
 
   socket.on("callUser", (data) => {
