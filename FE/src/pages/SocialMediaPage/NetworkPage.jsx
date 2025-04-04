@@ -3,7 +3,7 @@ import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { UserAddOutlined } from "@ant-design/icons";
 import { Radio, Input, Pagination } from "antd";
 import { SocialHeader } from "../../components/Header/SocialHeader";
-import userApi from "../../hooks/useUser";
+import reviewerApi from "../../hooks/reviewerApi";
 import { useSelector } from "react-redux";
 
 export const NetworkPage = () => {
@@ -20,7 +20,7 @@ export const NetworkPage = () => {
 
   const fetchRevierwers = async () => {
     try {
-      const response = await userApi.getAllReviewer(
+      const response = await reviewerApi.getAllReviewer(
         filter,
         search,
         pageSize,
@@ -47,7 +47,7 @@ export const NetworkPage = () => {
   };
   const handleUpdateStatus = async (id) => {
     try {
-      const response = await userApi.followUser(id);
+      const response = await reviewerApi.followUser(id);
       fetchRevierwers();
     } catch (error) {
       console.log(error);

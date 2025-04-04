@@ -1,6 +1,6 @@
-const Post = require("../../models/post");
+const Post = require("../../models/SocialModel/post");
 const {conectPostgresDb} = require("../../configs/database");
-const Notification = require("../../models/notification");
+const Notification = require("../../models/SocialModel/notification");
 const { getReceiverSocketId, io } = require("../../utils/socket");
 // this function is post comment
 exports.postCommentService = async (postId,content,userId) => {

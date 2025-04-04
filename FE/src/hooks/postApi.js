@@ -1,6 +1,6 @@
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const POST_ENDPOINT = "/post";
+const POST_ENDPOINT = "/api/v1/post";
 const postApi = {
   
   postCreatePost: (value) => {

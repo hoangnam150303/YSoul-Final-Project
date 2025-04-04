@@ -11,7 +11,7 @@ import {
   Input,
 } from "antd";
 import { AdminSideBar } from "../../components/SideBar/AdminSideBar";
-import userApi from "../../hooks/useUser";
+import userApi from "../../hooks/userApi";
 
 const { Option } = Select;
 

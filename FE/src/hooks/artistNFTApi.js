@@ -1,7 +1,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const ARTISTNFT_API_ENDPOINT = "/artistNFT";
+const ARTISTNFT_API_ENDPOINT = "/api/v1/artistNFT";
 const artistNFTApi = {
   
  getArtist :(addressWallet)=>{    

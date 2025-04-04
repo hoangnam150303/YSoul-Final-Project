@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import userApi from "../../hooks/useUser";
+import userApi from "../../hooks/userApi";
+import authApi from "../../hooks/authApi";
 import { message } from "antd";
 import constants from "../../constants/contants";
 export const SignUpPage = () => {
@@ -41,7 +42,7 @@ export const SignUpPage = () => {
     };
 
     try {
-      const response = await userApi.postRegister(values);
+      const response = await authApi.postRegister(values);
       onSuccess(response.data);
     } catch (error) {
       console.error("Error during sign-up:", error);
@@ -55,7 +56,7 @@ export const SignUpPage = () => {
       name,
     };
     try {
-      const respone = await userApi.postSendCode(value);
+      const respone = await authApi.postSendCode(value);
       const token = respone.data.verifyToken;
 
       if (respone.status === 200) {

@@ -1,5 +1,5 @@
 const { conectPostgresDb } = require("../../configs/database");
-const Notification = require("../../models/notification");
+const Notification = require("../../models/SocialModel/notification");
 
 // this function is get notification by user
 exports.getNotificationByUserService = async(userid,filter,currentPage,pageSize)=>{

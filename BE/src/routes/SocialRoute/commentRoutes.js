@@ -1,7 +1,7 @@
 const express = require("express");
 const commentRoute = express.Router();
-const commentController = require("../controllers/SocialMediaController.js/commentController");
-const auth = require("../middlewares/auth");
+const commentController = require("../../controllers/SocialMediaController.js/commentController");
+const auth = require("../../middlewares/auth");
 
 commentRoute.post("/postComment/:postId", auth.isAuth, commentController.postComment);
 commentRoute.put("/updateComment/:postId/:commentId", auth.isAuth, commentController.updateComment);

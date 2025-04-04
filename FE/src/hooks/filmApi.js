@@ -1,6 +1,6 @@
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const FILM_API_ENDPOINT = "/film";
+const FILM_API_ENDPOINT = "/api/v1/film";
 const filmApi = {
   getAllFilm: ({typeFilm, category, sort, search,typeUser }) => {
     const queryParams = new URLSearchParams({

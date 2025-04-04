@@ -2,7 +2,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const COMMENT_ENDPOINT = "/comment";
+const COMMENT_ENDPOINT = "/api/v1/comment";
 const commentApi = {
   
   postCreateComment: (value,id) => {

@@ -1,5 +1,5 @@
-const ArtistNFT = require("../../models/artistNFT");
-const NFTs = require("../../models/NFTs");
+const ArtistNFT = require("../../models/MarketModel/artistNFT");
+const NFTs = require("../../models/MarketModel/NFTs");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is for artist NFTs, artist can create new NFT
 exports.createNFTService = async (userId, addressWallet, image, name, description, price)=>{

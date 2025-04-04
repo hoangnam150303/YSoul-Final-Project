@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { message } from "antd";
 import { useGoogleLogin } from "@react-oauth/google";
-import userApi from "../../hooks/useUser";
+import authApi from "../../hooks/authApi";
 import constants from "../../constants/contants";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserRequest } from "../../reducers/user";
@@ -45,7 +45,7 @@ export const LoginPage = () => {
       password,
     };
     try {
-      const respone = await userApi.postLoginLocal(value);
+      const respone = await authApi.postLoginLocal(value);
       onLoginSuccess(respone.data);
     } catch (error) {
       console.log(error);
@@ -55,7 +55,7 @@ export const LoginPage = () => {
   const handleLoginGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const response = await userApi.postLoginWithGoogle({
+        const response = await authApi.postLoginWithGoogle({
           access_token: tokenResponse.access_token,
         });
 

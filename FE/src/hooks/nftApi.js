@@ -3,7 +3,7 @@
 
 import { axiosClient } from "../ApiConfig/apiConfig";
 
-const NFT_ENDPOINT = "/nft";
+const NFT_ENDPOINT = "/api/v1/nft";
 const nftApi = {
   
  postCreateNFT:(value) =>{

@@ -1,4 +1,4 @@
-const invoiceService = require("../services/invoiceService");
+const invoiceService = require("../../services/PaymentService/invoiceService");
 exports.createInvoice = async (req, res) => {
   try {
     const userId = req.params.id;
