@@ -39,7 +39,7 @@ export const RecommendedSideBar = () => {
 
           return (
             <div key={reviewer.id} className="flex items-center space-x-3">
-              <Link className="flex items-center" to="/profile">
+              <Link className="flex items-center" to={`/profile/${reviewer.id}`}>
                 <img
                   src={reviewer.avatar}
                   className="w-12 h-12 rounded-full mr-2"

@@ -28,6 +28,7 @@ import { SocialHomePage } from "../pages/SocialMediaPage/SocialHomePage";
 import { NotificationPage } from "../pages/SocialMediaPage/NottificationPage";
 import { NetworkPage } from "../pages/SocialMediaPage/NetworkPage";
 import { ProfileSocialPage } from "../pages/SocialMediaPage/ProfileSocialPage";
+import PostPage from "../pages/SocialMediaPage/PostPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -76,7 +77,8 @@ function App() {
             <Route path="/socialHomePage" element={<SocialHomePage />} />
             <Route path="/notification" element={<NotificationPage />} />
             <Route path="/network" element={<NetworkPage />} />
-            <Route path="/profile" element={<ProfileSocialPage />} />
+            <Route path="/profile/:id" element={<ProfileSocialPage />} />
+            <Route path="/post/:id" element={<PostPage />}></Route>
           </>
         ) : (
           <Route path="*" element={<Navigate to="/payment" />} />

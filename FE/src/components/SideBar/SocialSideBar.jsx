@@ -28,7 +28,6 @@ export const SocialSideBar = () => {
           />
         </Link>
         <h2 className="text-lg font-semibold mt-2">{userName}</h2>
-        <p className="text-gray-500 text-xs">12 connections</p>
       </div>
 
       {/* Navigation Menu */}
@@ -44,7 +43,7 @@ export const SocialSideBar = () => {
           </li>
           <li>
             <Link
-              to="/user"
+              to="/network"
               className="flex items-center py-3 px-6 hover:bg-gray-100 transition"
             >
               <UserAddOutlined className="text-gray-600 mr-3 text-lg" /> My
@@ -57,7 +56,7 @@ export const SocialSideBar = () => {
       {/* Profile Link */}
       <div className="border-t border-gray-200 p-4 text-center">
         <Link
-          to="/profile"
+          to={`/profile/${userId}`}
           className="text-blue-600 font-semibold hover:underline"
         >
           Visit your profile

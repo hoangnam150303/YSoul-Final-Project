@@ -22,7 +22,7 @@ export const SocialHomePage = () => {
         <div className="lg:col-span-3 p-6 bg-gray-50 rounded-lg shadow">
           {/* Main Content Here */}
           <PostCreation />
-          <ListPost />
+          <ListPost type={"homepage"}/>
         </div>
       </div>
     </>

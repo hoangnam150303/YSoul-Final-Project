@@ -34,7 +34,12 @@ const postApi = {
   likePost:(id)=>{
     const url = `${POST_ENDPOINT}/likePost/${id}`
     return axiosClient.put(url)
-  }
+  },
+  getPostByUser:(id)=>{
+    const url = `${POST_ENDPOINT}/getPostByUser/${id}`
+    return axiosClient.get(url)
+  },
+
 };
 
 

@@ -156,6 +156,8 @@ exports.getAllPostService = async (search) => {
 exports.getPostByIdService = async (id) => {
     try {
         const validPost = await Post.findById(id); // check if post is valid
+
+        
         if (!validPost) { // check if post is not valid
             return {success:false,message: "Post not found"}; // return error message
         }
@@ -177,6 +179,8 @@ exports.getPostByIdService = async (id) => {
             return user;
           });
         const result = {post:validPost,author:sanitizedUsers}; // create result
+
+        
         return {success:true,result}; // return success and result
     } catch (error) {
         console.log(error);
@@ -230,5 +234,35 @@ exports.getTopPostService = async () => {
         return {success:true,validPost}; // return success
     } catch (error) {
         return {success:false,message: "Internal server error"}; // return error message
+    }
+}
+
+// this function is get post by user_id
+exports.getPostByUserService = async (userId) => {
+    try {
+        const validUser = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]); // check if user is valid
+        if (!validUser) { // check if user is not valid
+            return {success:false,message: "User not found"}; // return error message
+        }
+        const validPost = await Post.find({ user_id: userId }); // find post by user_id
+        if (!validPost) { // check if post is not valid
+            return {success:false,message: "Post not found"}; // return error message
+        }
+        const sanitizedUsers = validUser.rows.map(user => {
+            delete user.password;
+            delete user.vip;
+            delete user.status;
+            delete user.authprovider;
+            delete user.lastlogin;
+            delete user.google_id;
+            delete user.is_admin;
+            delete user.created_at;
+            delete user.email;
+            return user;
+          });
+        const result = {user: sanitizedUsers, post: validPost}; // create result
+        return {success:true,data:result};
+    } catch (error) {
+        
     }
 }
