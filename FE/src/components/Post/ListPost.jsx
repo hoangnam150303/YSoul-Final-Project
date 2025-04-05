@@ -7,7 +7,7 @@ import {
   ShareAltOutlined,
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   Menu,
   Dropdown,
@@ -19,14 +19,15 @@ import {
   Upload,
 } from "antd";
 import { PostAction } from "./PostAction";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, set } from "date-fns";
 import commentApi from "../../hooks/commentApi";
 import { useSelector } from "react-redux";
 import postApi from "../../hooks/postApi";
 import { UploadOutlined } from "@ant-design/icons";
 import filmApi from "../../hooks/filmApi";
 import singleApi from "../../hooks/singleApi";
-export const ListPost = () => {
+export const ListPost = ({ type }) => {
+  const { id } = useParams();
   const [showComments, setShowComments] = useState({});
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
@@ -144,13 +145,33 @@ export const ListPost = () => {
   );
   const fetchPosts = async () => {
     try {
-      const response = await postApi.getAllPost(search);
-
-      setData(response.data.data);
+      if (type === "homepage") {
+        const response = await postApi.getAllPost(search);
+        setData(response.data.data);
+      } else if (type === "profile") {
+        const response = await postApi.getPostByUser(id);
+        const result = response.data.data;
+        setData([
+          {
+            post: result.post,
+            user: result.user[0],
+          },
+        ]);
+      } else if (type === "singlePost") {
+        const response = await postApi.getPostById(id); // gọi API để lấy bài viết theo ID
+        const result = response.data.result;
+        setData([
+          {
+            post: [result.post], // ✅ biến object thành array
+            user: result.author[0],
+          },
+        ]);
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     fetchPosts();
   }, [search]);
@@ -369,11 +390,7 @@ export const ListPost = () => {
   };
 
   // Link phim hoặc nhạc (Có thể lấy từ props nếu cần)
-  const mediaLink = {
-    type: "movie", // "movie" hoặc "music"
-    url: "https://www.imdb.com/title/tt0816692/", // Ví dụ link phim Interstellar
-    title: "Interstellar",
-  };
+
   const handleLikePost = async (id) => {
     try {
       await postApi.likePost(id);
@@ -444,7 +461,7 @@ export const ListPost = () => {
           <div className="p-4" key={index}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <Link to={`/profile`}>
+                <Link to={`/profile/${item.user?.id}`}>
                   <img
                     src={item.user?.avatar}
                     alt="avatar"
@@ -480,18 +497,32 @@ export const ListPost = () => {
               />
             </div>
             {/* Hiển thị link phim hoặc nhạc */}
-            {mediaLink && (
+            {post.film_id ? (
               <div className="mt-3">
                 <a
-                  href={mediaLink.url}
+                  href={`http://localhost:5173/watchPage/${post.film_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center  hover:text-blue-400 transition duration-200"
                 >
-                  {mediaLink.type === "movie" ? "🎬" : "🎵"}{" "}
+                  🎬
                   <span className="ml-2 underline text-white">
-                    {mediaLink.title} Click here to explore
+                    Click here to explore
                   </span>
+                </a>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <a
+                  // href={mediaLink.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center  hover:text-blue-400 transition duration-200"
+                >
+                  {/* {mediaLink.type === "movie" ? "🎬" : "🎵"}{" "} */}
+                  {/* <span className="ml-2 underline text-white">
+                    {mediaLink.title} Click here to explore
+                  </span> */}
                 </a>
               </div>
             )}

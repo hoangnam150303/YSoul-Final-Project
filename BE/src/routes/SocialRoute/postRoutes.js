@@ -9,5 +9,7 @@ postRoute.put("/updatePost/:id", upload.single("image"), auth.isVip, postControl
 postRoute.put("/activeOrDeactive/:id", auth.isVip, postController.activeOrDeactivePost);
 postRoute.get("/getAllPost", auth.isVip, postController.getAllPost);
 postRoute.get("/getPostById/:id", auth.isVip, postController.getPostById);
+postRoute.get("/getPostByUser/:id", auth.isVip, postController.getPostByUser);
 postRoute.put("/likePost/:id", auth.isVip, postController.likePost);
+
 module.exports = postRoute;

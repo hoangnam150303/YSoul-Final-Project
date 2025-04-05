@@ -1,6 +1,6 @@
 const { conectPostgresDb } = require("../../configs/database");
 const passwordHelpers = require("../../helpers/passWordHelpers");
-
+const Post = require("../../models/SocialModel/post")
 exports.getUserService = async (id) => {
   try {
     const user = await conectPostgresDb.query(
@@ -160,7 +160,6 @@ exports.updateUserProfileService = async (
   }
 };
 
-
 exports.getUserProfileService = async (id) => {
   try {
     const user = await conectPostgresDb.query(
@@ -171,6 +170,40 @@ exports.getUserProfileService = async (id) => {
       return { success: false, error: "User not found" };
     }
     return { success: true, user: user.rows[0] };
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
+
+exports.getDetailUserService = async (id) => {
+  try {
+    const user = await conectPostgresDb.query(
+      "SELECT * FROM users WHERE id = $1",
+      [id]
+    );
+    if (user.rows.length === 0) {
+      return { success: false, error: "User not found" };
+    }
+    // Loại bỏ thuộc tính password khỏi user
+    const sanitizedUsers = user.rows.map(user => {
+      delete user.password;
+      delete user.vip;
+      delete user.status;
+      delete user.authprovider;
+      delete user.lastlogin;
+      delete user.google_id;
+      delete user.is_admin;
+      delete user.created_at;
+      delete user.email;
+      return user;
+    });
+    const validPost = await Post.find({user_id:id});
+    const numberOfPosts = validPost.length;
+    const data = [...sanitizedUsers,numberOfPosts]
+
+    
+    return { success: true, data:data};
   } catch (error) {
     console.log(error);
     

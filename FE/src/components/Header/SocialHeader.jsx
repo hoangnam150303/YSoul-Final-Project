@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { BellOutlined, HomeOutlined, UserOutlined } from "@ant-design/icons";
 import notificationApi from "../../hooks/notificationApi";
 import { useSocket } from "../../context/SocketContext";
+import { useSelector } from "react-redux";
 
 export const SocialHeader = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notification, setNotification] = useState([]);
   const [newNotification, setNewNotification] = useState("");
+  const userId = useSelector((state) => state.user.id);
   const socket = useSocket();
   const getNotification = async () => {
     try {
@@ -112,7 +114,7 @@ export const SocialHeader = () => {
 
             {/* Profile */}
             <Link
-              to="/profile"
+              to={`/profile/${userId}`}
               className="flex flex-col items-center text-white"
             >
               <UserOutlined style={{ fontSize: "20px" }} />

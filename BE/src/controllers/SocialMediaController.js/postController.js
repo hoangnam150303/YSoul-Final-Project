@@ -73,7 +73,7 @@ exports.getAllPost = async (req,res)=>{
 // this function is get post by id
 exports.getPostById = async (req,res)=>{
     try {
-        const {id} = req.params; // get id from params
+        const {id} = req.params; // get id from params        
         if (!id) {
             return res.status(400).json({message: "Id field is required."});
         }
@@ -114,6 +114,20 @@ exports.getTopPost = async(req,res)=>{
             return res.status(400).json({message: response.message}); // return error message
         }
         
+        return res.status(200).json(response); // return success message
+    } catch (error) {
+        return res.status(500).json({message: "Internal server error"}); // return error message
+    }
+}
+
+// this function is get post by user
+exports.getPostByUser = async (req,res)=>{
+    try {
+        const {id} = req.params; // get id from user
+        const response = await postService.getPostByUserService(id); // call getPostByUserService from postService
+        if (!response.success) {
+            return res.status(400).json({message: response.message}); // return error message
+        }
         return res.status(200).json(response); // return success message
     } catch (error) {
         return res.status(500).json({message: "Internal server error"}); // return error message

@@ -73,3 +73,16 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
+exports.getDetailUser = async (req,res)=>{
+  try {
+    const { id } = req.params;
+    const response = await userService.getDetailUserService(id);
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error });
+    }
+   return res.status(200).json(response);
+  } catch (error) {
+    return res.status(401).json({ message: "Error! Please try again.", error });
+  }
+}
+

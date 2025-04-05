@@ -1,3 +1,4 @@
+
 import { axiosClient } from "../ApiConfig/apiConfig";
 const USER_API_ENDPOINT = "/api/v1/user";
 const userApi = {
@@ -25,6 +26,9 @@ const userApi = {
     const url = `${USER_API_ENDPOINT}/getUserProfile`; // update album by id
     return axiosClient.get(url);
   },
-
+  getDetailUser:(id) =>{
+    const url = `${USER_API_ENDPOINT}/getDetailUser/${id}`; // update album by id
+    return axiosClient.get(url);
+  }
 };
 export default userApi;
