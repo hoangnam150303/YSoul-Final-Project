@@ -16,6 +16,7 @@ const createUserTableQuery = `
     is_admin BOOLEAN,
     user_follow INTEGER[] DEFAULT '{}',
     user_followed INTEGER[] DEFAULT '{}',
+    is_online BOOLEAN DEFAULT FALSE
 )
 `;
 
