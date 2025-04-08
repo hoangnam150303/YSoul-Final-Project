@@ -13,7 +13,7 @@ export const SocialHeader = () => {
   const socket = useSocket();
   const getNotification = async () => {
     try {
-      const response = await notificationApi.getNotification("");
+      const response = await notificationApi.getNotification("isNotRead");
       setNotification(response.data.data);
     } catch (error) {
       console.log(error);
@@ -63,7 +63,14 @@ export const SocialHeader = () => {
               <i className="bi bi-people" style={{ fontSize: "20px" }}></i>
               <span className="text-xs hidden md:block">My Network</span>
             </Link>
-
+            {/* My Chat */}
+            <Link
+              to="/chat"
+              className="flex flex-col items-center text-white relative"
+            >
+              <i className="bi bi-chat-dots" style={{ fontSize: "20px" }}></i>
+              <span className="text-xs hidden md:block">My Chat</span>
+            </Link>
             {/* Notifications */}
             <div
               className="relative"

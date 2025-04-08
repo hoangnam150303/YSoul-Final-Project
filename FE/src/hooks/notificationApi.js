@@ -8,5 +8,9 @@ const notificationApi = {
     const url = `${NOTIFICATION_API_ENDPOINT}/getNotificationByUser?filter=${filter}&currentPage=${page}&pageSize=${limit}`;
        return axiosClient.get(url)
     },
+    readNotification:(id)=>{
+        const url = `${NOTIFICATION_API_ENDPOINT}/readNotification/${id}`;
+        return axiosClient.put(url)
+    }
 };
 export default notificationApi;
