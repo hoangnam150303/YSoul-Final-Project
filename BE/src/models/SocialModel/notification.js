@@ -8,6 +8,7 @@ const notificationSchema = new mongoose.Schema(
         user_id: { type: String },
         username: { type: String },
         avatar: { type: String },    
+        post_id: { type: String },
      },
     isRead: { type: Boolean, default: false },
   },

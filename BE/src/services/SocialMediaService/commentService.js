@@ -18,7 +18,7 @@ exports.postCommentService = async (postId,content,userId) => {
         await validPost.save(); // save post
         
         if (userId.toString() !== validPost.user_id) { // check if user is post owner
-          const newNotification =  await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar}});
+          const newNotification =  await Notification.create({user_id:validPost.user_id,type:"comment",content:{user_id:userId,username:validUser.rows[0].name,avatar:validUser.rows[0].avatar,post_id:postId}});
           const receiverSocketId = getReceiverSocketId(validPost.user_id); // get receiver socket id
           io.to(receiverSocketId).emit("new-notification", newNotification);
         }
@@ -75,6 +75,7 @@ exports.postReplyCommentService = async (postId,commentId,content,userId) => {
                     user_id: userId,
                     username: validUser.rows[0].name,
                     avatar: validUser.rows[0].avatar,
+                    post_id: postId,
                 },
             });
         

@@ -5,8 +5,8 @@ import {
   UserAddOutlined,
 } from "@ant-design/icons";
 import React, { useEffect, useState } from "react";
-import { message, Pagination } from "antd";
-import { Link } from "react-router-dom";
+import { message, Pagination, Select } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { formatDistanceToNow } from "date-fns";
 import notificationApi from "../../hooks/notificationApi";
@@ -20,8 +20,9 @@ export const NotificationPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Mặc định 10 item/trang
   const [totalItems, setTotalItems] = useState(0);
-
+  const navigate = useNavigate(); // Thêm dòng này
   const socket = useSocket();
+  const { Option } = Select;
   const fetchNotifications = async () => {
     try {
       setIsLoading(true);
@@ -50,7 +51,13 @@ export const NotificationPage = () => {
   useEffect(() => {
     fetchNotifications();
   }, [fiter, newNotification, currentPage, pageSize]);
-
+  const handleReadNotification = async (notificationId) => {
+    try {
+      await notificationApi.readNotification(notificationId);
+    } catch (error) {
+      message.error("Error reading notification.");
+    }
+  };
   const renderNotificationIcon = (type) => {
     switch (type) {
       case "like":
@@ -65,19 +72,42 @@ export const NotificationPage = () => {
         return null;
     }
   };
+  const handleViewNotification = (notification) => {
+    if (
+      notification.type === "like" ||
+      notification.type === "comment" ||
+      notification.type === "reply"
+    ) {
+      navigate(`/post/${notification?.content?.post_id}`);
+
+      if (notification?.isRead === false) {
+        handleReadNotification(notification._id);
+      }
+    } else if (notification.type === "follow") {
+      if (notification.content?.isRead === false) {
+        handleReadNotification(notification._id);
+      }
+      navigate(`/profile/${notification.content?.user_id}`);
+    }
+  };
 
   const renderNotificationContent = (notification) => {
     switch (notification.type) {
       case "like":
         return (
-          <span>
-            <strong>{notification.content?.username}</strong> liked your post
-          </span>
+          <Link to={`/profile/${notification?.content?.user_id}`}>
+            <span>
+              <strong>{notification.content?.username}</strong> liked your post
+            </span>
+          </Link>
         );
       case "comment":
         return (
           <span>
-            <Link to={`/post/${notification?.postId}`} className="font-bold">
+            <Link
+              to={`/profile/${notification?.content?.user_id}`}
+              className="font-bold"
+            >
               {notification.content?.username}
             </Link>{" "}
             commented on your post
@@ -86,7 +116,10 @@ export const NotificationPage = () => {
       case "share":
         return (
           <span>
-            <Link to={`/post/${notification?.postId}`} className="font-bold">
+            <Link
+              to={`/profile/${notification?.content?.user_id}`}
+              className="font-bold"
+            >
               <strong>{notification.content?.username}</strong> shared your post
             </Link>
           </span>
@@ -94,8 +127,9 @@ export const NotificationPage = () => {
       case "follow":
         return (
           <span>
-            <Link>
-              <strong>{notification?.user}</strong> started following you
+            <Link to={`/profile/${notification?.content?.user_id}`}>
+              <strong>{notification?.content.username}</strong> started
+              following you
             </Link>
           </span>
         );
@@ -138,6 +172,22 @@ export const NotificationPage = () => {
         <div className="col-span-1 lg:col-span-3">
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold mb-6">Notifications</h1>
+            <div className="flex justify-between items-center mb-4">
+              <Select
+                value={fiter}
+                onChange={(value) => {
+                  setFilter(value);
+                  setCurrentPage(1); // Reset về trang 1 khi lọc
+                }}
+                style={{ width: 200 }}
+                placeholder="Filter by status"
+              >
+                <Option value="">All</Option>
+                <Option value="isRead">Read</Option>
+                <Option value="isNotRead">Unread</Option>
+              </Select>
+            </div>
+
             {isLoading ? (
               <p>Loading...</p>
             ) : notifications && notifications.length > 0 ? (
@@ -151,7 +201,7 @@ export const NotificationPage = () => {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-4">
-                        <Link to={`/profile/${notification?.user}`}>
+                        <Link to={`/profile/${notification?.content.user_id}`}>
                           <img
                             src={notification.content.avatar}
                             alt="hoangnam"
@@ -183,6 +233,7 @@ export const NotificationPage = () => {
                           <button
                             className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
                             aria-label="Mark as read"
+                            onClick={() => handleViewNotification(notification)}
                           >
                             <i className="bi bi-eye"></i>
                           </button>

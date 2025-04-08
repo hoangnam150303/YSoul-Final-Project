@@ -11,24 +11,25 @@ exports.getNotificationByUserService = async(userid,filter,currentPage,pageSize)
         }
     
         // Chuyển đổi kiểu dữ liệu từ query string sang số
-        const page = parseInt(currentPage, 10) || 1;
-        const limit = parseInt(pageSize, 10) || 10;
+        const page = parseInt(currentPage, 10) 
+        const limit = parseInt(pageSize, 10)
         const skip = (page - 1) * limit;
     
         // Tạo query filter
         let query = { user_id: userid };
         if (filter === "isRead") query.isRead = true;
         else if (filter === "isNotRead") query.isRead = false;
-    
-        // Lấy tổng số lượng thông báo (dùng cho phân trang)
-        const total = await Notification.countDocuments(query);
-    
+        else query === null;
+        
         // Truy vấn thông báo với phân trang
         const notifications = await Notification.find(query)
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit);
-    
+          
+     // Lấy tổng số lượng thông báo (dùng cho phân trang)
+          const total = await Notification.countDocuments(query);
+          
         return {
           success: true,
           data: notifications,
@@ -84,6 +85,24 @@ exports.deleteNotificationService = async(userId,notificationId)=>{
         return {success:false,message: "You are not author of this notification"}; // return error message
        }
     } catch (error) {
+        return {success:false,message: error.toString()};
+    }
+}
+
+exports.readNotificationService = async(userId,notificationId)=>{
+    try {
+        const validNotification = await Notification.findById(notificationId); // check if notification is valid
+        if (!validNotification) { // check if notification is not valid
+            return {success:false,message: "Notification not found"}; // return error message
+        }
+       if (validNotification.user_id === userId.toString()) { // check if user is notification owner
+        validNotification.isRead = true; // set notification isRead to true
+        await validNotification.save(); // save notification
+        return {success:true,message:"success"}; // return success
+       }else{
+        return {success:false,message: "You are not author of this notification"}; // return error message
+       }
+    } catch (error) {        
         return {success:false,message: error.toString()};
     }
 }
