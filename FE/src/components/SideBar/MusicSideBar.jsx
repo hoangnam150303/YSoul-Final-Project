@@ -74,9 +74,7 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
   const onCloseDrawer = () => {
     setOpenDrawer(false);
   };
-  useEffect(() => {
-    console.log(role);
-  }, [role]);
+
   const handleLogout = () => {
     console.log(role);
     dispatch(logoutUser()); // Dispatch action logout

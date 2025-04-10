@@ -21,6 +21,8 @@ export const SocialHeader = () => {
   };
   useEffect(() => {
     if (socket) {
+      console.log(socket);
+      
       socket.on("new-notification", (notification) => {
         setNewNotification(notification);
       });
