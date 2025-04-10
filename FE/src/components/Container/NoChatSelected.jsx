@@ -6,13 +6,13 @@ const NoChatSelected = () => {
       <div className="max-w-md text-center space-y-6">
         <div className="flex justify-center gap-4 mb-4">
           <div className="relative">
-            <div className="w-16 h-16 rounded-2xl gradient-bg-hero flex items-center justify-center animate-bounce">
+            <div className="w-16 h-16 rounded-2xl gradient-bg-hero flex items-center justify-center animate-bounce text-white">
               <i className="bi bi-chat-left-dots"></i>
             </div>
           </div>
         </div>
-        <h2 className="text-2xl font-bold">Welcome to chat</h2>
-        <p className="text-gray-400">
+        <h2 className="text-2xl font-bold text-white">Welcome to chat</h2>
+        <p className="text-white">
           {" "}
           Select a conversation from the sidebar to start chatting
         </p>

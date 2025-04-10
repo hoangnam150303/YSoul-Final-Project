@@ -87,7 +87,8 @@ exports.followUserService = async (userId, userFollowId) => {
             email: user.email,
             avatar: user.avatar,
             user_follow: user.user_follow,
-            user_followed: user.user_followed
+            user_followed: user.user_followed,
+            is_online: user.is_online
           })),
           total: parseInt(countQuery.rows[0].count),
           currentPage: parseInt(currentPage),

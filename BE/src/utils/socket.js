@@ -18,7 +18,6 @@ function getReceiverSocketId(userId) {
 const userSocketMap = {};
 io.on("connection", async (socket) => {
   const userId = socket.handshake.query.userId;
-
   if (userId) {
     userSocketMap[userId] = socket.id;
     try {

@@ -1,117 +1,123 @@
+const { conectPostgresDb } = require("../../configs/database");
 const Message = require("../../models/SocialModel/message");
-const { getReceiverSocketId, io } = require("../utils/socket");
-//
+const { getReceiverSocketId, io } = require("../../utils/socket");
+
+// this function is create message
+exports.createConversationService = async (userId, receiverId) => {
+  try {
+
+    const validParticipant1 = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]); // check if user is valid
+    if (validParticipant1.rows.length === 0) { // check if user is not valid
+      return {success:false,message: "User not found"}; // return error message
+    }
+    const validParticipant2 = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [receiverId]); // check if receiver is valid
+    if (validParticipant2.rows.length === 0) { // check if receiver is not valid
+      return {success:false,message: "Receiver not found"}; // return error message
+    }
+    const validConversation = await Message.find({$or:[{participant1:validParticipant1.rows[0].id,participant2:validParticipant2.rows[0].id},{participant1:validParticipant2.rows[0].id,participant2:validParticipant1.rows[0].id}]});
+    if (validConversation.length > 0) { // check if conversation is not valid
+    return {
+      success: true,
+      data: validConversation[0], 
+    };
+    }
+    const newConversation = await Message.create(
+      {participant1:validParticipant1.rows[0].id,
+        participant1Name:validParticipant1.rows[0].name,
+        participant1Avatar:validParticipant1.rows[0].avatar,
+        participant2:validParticipant2.rows[0].id,
+        participant2Name:validParticipant2.rows[0].name,
+        participant2Avatar:validParticipant2.rows[0].avatar,}
+    );
+    return {success:true,data:newConversation}
+  } catch (error) {
+    return {success:false,message: "Internal server error"}
+  }
+}
+
+// this function is get all conversation
 exports.getAllConversationService = async (userId) => {
   try {
-    const user = await users.findById(userId);
-    if (!user) {
-      throw new Error("User not found");
+    const validUser = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]); // check if user is valid
+    if (validUser.rows.length === 0) { // check if user is not valid
+      return {success:false,message: "User not found"}; // return error message
     }
-
-    const conversations = await Message.aggregate([
-      {
-        $match: {
-          $or: [{ senderId: user._id }, { receiverId: user._id }],
-        },
-      },
-      {
-        $sort: { createdAt: -1 }, // Sắp xếp theo thời gian gần nhất
-      },
-      {
-        $group: {
-          _id: {
-            $cond: [
-              { $eq: ["$senderId", user._id] },
-              "$receiverId",
-              "$senderId",
-            ],
-          },
-          lastMessage: { $first: "$message" }, // Tin nhắn gần nhất
-          lastMessageTime: { $first: "$createdAt" }, // Thời gian gần nhất
-          correctReceiverId: {
-            $first: {
-              $cond: [
-                { $eq: ["$senderId", user._id] }, // Nếu tôi gửi
-                "$receiverId", // Lấy người nhận
-                "$senderId", // Nếu người khác gửi, lấy người gửi
-              ],
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "correctReceiverId",
-          foreignField: "_id",
-          as: "receiverInfo",
-        },
-      },
-      {
-        $unwind: "$receiverInfo",
-      },
-      {
-        $project: {
-          _id: 0,
-          receiverId: "$correctReceiverId",
-          lastMessage: 1,
-          lastMessageTime: 1,
-          "receiverInfo.username": 1,
-          "receiverInfo.avatar": 1,
-        },
-      },
-      { $sort: { lastMessageTime: -1 } },
-    ]);
-
-    return { success: true, conversations };
+    // find all conversation with message not empty
+    const conversation = await Message.find({$or:[{participant1:validUser.rows[0].id},{participant2:validUser.rows[0].id}],messages:{$ne:[]}}).sort({updatedAt:-1});
+    
+    return {success:true,data:conversation}
   } catch (error) {
-    console.error(error);
-    return { success: false, message: error.message };
+    console.log(error);
+    
+    return {success:false,message: "Internal server error"}
   }
-};
+}
 
-exports.getMessageService = async (userId, receiverId) => {
+exports.getDetailConversationService = async (id,userId) =>{
   try {
-    const messages = await Message.find({
-      $or: [
-        { senderId: userId, receiverId: receiverId },
-        { senderId: receiverId, receiverId: userId },
-      ],
-    });
-    if (!messages) {
-      throw new Error("Messages not found");
+    const validConversation = await Message.findById(id);
+    if(!validConversation){
+      return {success:false,message:"conversation not found!"}
     }
-    return { success: true, messages };
-  } catch (error) {}
-};
+    const receiverId = 
+    validConversation.participant1 !== userId.toString()
+      ? validConversation.participant1
+      : validConversation.participant2;
+    const receiver = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [receiverId]);
+    if (receiver.rows.length === 0) {
+      return {success:false, message:"Receiver not found!"};
+    }
+    const { name, avatar, is_online } = receiver.rows[0];
 
-exports.sendMessageService = async (userId, receiverId, message) => {
+    const receiverData = { name, avatar, is_online };
+    return {success:true, data:{conversation:validConversation,receiver:receiverData}}
+  } catch (error) {
+    return {success:false,message: "Internal server error"}
+  }
+}
+
+// this function is send message
+exports.sendMessageService = async (userId, id, message,image) => {
   try {
-    const senderUser = await users.findById(userId);
-    if (!senderUser) {
-      throw new Error("Sender user not found");
+    const validUser = await conectPostgresDb.query("SELECT * FROM users WHERE id = $1", [userId]);
+    if (validUser.rows.length === 0) {
+      return {success:false, message:"User not found!"};
+    } 
+    const validConversation = await Message.findById(id);
+    if (!validConversation) {
+      return {success:false, message:"Conversation not found!"};
     }
-    const receiverUser = await users.findById(receiverId);
-    if (!receiverUser) {
-      throw new Error("Receiver user not found");
-    }
-    if (!message) {
-      return;
-    }
-    const newMessage = await Message.create({
-      senderId: userId,
-      receiverId: receiverUser._id,
-      message,
-    });
-    const receiverSocketId = getReceiverSocketId(receiverId);
-
+    const receiverId = 
+    validConversation.participant1 === userId.toString()
+      ? validConversation.participant2
+      : validConversation.participant1; 
+    const receiverSocketId = getReceiverSocketId(receiverId); // get receiver socket id
     if (receiverSocketId) {
+       // push new Message
+      const newMessage =  await validConversation.messages.push({user_id:validUser.rows[0].id, username:validUser.rows[0].name, avatar:validUser.rows[0].avatar, content:message,image:image});
+      validConversation.save();      
       io.to(receiverSocketId).emit("new-message", newMessage);
-    } else {
-      console.log("Receiver is not connected:", receiverId);
+      return {success:true,message:"send success!"}
+    }else{
+      await validConversation.messages.push({user_id:validUser.rows[0].id, username:validUser.rows[0].name, avatar:validUser.rows[0].avatar, content:message,image:image});
+      validConversation.save();      
+      return {success:true,message:"send success!"}
     }
-    return { success: true };
+    return {success:false, message:"Receiver not found!"};
   } catch (error) {
-    return { success: false, message: error.message };
+    return {success:false, message:error};
   }
-};
+}
+
+// this function is delete conversation
+exports.deleteConversationService = async (id) =>{
+  try {
+    const validConversation = await Message.findByIdAndDelete(id);
+    if (!validConversation) {
+      return {success:false,message:"Conversation not found!"}
+    }
+    return {success:true,message:"Delete success!"}
+  } catch (error) {
+    return {success:false, message:"Delete Fail!"}
+  }
+}
