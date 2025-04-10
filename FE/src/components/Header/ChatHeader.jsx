@@ -14,11 +14,7 @@ const ChatHeader = () => {
     setUserSeclected(null);
     setIdMessage(null);
   };
-   useEffect(() => {
-     console.log(userSelected);
-     
-     
-    }, [userSelected]);
+
   return (
     <>
       {userSelected && messageSelected && (
