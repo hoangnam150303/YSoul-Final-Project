@@ -76,18 +76,56 @@ exports.sendMessage = async (req, res) => {
   }
 }
 
-//delete message
+//delete conversation
 exports.deleteConversation = async (req,res) =>{
   try {
     const {id} = req.params;
+    const userId = req.user.id;
     if (!id) {
       return res.status(400).json({message:"Id is required!"})
     }
-    const response = await messageService.deleteConversationService(id);
+    const response = await messageService.deleteConversationService(id,userId);
     if (!response.success) {
       return res.status(400).json(response.message)
     }
     return res.status(200).json(response)
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" }); // return error message
+  }
+}
+
+// update message
+exports.updateMessage = async (req,res)=>{
+  try {
+    const {conversationId, messageId} = req.params; // get id from params
+    const {text} = req.body; // get message from body
+    const userId = req.user.id; // get userId from user
+    if (!conversationId || !messageId) {
+      return res.status(400).json({message:"Id is required!"}) // return error message
+    }
+    const response = await messageService.updateMessageService(conversationId,messageId,text,userId); // call updateMessageService from messageService
+    if (!response.success) {
+      return res.status(400).json(response.message) // return error message
+    }
+    return res.status(200).json(response) // return success message
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" }); // return error message
+  }
+}
+
+// delete message
+exports.deleteMessage = async(req,res)=>{
+  try {
+    const {conversationId, messageId} = req.params; // get id from params
+    const userId = req.user.id;
+    if (!conversationId || !messageId) { // if id is not exist
+      return res.status(400).json({message:"Id is required!"})
+    }
+    const response = await messageService.deleteMessageService(conversationId,messageId,userId); // call deleteMessageService from messageService
+    if (!response.success) {
+      return res.status(400).json(response.message) // return error message
+    }
+    return res.status(200).json(response) // return success message
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" }); // return error message
   }

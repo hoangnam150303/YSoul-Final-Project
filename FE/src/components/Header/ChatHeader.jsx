@@ -7,12 +7,12 @@ const ChatHeader = () => {
     setUserSeclected,
     setMessageSelected,
     messageSelected,
-    setIdMessage,
+    setIdConversation,
   } = useContext(ChatContext);
   const handleCancle = () => {
     setMessageSelected(null);
     setUserSeclected(null);
-    setIdMessage(null);
+    setIdConversation(null);
   };
 
   return (

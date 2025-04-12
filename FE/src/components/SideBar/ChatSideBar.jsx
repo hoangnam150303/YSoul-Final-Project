@@ -4,17 +4,23 @@ import messageApi from "../../hooks/messageApi";
 import reviewerApi from "../../hooks/reviewerApi";
 import { message } from "antd";
 import { useSelector } from "react-redux";
-
+import { Dropdown, Menu } from "antd";
+import { DeleteOutlined, EllipsisOutlined } from "@ant-design/icons";
+import { useSocket } from "../../context/SocketContext";
 const ChatSideBar = () => {
+  const socket = useSocket();
   const [users, setUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const {
     userSelected,
-    setUserSeclected,
-    setIdMessage,
+    setIdConversation,
     newMessage,
     messageTrigger,
+    deleteConversation,
+    idConversation,
+    setMessageSelected,
+    fetchDetailConversation,
   } = useContext(ChatContext);
   const userId = useSelector((state) => state.user.id);
   const fetchConversations = async () => {
@@ -29,7 +35,7 @@ const ChatSideBar = () => {
     try {
       const response = await messageApi.createConvesation(id);
       if (response.status === 200) {
-        setIdMessage(response.data.data._id);
+        setIdConversation(response.data.data._id);
       }
     } catch (error) {
       message.error(error.message || "Đã xảy ra lỗi khi tải dữ liệu");
@@ -49,9 +55,48 @@ const ChatSideBar = () => {
     }
   };
   useEffect(() => {
-    if (newMessage.lenght !== 0 && messageTrigger !== 0) {
-      fetchConversations();
+    if (socket) {
+      socket.on("delete-conversation", (conversation) => {
+        // Nếu cuộc trò chuyện bị xóa, gọi lại fetch
+        fetchConversations();
+        console.log(conversation._id, idConversation);
+
+        if (conversation._id === idConversation) {
+          setMessageSelected(null);
+          message.error("This conversation was deleted by another user!");
+        }
+      });
+      socket.on("delete-message", (conversation) => {
+        fetchConversations();
+        if (conversation._id === idConversation) {
+          fetchDetailConversation();
+        }
+      });
+      console.log(1111);
+      socket.on("update-message", (conversation) => {
+        fetchConversations();
+        if (conversation._id === idConversation) {
+          fetchDetailConversation();
+        }
+      });
     }
+
+    // Cleanup để tránh double event khi component unmount
+    return () => {
+      if (socket) {
+        socket.off("delete-conversation");
+        socket.off("delete-message");
+        socket.off("update-message");
+      }
+    };
+  }, [socket, idConversation]);
+
+  const handleDeleteConversation = (id) => {
+    deleteConversation(id);
+    fetchConversations();
+  };
+  useEffect(() => {
+    fetchConversations();
   }, [newMessage, messageTrigger]);
 
   useEffect(() => {
@@ -144,52 +189,75 @@ const ChatSideBar = () => {
             const isOnline = users.find(
               (u) => u.id.toString() === otherUserId
             )?.is_online;
-            console.log(
-              users.find((u) => u.id.toString() === otherUserId)?.is_online
-            );
 
             return (
-              <button
-                key={conversation._id}
-                onClick={() => setIdMessage(conversation._id)}
-                className="w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors"
-              >
-                {/* Avatar */}
-                <div className="relative">
-                  <img
-                    src={otherUserAvatar || "https://via.placeholder.com/150"}
-                    alt={otherUserName}
-                    className="w-12 h-12 object-cover rounded-full"
-                  />
-                  {isOnline && (
-                    <span
-                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white 
-          ${isOnline ? "bg-green-500" : "bg-gray-400"}`}
-                    ></span>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 text-left">
-                  <div className="text-white font-semibold truncate">
-                    {otherUserName}
-                  </div>
-                  <div className="text-sm text-gray-300 truncate max-w-[180px]">
-                    {lastMessage ? (
-                      lastMessage.user_id === userId.toString() ? (
-                        <>you: {lastMessage.content}</>
-                      ) : (
-                        <>
-                          {otherUserName?.split(" ").slice(-1)[0]}:{" "}
-                          {lastMessage.content}
-                        </>
-                      )
-                    ) : (
-                      <>Chưa có tin nhắn</>
+              <div key={conversation._id} className="relative group">
+                <button
+                  onClick={() => setIdConversation(conversation._id)}
+                  className="w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors"
+                >
+                  {/* Avatar */}
+                  <div className="relative">
+                    <img
+                      src={otherUserAvatar || "https://via.placeholder.com/150"}
+                      alt={otherUserName}
+                      className="w-12 h-12 object-cover rounded-full"
+                    />
+                    {isOnline && (
+                      <span
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white 
+                      bg-green-500`}
+                      ></span>
                     )}
                   </div>
+
+                  {/* Info */}
+                  <div className="flex-1 text-left">
+                    <div className="text-white font-semibold truncate">
+                      {otherUserName}
+                    </div>
+                    <div className="text-sm text-gray-300 truncate max-w-[180px]">
+                      {lastMessage ? (
+                        lastMessage.user_id === userId.toString() ? (
+                          <>you: {lastMessage.content}</>
+                        ) : (
+                          <>
+                            {otherUserName?.split(" ").slice(-1)[0]}:{" "}
+                            {lastMessage.content}
+                          </>
+                        )
+                      ) : (
+                        <>Chưa có tin nhắn</>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {/* Dropdown menu - Hiện khi hover */}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Dropdown
+                    overlay={
+                      <Menu>
+                        <Menu.Item
+                          key="delete"
+                          icon={<DeleteOutlined />}
+                          onClick={() =>
+                            handleDeleteConversation(conversation._id)
+                          }
+                        >
+                          Xóa cuộc trò chuyện
+                        </Menu.Item>
+                      </Menu>
+                    }
+                    trigger={["click"]}
+                  >
+                    <EllipsisOutlined
+                      className="text-white cursor-pointer text-xl"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </Dropdown>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
