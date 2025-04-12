@@ -22,6 +22,18 @@ const messageApi = {
               "Content-Type": "multipart/form-data",
             },
           })
-    }
+    },
+    deleteConversation:(id)=>{
+        const url = `${MESSAGE_API_ENDPOINT }/deleteConversation/${id}`
+        return axiosClient.delete(url)
+    },
+    deleteMessage:(conversationId, messageId) => {
+        const url = `${MESSAGE_API_ENDPOINT}/deleteMessage/${conversationId}/${messageId}`;
+        return axiosClient.delete(url);
+    },
+    updateMessage:(conversationId,messageId,text)=>{
+        const url = `${MESSAGE_API_ENDPOINT}/updateMessage/${conversationId}/${messageId}`
+        return axiosClient.put(url,{text})
+    },
 };
 export default messageApi;

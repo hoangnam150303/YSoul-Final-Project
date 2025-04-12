@@ -31,7 +31,6 @@ exports.postCommentService = async (postId,content,userId) => {
 // this function is update comment
 exports.updateCommentService = async (commentId,postId,content) => {
     try {
-        
         const validPost = await Post.findById(postId); // check if post is valid
         if (!validPost) { // check if post is not valid
             return {success:false,message: "Post not found"}; // return error message

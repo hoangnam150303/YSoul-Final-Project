@@ -103,21 +103,76 @@ exports.sendMessageService = async (userId, id, message,image) => {
       validConversation.save();      
       return {success:true,message:"send success!"}
     }
-    return {success:false, message:"Receiver not found!"};
   } catch (error) {
     return {success:false, message:error};
   }
 }
 
 // this function is delete conversation
-exports.deleteConversationService = async (id) =>{
+exports.deleteConversationService = async (id,userId) =>{
   try {
     const validConversation = await Message.findByIdAndDelete(id);
     if (!validConversation) {
       return {success:false,message:"Conversation not found!"}
     }
+    const receiverId = 
+    validConversation.participant1 === userId.toString()
+      ? validConversation.participant2
+      : validConversation.participant1; 
+    const receiverSocketId = getReceiverSocketId(receiverId); // get receiver socket id
+      io.to(receiverSocketId).emit("delete-conversation", validConversation);
     return {success:true,message:"Delete success!"}
   } catch (error) {
     return {success:false, message:"Delete Fail!"}
+  }
+}
+
+// this funcntion is delete message
+exports.deleteMessageService = async (conversationId, messageId,userId) => {
+  try {
+    const validConversation = await Message.findById(conversationId);
+    if (!validConversation) {
+      return {success:false,message:"Conversation not found!"}
+    }
+    const validMessage = validConversation.messages.find((message) => message._id.toString() === messageId);
+    if (!validMessage) {
+      return {success:false,message:"Message not found!"}
+    }
+    validConversation.messages = validConversation.messages.filter((message) => message._id.toString() !== messageId);
+    await validConversation.save();
+    const receiverId = 
+    validConversation.participant1 === userId.toString()
+      ? validConversation.participant2
+      : validConversation.participant1; 
+    const receiverSocketId = getReceiverSocketId(receiverId); // get receiver socket id
+      io.to(receiverSocketId).emit("delete-message", validConversation);
+    return {success:true,data:validConversation}
+  } catch (error) {
+    return {success:false, message:"Delete Fail!"}
+  }
+}
+
+// this function is update message
+exports.updateMessageService = async (conversationId,messageId,text,userId) =>{
+  try {
+    const validConversation = await Message.findById(conversationId); // check if conversation is valid
+    if (!validConversation) { // check if conversation is not valid
+      return {success:false,message:"Conversation not found!"} // return error message
+    }
+    const validMessage = validConversation.messages.find((message) => message._id.toString() === messageId); // check if message is valid
+    if (!validMessage) { // check if message is not valid
+      return {success:false,message:"Message not found!"}
+    }
+    validMessage.content = text; // update message
+    await validConversation.save(); // save conversation
+    const receiverId = 
+    validConversation.participant1 === userId.toString()
+      ? validConversation.participant2
+      : validConversation.participant1; 
+    const receiverSocketId = getReceiverSocketId(receiverId); // get receiver socket id
+      io.to(receiverSocketId).emit("update-message", validConversation);
+    return {success:true,data:validMessage}
+  } catch (error) { // catch error
+    return {success:false, message:"Update Fail!"}
   }
 }
