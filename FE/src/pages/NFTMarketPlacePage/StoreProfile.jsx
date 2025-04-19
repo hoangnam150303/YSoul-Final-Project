@@ -202,7 +202,7 @@ const StoreProfile = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(2);
+  const [limit, setLimit] = useState(8);
   const [editingNft, setEditingNft] = useState(null);
   // State cho form đăng ký artist
   const [formData, setFormData] = useState({
@@ -234,7 +234,6 @@ const StoreProfile = () => {
   };
   const handleRegister = async () => {
     setFormData((prev) => ({ ...prev, addressWallet: currentAccount }));
-    console.log(formData);
     
     const response = await artistNFTApi.postRegisterArtist(formData);
     if (response.status === 200) {

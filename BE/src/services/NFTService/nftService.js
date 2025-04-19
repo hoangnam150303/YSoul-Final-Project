@@ -25,37 +25,54 @@ exports.createNFTService = async (userId, addressWallet, image, name, descriptio
 }
 
 // this function is for user, user can get all NFTs
-exports.getAllNFTsService = async (filter, search,page,limit) => {
-    try {
-      let filterOptions = {}; // set filterOptions to empty string
-      switch (filter) {
-        case "popular":
-          filterOptions = { likes: { $gt: 0 } }; // if filter is popular, set filterOptions to likes
-          break;
-        case "priceAsc":
-          filterOptions = { price: 1 }; // if filter is priceAsc, set filterOptions to price
-          break;
-        case "priceDesc":
-          filterOptions = { price: -1 }; // if filter is priceDesc, set filterOptions to price
-          break;
-        default:
-          filterOptions = {};
-          break;
-      }  
-     
-      const nfts = await NFTs.find({ // find NFTs
-        name: { $regex: search, $options: "i" },
-      }).sort({ createdAt: -1 }, filterOptions);
-  
-      if (nfts) { // if nfts is not empty
-        return { success: true, data: nfts };
-      }
-      return { success: false, message: "Fail to get NFTs" }; // return fail
-    } catch (error) {
-      console.log(error);
-      return { success: false, message: error.toString() };
+exports.getAllNFTsService = async (filter, search, page, limit) => {
+  try {
+    // Phân trang
+    const pageNumber = parseInt(page) || 1;
+    const limitNumber = parseInt(limit) || 8;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Thiết lập điều kiện lọc tìm kiếm
+    const query = {
+      name: { $regex: typeof search === "string" ? search : "", $options: "i" },
+    };
+
+    // Thiết lập tiêu chí sắp xếp mặc định
+    let sortCriteria = { createdAt: -1 };
+
+    // Áp dụng filter
+    switch (filter) {
+      case "popular":
+        query.likes = { $gt: 0 };
+        break;
+      case "priceAsc":
+        sortCriteria = { price: 1 };
+        break;
+      case "priceDesc":
+        sortCriteria = { price: -1 };
+        break;
+      default:
+        break;
     }
+
+    // Thực hiện truy vấn với phân trang và sắp xếp
+    const nfts = await NFTs.find(query)
+      .sort(sortCriteria)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const totalNft = await NFTs.countDocuments(query);
+
+    if (nfts) {
+      return { success: true, data: nfts, totalNft: totalNft };
+    }
+    return { success: false, message: "Fail to get NFTs" };
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: error.toString() };
+  }
 };
+
 
 exports.getNFTByArtistService = async (filter, search, typeUser, artistId, page, limit) => {
     try {

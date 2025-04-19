@@ -1,27 +1,28 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import nftApi from "../../hooks/nftApi";
 import { BuyNFT } from "../BuyNFT/BuyNFT";
 
-
-const Artwork = () => {
+const Artwork = ({ search, filter, page, limit, setTotalNFT, isHomePage }) => {
   const [nfts, setNFTs] = useState([]);
   const [selectedNFTId, setSelectedNFTId] = useState(null);
   const [isBuyModalVisible, setIsBuyModalVisible] = useState(false);
-  
+
   const fetchNFTs = async () => {
     try {
-      const response = await nftApi.getAllNFTs("", "newest");      
+      const response = await nftApi.getAllNFTs(search, filter, page, limit); // ← thêm page, limit
       if (response.status === 200) {
         setNFTs(response.data.data);
+        if (setTotalNFT) {
+          setTotalNFT(response.data.totalNft); // ← cập nhật tổng NFT
+        }
       }
     } catch (error) {
       console.log(error);
     }
   };
-
   useEffect(() => {
     fetchNFTs();
-  }, []);
+  }, [search, filter, page, limit]); // Fetch NFTs whenever search or filter changes
 
   // Component Card hiển thị thông tin NFT
   const Card = ({ nft }) => (
@@ -72,9 +73,13 @@ const Artwork = () => {
           )}
         </div>
         <div className="text-center my-5">
-          <button className="shadow-lg shadow-black text-white bg-[#e32970] hover:bg-[#bd255f] rounded-full p-2">
-            Load More
-          </button>
+          <div className="flex justify-center my-8">
+            {isHomePage ? (
+              <button className="flex items-center gap-2 px-6 py-3 text-white font-semibold bg-gradient-to-r from-[#e32970] to-[#bd255f] rounded-full shadow-lg hover:scale-105 transition-transform duration-300">
+                Load More
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
       {/* Render modal BuyNFT khi isBuyModalVisible là true */}
