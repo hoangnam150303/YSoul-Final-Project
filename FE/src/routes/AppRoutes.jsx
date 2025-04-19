@@ -30,6 +30,8 @@ import { NetworkPage } from "../pages/SocialMediaPage/NetworkPage";
 import { ProfileSocialPage } from "../pages/SocialMediaPage/ProfileSocialPage";
 import PostPage from "../pages/SocialMediaPage/PostPage";
 import ChatPage from "../pages/SocialMediaPage/ChatPage";
+import NFTsPage from "../pages/NFTMarketPlacePage/NFTsPage";
+import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -79,8 +81,10 @@ function App() {
             <Route path="/notification" element={<NotificationPage />} />
             <Route path="/network" element={<NetworkPage />} />
             <Route path="/profile/:id" element={<ProfileSocialPage />} />
-            <Route path="/post/:id" element={<PostPage />}/>
+            <Route path="/post/:id" element={<PostPage />} />
             <Route path="/chat" element={<ChatPage />} />
+            <Route path="/NFTs" element={<NFTsPage />} />
+            <Route path="/ArtistNFTs" element={<ArtistNFTsPage />} />
           </>
         ) : (
           <Route path="*" element={<Navigate to="/payment" />} />

@@ -14,8 +14,8 @@ const nftApi = {
           },
     })
  },
- getAllNFTs: (search,filter) => {    
-    const url = `${NFT_ENDPOINT}/getAllNFTs?search=${search}&filter=${filter}`
+ getAllNFTs: (search,filter,page,limit) => {    
+    const url = `${NFT_ENDPOINT}/getAllNFTs?search=${search}&filter=${filter}&page=${page}&limit=${limit}`
     return axiosClient.get(url)
 },
 

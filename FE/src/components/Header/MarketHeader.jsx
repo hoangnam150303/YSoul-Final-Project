@@ -19,8 +19,13 @@ const MarketHeader = () => {
         <Link to="/market">
           <li className="mx-4 cursor-pointer">Market</li>
         </Link>
-        <li className="mx-4 cursor-pointer">Artist</li>
-        <li className="mx-4 cursor-pointer">NFTs</li>
+        <Link to="/ArtistNFTs">
+          <li className="mx-4 cursor-pointer">Artist</li>
+        </Link>
+
+        <Link to="/NFTs">
+          <li className="mx-4 cursor-pointer">NFTs</li>
+        </Link>
         {currentAccount && (
           <Link to="/store">
             <li className="mx-4 cursor-pointer">Your Store</li>
