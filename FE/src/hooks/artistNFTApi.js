@@ -15,6 +15,11 @@ const artistNFTApi = {
             "Content-Type": "multipart/form-data",
           },
     })
+ },
+ 
+ getAllArtists:(page,limit,search)=>{
+   const url = `${ARTISTNFT_API_ENDPOINT}/getAllArtistNFT?page=${page}&limit=${limit}&search=${search}`;
+   return axiosClient.get(url);
  }
 };
 

@@ -59,10 +59,28 @@ exports.getArtistNFT = async (addressWallet) =>{
     }
 }
 
-exports.getAllArtistNFT = async (page,limit) =>{
-    try {
-        
+exports.getAllArtistNFT = async (search,page,limit) =>{
+    try {  
+        const pageNumber = parseInt(page) || 1;
+        const limitNumber = parseInt(limit) || 8;
+        const skip = (pageNumber - 1) * limitNumber;
+        const query = {
+            name: { $regex: typeof search === "string" ? search : "", $options: "i" },
+          };
+          let sortCriteria = { createdAt: -1 };
+            const artistNFTs = await ArtistNFT
+            .find(query)
+            .sort(sortCriteria)
+            .skip(skip)
+            .limit(limitNumber);   
+            const totlaArtistNFT = await ArtistNFT.countDocuments(query); // count total artist NFTs
+            if (artistNFTs) {
+                return {success:true,artistNFTs:artistNFTs,total:totlaArtistNFT} // return success and artist NFTs
+            }
+            return {success:false,message:"Artist NFTs not found"} // return fail
     } catch (error) {
+        console.log(error);
         
+        throw new Error(error); // return error
     }
 }

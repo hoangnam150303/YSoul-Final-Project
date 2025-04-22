@@ -30,7 +30,7 @@ const artistApi = {
   getArtistById: (id) => {
     const url = `${ARTIST_API_ENDPOINT}/getArtistById/${id}`;
     return axiosClient.get(url);
-  }
+  },
 };
 
 export default artistApi;
