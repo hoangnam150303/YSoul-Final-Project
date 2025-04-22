@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import { contractABI, contractAddress } from "../constants/AddressContants";
 import { ethers } from "ethers";
+import { message } from "antd";
 export const TransactionContext = createContext();
 
 const { ethereum } = window;
@@ -18,6 +19,7 @@ const getEthereumContract = () => {
 };
 export const TransactionProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [transactions, setTransactions] = useState([]);
   const [formData, setFormData] = useState({
     addressTo: "",
     amount: "",
@@ -54,21 +56,27 @@ export const TransactionProvider = ({ children }) => {
 
   const sendTransaction = async () => {
     try {
+      console.log(1);
+
       if (!ethereum) return alert("Please install metamask");
       const { addressTo, amount, keyword, nftName, urlImage } = formData;
       const transactionContract = await getEthereumContract();
       const parsedAmount = ethers.utils.parseEther(amount.toString());
-      await ethereum.request({
-        method: "eth_sendTransaction",
-        params: [
-          {
-            from: currentAccount,
-            to: addressTo,
-            gas: "0x5208",
-            value: parsedAmount._hex,
-          },
-        ],
-      });
+      try {
+        await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: currentAccount,
+              to: addressTo,
+              gas: "0x5208",
+              value: parsedAmount._hex,
+            },
+          ],
+        });
+      } catch (error) {
+        console.log(error);
+      }
 
       try {
         await transactionContract.addToBlockchain(
@@ -78,6 +86,7 @@ export const TransactionProvider = ({ children }) => {
           urlImage,
           keyword
         );
+        message.success("Transaction successful!");
       } catch (error) {
         console.log("Lỗi từ contract:", error);
       }
@@ -116,6 +125,8 @@ export const TransactionProvider = ({ children }) => {
       try {
         const result = await transactionsContract.getAllTransactions();
         console.log(result);
+
+        setTransactions(result);
       } catch (error) {
         console.log(error);
       }
@@ -136,6 +147,7 @@ export const TransactionProvider = ({ children }) => {
         formData,
         setFormData,
         sendTransaction,
+        transactions,
       }}
     >
       {children}

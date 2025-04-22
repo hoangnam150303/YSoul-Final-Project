@@ -35,7 +35,7 @@ exports.updateArtistNFT = async (res,req)=>{
 }
 
 
-  exports.getArtistNFT = async (req, res) => {
+exports.getArtistNFT = async (req, res) => {
     try {
 
       const { addressWallet } = req.params;
@@ -51,4 +51,18 @@ exports.updateArtistNFT = async (res,req)=>{
       return res.status(500).json("Error", error);
     }
   }
-    
+
+exports.getAllArtistNFT = async (req, res) => {
+  try {
+      const {search,page,limit} = req.query;
+      const response = await artistNFTService.getAllArtistNFT(search,page,limit);
+      if (!response.success) {
+        console.log(response);
+        
+          return res.status(400).json("Fail to get all artistNFT")
+      }
+      return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json("Error", error);
+  }
+}
