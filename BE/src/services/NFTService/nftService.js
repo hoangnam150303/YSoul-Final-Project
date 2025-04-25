@@ -1,5 +1,7 @@
 const ArtistNFT = require("../../models/MarketModel/artistNFT");
 const NFTs = require("../../models/MarketModel/NFTs");
+const userStore = require("../../models/UserModel/userStore");
+const { conectPostgresDb } = require("../../configs/database");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is for artist NFTs, artist can create new NFT
 exports.createNFTService = async (userId, addressWallet, image, name, description, price)=>{
@@ -56,7 +58,8 @@ exports.getAllNFTsService = async (filter, search, page, limit) => {
     }
 
     // Thực hiện truy vấn với phân trang và sắp xếp
-    const nfts = await NFTs.find(query)
+    const nfts = await NFTs.find({...query,
+      quantity: 1})
       .sort(sortCriteria)
       .skip(skip)
       .limit(limitNumber);
@@ -129,7 +132,8 @@ exports.getNFTByArtistService = async (filter, search, typeUser, artistId, page,
       }
   
       // Thực hiện truy vấn với phân trang, sắp xếp và bỏ qua (skip)
-      const nfts = await NFTs.find(query)
+      const nfts = await NFTs.find({...query,
+      quantity: 1})
         .sort(sortCriteria)
         .skip(skip)
         .limit(limitNumber);
@@ -198,4 +202,32 @@ exports.getNFTByIdService = async (id) => {
     
   }
 }
-  
+
+// this function is for user, user can buy NFT
+exports.buyNFTService = async (id, addressWallet) => {
+  try {
+    const validNFT = await NFTs.findById({id:id,quantity:1});
+    if (!validNFT) {
+      return { success: false, message: "NFT not found" };
+    }
+    validNFT.quantity = 0;
+    validNFT.save();
+    const validUser = await conectPostgresDb.query(
+
+      `SELECT * FROM users WHERE id = ${id}'`
+    );
+    if (validUser.rows.length === 0) {
+      return { success: false, message: "User not found" };
+    }
+    const validUserStore = await userStore.findOne({user_id:validUser.rows[0].id});
+    if (!validUserStore) {
+      await userStore.create({user_id:validUser.rows[0].id,NFTs:[validNFT._id]});
+    }else {
+      validUserStore.NFTs.push(validNFT._id);
+      validUserStore.save();
+    }
+    return { success: true, data: validNFT };
+  } catch (error) {
+    return { success: false, message: error.toString() };
+  }
+}

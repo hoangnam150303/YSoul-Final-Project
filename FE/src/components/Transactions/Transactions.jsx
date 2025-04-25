@@ -68,21 +68,14 @@ const Transactions = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {allTransactions.length > 0 ? (
-            allTransactions.map((tx, i) => <TransactionCard key={i} tx={tx} />)
+            allTransactions
+              .slice(0, 6)
+              .map((tx, i) => <TransactionCard key={i} tx={tx} />)
           ) : (
             <p className="text-white col-span-full text-center">
               No transactions found.
             </p>
           )}
-        </div>
-
-        <div className="text-center my-5">
-          <button
-            className="shadow-lg shadow-black text-white bg-[#e32970] hover:bg-[#bd255f] 
-            rounded-full px-6 py-2 text-sm font-medium"
-          >
-            Load More
-          </button>
         </div>
       </div>
     </div>

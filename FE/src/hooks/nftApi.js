@@ -1,6 +1,7 @@
 
 
 
+
 import { axiosClient } from "../ApiConfig/apiConfig";
 
 const NFT_ENDPOINT = "/api/v1/nft";
@@ -41,7 +42,11 @@ updateStatusNFT: (id) => {
 getNFTById:(id) => {
     const url = `${NFT_ENDPOINT}/getNFTById/${id}`
     return axiosClient.get(url)
-}
+},
+buyNFT: (id) => {
+    const url = `${NFT_ENDPOINT}/buyNFT/${id}`
+    return axiosClient.put(url)
+},
 };
 
 

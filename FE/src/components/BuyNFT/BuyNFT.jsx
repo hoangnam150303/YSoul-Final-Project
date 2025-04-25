@@ -38,8 +38,6 @@ export const BuyNFT = ({ id, visible, onClose }) => {
     }
   }, [nftData]);
   const handleBuy = () => {
-
-    
     sendTransaction();
   };
 

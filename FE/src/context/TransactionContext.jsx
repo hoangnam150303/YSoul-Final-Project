@@ -56,14 +56,14 @@ export const TransactionProvider = ({ children }) => {
 
   const sendTransaction = async () => {
     try {
-      console.log(1);
-
       if (!ethereum) return alert("Please install metamask");
+
       const { addressTo, amount, keyword, nftName, urlImage } = formData;
       const transactionContract = await getEthereumContract();
       const parsedAmount = ethers.utils.parseEther(amount.toString());
+      let txHash;
       try {
-        await ethereum.request({
+        txHash = await ethereum.request({
           method: "eth_sendTransaction",
           params: [
             {
@@ -75,7 +75,9 @@ export const TransactionProvider = ({ children }) => {
           ],
         });
       } catch (error) {
-        console.log(error);
+        console.error("Failed to send transaction:", error);
+        message.error("Failed to send transaction");
+        return;
       }
 
       try {
@@ -86,14 +88,19 @@ export const TransactionProvider = ({ children }) => {
           urlImage,
           keyword
         );
-        message.success("Transaction successful!");
       } catch (error) {
-        console.log("Lỗi từ contract:", error);
+        console.error("Lỗi từ contract:", error);
+        message.error("Blockchain interaction failed");
+        return;
       }
+     await getAllTransactions();
+   
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      message.error("An unexpected error occurred");
     }
   };
+
   const checkIfTransactionsExists = async () => {
     try {
       if (!ethereum) {
@@ -110,9 +117,6 @@ export const TransactionProvider = ({ children }) => {
 
       const currentTransactionCount =
         await transactionsContract.getTransactionCount();
-
-      console.log("Transaction Count:", currentTransactionCount);
-
       window.localStorage.setItem("transactionCount", currentTransactionCount);
     } catch (error) {
       console.log(error);
@@ -125,7 +129,7 @@ export const TransactionProvider = ({ children }) => {
       try {
         const result = await transactionsContract.getAllTransactions();
         console.log(result);
-
+        
         setTransactions(result);
       } catch (error) {
         console.log(error);
@@ -148,6 +152,7 @@ export const TransactionProvider = ({ children }) => {
         setFormData,
         sendTransaction,
         transactions,
+        getAllTransactions,
       }}
     >
       {children}

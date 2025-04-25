@@ -96,3 +96,21 @@ exports.getNFTById = async (req, res) => {
         return res.status(500).json({ message: "Error! Please try again." });
     }
 };
+
+exports.buyNFT = async (req, res) => {
+    try {
+        const { id } = req.params; // get id from params
+        const userId = req.user.id; // get userId from user
+        if (!id) {
+            return res.status(401).json({ message: "NFT id is required." });
+        }
+        const response = await nftService.buyNFTService(id, userId); // call buyNFTService from nftService
+        if (!response.success) { // if response is not success
+            return res.status(401).json({ message: "Error! Please try again." });
+        }
+        return res.status(200).json(response); // return response
+        
+    } catch (error) {
+        return res.status(500).json({ message: "Error! Please try again." });
+    }
+}
