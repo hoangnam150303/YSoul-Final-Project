@@ -9,6 +9,7 @@ const NFTsSchema = new mongoose.Schema(
     description:{type:String},
     purchases:{type:Number,default:0},
     status:{type:Boolean,default:true},
+    quantity:{type:Number,default:1},
   },
   {
     timestamps: true,
