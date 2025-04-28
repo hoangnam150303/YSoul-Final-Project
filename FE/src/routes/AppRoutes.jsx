@@ -32,6 +32,7 @@ import PostPage from "../pages/SocialMediaPage/PostPage";
 import ChatPage from "../pages/SocialMediaPage/ChatPage";
 import NFTsPage from "../pages/NFTMarketPlacePage/NFTsPage";
 import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
+import SinglePage from "../pages/MusicPages/SinglePage";
 
 function App() {
   const dispatch = useDispatch();
@@ -72,6 +73,7 @@ function App() {
             <Route path="/musicHomePage" element={<MusicHomePage />} />
             <Route path="/userProfile" element={<UserProfilePage />} />
             <Route path="/album/:id" element={<AlbumPage />} />
+            <Route path="/singlePage/:id" element={<SinglePage />} />
             <Route path="/artist/:id" element={<ArtistPage />} />
             <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
             <Route path="/searchPageMuscic" element={<MusicSearchPage />} />

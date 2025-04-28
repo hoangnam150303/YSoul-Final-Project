@@ -88,7 +88,7 @@ export const BuyNFT = ({ id, visible, onClose }) => {
                   Price: {nftData.price} ETH
                 </p>
               )}
-              {nftData.addressWallet && (
+              {nftData.artistId.addressWallet && (
                 <>
                   <p className="text-sm text-gray-400 flex items-center">
                     <img

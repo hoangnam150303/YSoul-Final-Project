@@ -16,6 +16,8 @@ exports.createNFTService = async (userId, addressWallet, image, name, descriptio
             price:price,
             description:description,
             name:name});
+          console.log(nft);
+          
         if (nft) {
             return {success:true,message:"Create Success!"} // return success
         }
@@ -61,6 +63,7 @@ exports.getAllNFTsService = async (filter, search, page, limit) => {
     const nfts = await NFTs.find({...query,
       quantity: 1})
       .sort(sortCriteria)
+      .populate("artistId","addressWallet name avatar")
       .skip(skip)
       .limit(limitNumber);
 
