@@ -14,7 +14,7 @@ const Artwork = ({ filter, isHomePage }) => {
   const [totalNFT, setTotalNFT] = useState(0); // Default totalNFT is 0
   const fetchNFTs = async () => {
     try {
-      const response = await nftApi.getAllNFTs(search, filter, page, limit); // ← thêm page, limit
+      const response = await nftApi.getAllNFTs(search, filter, page, limit); // ← thêm page, limit      
       if (response.status === 200) {
         setNFTs(response.data.data);
         if (setTotalNFT) {

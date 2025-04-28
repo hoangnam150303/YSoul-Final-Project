@@ -4,6 +4,8 @@ const nftService = require('../../services/NFTService/nftService');
 exports.createNFT = async (req, res) => {
     try {
         const { addressWallet, name, description, price } = req.body; // get addressWallet, name, description, price from body
+        console.log(`createNFT`, req.body); // log createNFT and req.body
+        
         const userId = req.user.id; // get userId from user
         const image = req.file.path; // get image from file
         if (!userId || !addressWallet || !image || !name || !description || !price) { // if userId, addressWallet, image, name, description, price is empty
