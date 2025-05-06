@@ -58,6 +58,8 @@ exports.createFilm = async (req, res) => {
 exports.getAllFilm = async (req, res) => {
   try {
     const {typeFilm, category, sort, search,typeUser } = req.query;
+
+    
     const response = await filmService.getAllFilmService(
       typeFilm,
       category,

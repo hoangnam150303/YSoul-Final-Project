@@ -372,7 +372,7 @@ export const CRUDFilmPage = () => {
             cast: [],
             releaseYear: "",
             isForAllUser: false,
-            genre: [],
+            genre: "",
             small_image: "",
             large_image: "",
             trailer: "",
@@ -394,7 +394,7 @@ export const CRUDFilmPage = () => {
               formData.append("releaseYear", values.releaseYear);
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
-              formData.append("genre", JSON.stringify(values.genre));
+              formData.append("genre", values.genre);
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
               formData.append("age", values.age);
@@ -607,7 +607,6 @@ export const CRUDFilmPage = () => {
                   <div className="w-full flex flex-col items-start">
                     <Select
                       className="w-full"
-                      mode="multiple"
                       value={values.genre}
                       placeholder="Select genres"
                       style={{ flex: 1 }}
@@ -860,7 +859,7 @@ export const CRUDFilmPage = () => {
             releaseYear: film.releaseYear || "",
             isForAllUser: film.isForAllUsers,
             // Giả sử genre được lưu dưới dạng mảng, nếu không thì convert lại
-            genre: film.genre ? JSON.parse(film.genre) : [],
+            genre: film.genre || "",
             small_image: film.small_image || "",
             large_image: film.large_image || "",
             trailer: film.trailer || "",
@@ -1106,7 +1105,6 @@ export const CRUDFilmPage = () => {
                   <div className="w-full flex flex-col items-start">
                     <Select
                       className="w-full"
-                      mode="multiple"
                       placeholder="Select genres"
                       value={values.genre}
                       onChange={(value) => setFieldValue("genre", value)}

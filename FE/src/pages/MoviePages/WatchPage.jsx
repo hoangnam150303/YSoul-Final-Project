@@ -20,11 +20,13 @@ export const WatchPage = () => {
   const [film, setFilm] = useState({});
   const [isMovie, setIsMovie] = useState(true);
   const [episodes, setEpisodes] = useState([]);
-  const [video,setVideo] = useState([]);
+  const [video, setVideo] = useState([]);
   const movieId = useParams().movieId;
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
+  const [relatedFilm, setRelatedFilm] = useState([]);
   const [videoSelected, setVideoSelected] = useState("");
+  const [category, setCategory] = useState("");
   const dispatch = useDispatch();
   const isVip = useSelector((state) => state.user.vip);
   dispatch(getUserRequest());
@@ -37,22 +39,33 @@ export const WatchPage = () => {
   };
   const fetchFilm = async (id) => {
     const respone = await filmApi.getFilmById(id);
-    setVideo(respone.data.data.video);    
+    setVideo(respone.data.data.video);
     setFilm(respone.data.data);
-    
+    setCategory(respone.data.data.genre);
   };
-
+  const fetchAllFilm = async () => {
+    try {
+      const response = await filmApi.getAllFilm({
+        category: category,
+      });
+      setRelatedFilm(response.data.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleUpdateStatus = async (id, type, data) => {
     await filmApi.postUpdateStatusFilm(id, type, data, userId);
     fetchFilm(id);
   };
-  const handlePageChange = (pageNumber) => {    
+  const handlePageChange = (pageNumber) => {
     setPage(pageNumber);
   };
   useEffect(() => {
     fetchFilm(movieId);
-  
-  }, [movieId]);
+    if (category !== "") {
+      fetchAllFilm();
+    }
+  }, [movieId, category]);
 
   useEffect(() => {
     if (video.length > 1) {
@@ -60,13 +73,11 @@ export const WatchPage = () => {
       setTotalPage(video?.length);
     }
     if (film) {
-      console.log(film);
-      
-      if (isVip === false  && film?.isForAllUsers === false) {
-        navigate("/payment")
+      if (isVip === false && film?.isForAllUsers === false) {
+        navigate("/payment");
       }
     }
-  },[video,isVip]);
+  }, [video, isVip]);
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -148,20 +159,16 @@ export const WatchPage = () => {
         <div className="mt-12 max-w-5xl mx-auto relative">
           <h3 className="text-3xl font-bold">Similar Movies/Tv Show</h3>
           <div className="flex overflow-x-scroll scrollbar-hide gap-4 pb-4 group">
-            {Array(5)
-              .fill("")
-              .map((_, index) => (
-                <Link className="min-w-45 flex-none" key={index}>
-                  <img
-                    src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736953120/strangerthings_s3_fdp4gm.jpg"
-                    alt="small poster"
-                    className="w-full h-auto rounded-md"
-                  />
-                  <h4 className="mt-2 text-lg font-semibold">
-                    Stranger Things
-                  </h4>
-                </Link>
-              ))}
+            {relatedFilm.slice(0, 10).map((film, index) => (
+              <Link className="min-w-45 flex-none" key={index}>
+                <img
+                  src={film?.small_image}
+                  alt="small poster"
+                  className="w-32 h-48 object-cover rounded-md"
+                />
+                <h4 className="mt-2 text-lg font-semibold">{film.name}</h4>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
