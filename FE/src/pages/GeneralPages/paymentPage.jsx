@@ -3,6 +3,7 @@ import { Card, Button, message } from "antd";
 import paymentApi from "../../hooks/paymentApi";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserRequest } from "../../reducers/user";
+import { Link } from "react-router-dom";
 const PaymentPage = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const dispatch = useDispatch();
@@ -101,6 +102,14 @@ const PaymentPage = () => {
         <Button type="primary" className="mt-6" onClick={handleAcceptPayment}>
           Accept Payment
         </Button>
+        <Link to="/">
+          <Button type="default" className="mt-4">
+            Back to Home
+          </Button>
+        </Link>
+        <div className="mt-4 text-gray-500 text-sm">
+          Note: Please ensure that you have a valid payment method selected.
+        </div>
       </div>
     </div>
   );

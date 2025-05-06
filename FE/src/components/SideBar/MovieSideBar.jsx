@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import {
   AlignLeftOutlined,
   RightOutlined,
@@ -7,20 +8,15 @@ import {
   LineChartOutlined,
   WechatWorkOutlined,
   SearchOutlined,
-  UserSwitchOutlined,
-  MoreOutlined,
   HeartOutlined,
 } from "@ant-design/icons";
-import { Button, Drawer, Dropdown, Menu } from "antd";
-import { useEffect, useState } from "react";
-import { Link, NavLink, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { Button, Drawer } from "antd";
+import { useSelector } from "react-redux";
+
 export const MovieSideBar = ({ onToggle, isOpen }) => {
-  const [open, setOpen] = useState(false);
-  const id = useParams().id;
-  const [shopDetail, setShopDetail] = useState();
-  const role = useSelector((state) => state.user.role);
-  const dispatch = useDispatch();
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const userId = useSelector((state) => state.user.id);
+
   const Menus = [
     {
       title: "Profile",
@@ -54,17 +50,18 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
     },
   ];
 
-  // Tablet - Mobile - Ipad
-  const [openDrawer, setOpenDrawer] = useState(false);
   const showDrawer = () => {
     setOpenDrawer(true);
   };
+
   const onCloseDrawer = () => {
     setOpenDrawer(false);
   };
 
+  // Hàm logout tự xử lý
   const handleLogout = () => {
-    dispatch(logoutUser()); // Dispatch action logout
+    localStorage.removeItem("access_token"); // Xóa token khỏi localStorage
+    window.location.href = "/login"; // Điều hướng đến trang đăng nhập
   };
 
   return (
@@ -80,8 +77,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
             <Link to={"/"}>
               <img
                 src={
-                  shopDetail?.images[0] ||
-                  "https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
+                  "https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png" // avatar mặc định
                 }
                 alt="User"
                 className={`cursor-pointer duration-500 rounded-full w-16 h-16 my-2`}
@@ -118,19 +114,29 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
           ))}
         </ul>
         <div className="mt-auto p-4">
-          <Link to={`/login`}>
+          {userId !== null ? (
             <Button
               type="primary"
               className="w-full bg-black text-white px-3 py-2 rounded-full hover:bg-gray-800 duration-300 hover:text-white"
+              onClick={handleLogout}
             >
-              Login
+              Logout
             </Button>
-          </Link>
+          ) : (
+            <Link to={`/login`}>
+              <Button
+                type="primary"
+                className="w-full bg-black text-white px-3 py-2 rounded-full hover:bg-gray-800 duration-300 hover:text-white"
+              >
+                Login
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
       {/* Sidebar nhỏ (Tablet - Mobile - Ipad) */}
-      <div className="m-2 lg:hidden">
+      <div className="m-2 lg:hidden bg-black">
         <Button
           type="primary"
           onClick={showDrawer}
@@ -144,9 +150,9 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
           open={openDrawer}
           placement="left"
           width={225}
-          className="bg-black text-white"
+          className="bg-black text-white" // Giữ màu nền đen cho Drawer
+          bodyStyle={{ backgroundColor: "black" }} // Đảm bảo phần thân của Drawer cũng có nền đen
         >
-          <div className="w-64 h-20 mb-4">{/* Hình ảnh shop (nếu có) */}</div>
           <ul className="pt-6">
             {Menus.map((menu, index) => (
               <NavLink
@@ -166,8 +172,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
             ))}
           </ul>
           <div className="mt-auto p-4">
-            {role && role !== "" ? (
-              // Hiển thị nút Logout nếu role khác null
+            {userId !== null ? (
               <Button
                 type="primary"
                 className="w-full bg-black text-white px-3 py-2 rounded-full hover:bg-gray-800 duration-300 hover:text-white"
@@ -176,13 +181,14 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
                 Logout
               </Button>
             ) : (
-              // Hiển thị nút Login nếu role là null
-              <Button
-                type="primary"
-                className="w-full bg-black text-white px-3 py-2 rounded-full hover:bg-gray-800 duration-300 hover:text-white"
-              >
-                Login
-              </Button>
+              <Link to={`/login`}>
+                <Button
+                  type="primary"
+                  className="w-full bg-black text-white px-3 py-2 rounded-full hover:bg-gray-800 duration-300 hover:text-white"
+                >
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
         </Drawer>

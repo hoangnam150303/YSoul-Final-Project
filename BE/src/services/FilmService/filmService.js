@@ -109,7 +109,7 @@ exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
     let query = {};
 
     // Kiểm tra category trước khi thêm vào query
-    if (category && category !== "undefined") {
+    if (category && category !== "undefined") {      
       query.genre = category;
     }
 
@@ -147,7 +147,9 @@ exports.getAllFilmService = async (type, category, sort, search,typeUser) => {
 
     }
     else{
+      
       films = await Film.find(query).sort( { ...sortOption}).where({ isDeleted: false });
+     
       
     }
     return {
