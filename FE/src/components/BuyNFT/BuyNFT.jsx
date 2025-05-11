@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Button, message, Spin } from "antd";
 import nftApi from "../../hooks/nftApi";
 import { TransactionContext } from "../../context/TransactionContext";
-export const BuyNFT = ({ id, visible, onClose }) => {
+export const BuyNFT = ({ id, visible, onClose, onBought }) => {
   const [nftData, setNftData] = useState(null);
   const [loading, setLoading] = useState(false);
   const { formData, setFormData, sendTransaction } =
@@ -37,8 +37,19 @@ export const BuyNFT = ({ id, visible, onClose }) => {
       });
     }
   }, [nftData]);
-  const handleBuy = () => {
-    sendTransaction();
+  const handleBuy = async () => {
+    try {
+      await sendTransaction(); // Đợi giao dịch xong
+      const response = await nftApi.buyNFT(id); // Sau đó mới gọi API
+      if (response.status === 200) {
+        if (onBought) onBought(); // Gọi hàm fetch lại dữ liệu
+        message.success("Transaction successful");
+        onClose(); // Cuối cùng mới đóng modal
+      }
+    } catch (error) {
+      console.log(error);
+      message.error("Transaction failed");
+    }
   };
 
   // Nếu không visible thì không render gì

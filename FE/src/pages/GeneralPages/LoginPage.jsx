@@ -11,6 +11,8 @@ export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
+  const [loginComplete, setLoginComplete] = useState(false);
+
   const is_admin = useSelector((state) => state.user.is_admin);
 
   const navigate = useNavigate();
@@ -21,13 +23,7 @@ export const LoginPage = () => {
         message.success("Đăng nhập thành công");
         localStorage.setItem(constants.ACCESS_TOKEN, data.access_token);
         await dispatch(getUserRequest());
-        if (is_admin) {
-      
-          
-          navigate("/homePageAdmin");
-        } else {
-          navigate("/");
-        }
+        setLoginComplete(true);
       } else {
         message.error("login falied");
       }
@@ -36,6 +32,15 @@ export const LoginPage = () => {
       console.log(error, "error");
     }
   };
+  useEffect(() => {
+    if (loginComplete) {
+      if (is_admin) {
+        navigate("/homePageAdmin");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [loginComplete, is_admin]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -10,10 +10,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import { Pagination, Rate } from "antd";
 import filmApi from "../../hooks/filmApi";
-import { useDispatch, useSelector } from "react-redux";
-import { getUserRequest } from "../../reducers/user";
+import { useSelector } from "react-redux";
 export const WatchPage = () => {
-  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [favorite, setFavorite] = useState(false);
   const navigate = useNavigate();
@@ -27,9 +25,8 @@ export const WatchPage = () => {
   const [relatedFilm, setRelatedFilm] = useState([]);
   const [videoSelected, setVideoSelected] = useState("");
   const [category, setCategory] = useState("");
-  const dispatch = useDispatch();
   const isVip = useSelector((state) => state.user.vip);
-  dispatch(getUserRequest());
+  const userId = useSelector((state) => state.user.id);
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -54,8 +51,12 @@ export const WatchPage = () => {
     }
   };
   const handleUpdateStatus = async (id, type, data) => {
-    await filmApi.postUpdateStatusFilm(id, type, data, userId);
-    fetchFilm(id);
+    try {
+      await filmApi.postUpdateStatusFilm(id, type, data, userId);
+      fetchFilm(id);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const handlePageChange = (pageNumber) => {
     setPage(pageNumber);
@@ -108,7 +109,9 @@ export const WatchPage = () => {
               onClick={() => setFavorite((prev) => !prev)}
             />
             <ShareAltOutlined style={{ fontSize: "24px" }} />
-            <CommentOutlined style={{ fontSize: "24px" }} />
+            <Link to={`/socialHomePage`}>
+              <CommentOutlined style={{ fontSize: "24px" }} />
+            </Link>
             <Rate
               allowHalf
               key={film.totalRating}

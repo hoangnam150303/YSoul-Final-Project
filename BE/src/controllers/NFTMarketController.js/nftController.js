@@ -36,6 +36,7 @@ exports.getAllNFTs = async (req, res) => {
     }
 };
 
+// this function is for user, user can get NFTs by artist
 exports.getNFTByArtist = async (req, res) => {
     try {
 
@@ -50,6 +51,7 @@ exports.getNFTByArtist = async (req, res) => {
     }
 };
 
+// this function is for artist, artist can update NFT
 exports.updateNFT = async (req,res)=>{
     try {
         const { id } = req.params; // get id from params
@@ -65,6 +67,7 @@ exports.updateNFT = async (req,res)=>{
     }
 }
 
+// this function is for admin, admin can update status of NFT
 exports.updateStatusNFt = async (req,res)=>{
     try {
         const { id } = req.params; // get id from params
@@ -82,6 +85,7 @@ exports.updateStatusNFt = async (req,res)=>{
     }
 }
 
+// this function is for user, user can get NFT by id
 exports.getNFTById = async (req, res) => {
     try {
         const id = req.params.id; // get id from request params
@@ -99,6 +103,7 @@ exports.getNFTById = async (req, res) => {
     }
 };
 
+// this function is for user, user can buy NFT
 exports.buyNFT = async (req, res) => {
     try {
         const { id } = req.params; // get id from params
@@ -108,6 +113,8 @@ exports.buyNFT = async (req, res) => {
         }
         const response = await nftService.buyNFTService(id, userId); // call buyNFTService from nftService
         if (!response.success) { // if response is not success
+            console.log(response);
+            
             return res.status(401).json({ message: "Error! Please try again." });
         }
         return res.status(200).json(response); // return response

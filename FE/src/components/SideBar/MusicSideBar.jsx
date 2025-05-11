@@ -20,10 +20,10 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
   const role = useSelector((state) => state.user.role);
   const dispatch = useDispatch();
   const Menus = [
-    {
+     {
       title: "Profile",
       icon: <UserOutlined className="text-2xl" />,
-      path: `/`,
+      path: `/userprofile`,
     },
     {
       title: "Search",

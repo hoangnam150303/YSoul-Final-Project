@@ -88,13 +88,20 @@ export const TransactionProvider = ({ children }) => {
           urlImage,
           keyword
         );
+ 
+        setFormData({
+          addressTo: "",
+          amount: "",
+          keyword: "",
+          nftName: "",
+          urlImage: "",
+        });
       } catch (error) {
         console.error("Lỗi từ contract:", error);
         message.error("Blockchain interaction failed");
         return;
       }
-     await getAllTransactions();
-   
+      await getAllTransactions();
     } catch (error) {
       console.error(error);
       message.error("An unexpected error occurred");
@@ -129,7 +136,7 @@ export const TransactionProvider = ({ children }) => {
       try {
         const result = await transactionsContract.getAllTransactions();
         console.log(result);
-        
+
         setTransactions(result);
       } catch (error) {
         console.log(error);
