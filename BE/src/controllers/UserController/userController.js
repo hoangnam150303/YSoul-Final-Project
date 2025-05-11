@@ -73,16 +73,45 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
+// this function is get detail user
 exports.getDetailUser = async (req,res)=>{
   try {
-    const { id } = req.params;
-    const response = await userService.getDetailUserService(id);
-    if (!response.success) {
-      return res.status(401).json({ message: "Error! Please try again.", error });
+    const { id } = req.params; // get id from request params
+    const response = await userService.getDetailUserService(id); // call getDetailUserService from userService
+    if (!response.success) { // check if response is success
+      return res.status(401).json({ message: "Error! Please try again.", error }); // return error
     }
-   return res.status(200).json(response);
+   return res.status(200).json(response); // return response
   } catch (error) {
-    return res.status(401).json({ message: "Error! Please try again.", error });
+    return res.status(401).json({ message: "Error! Please try again.", error }); // return error
   }
 }
 
+// this function is get user store
+exports.getUserStore = async (req,res)=>{
+  try {
+    const userId = req.user.id; // get userId from request user
+    const response = await userService.getUserStoreService(userId); // call getUserService from userService
+    if (!response.success) {
+      return res.status(401).json({ message: "Error! Please try again.", error }); // return error
+    }
+   return res.status(200).json(response); // return response
+  } catch (error) {
+    return res.status(500).json({ message: "Error! Please try again.", error }); // return error
+  }
+}
+
+// this function is update avatar by nft image
+exports.updateAvatarNFT = async (req,res)=>{
+  try {
+      const userId = req.user.id; // get userId from request user
+      const {image} = req.body      
+      const response = await userService.updateAvatarNFTService(userId,image); // call getUserService from userService
+      if (!response.success) {
+        return res.status(401).json({ message: "Error! Please try again.", error }); // return error
+      }
+      return res.status(200).json(response); // return response
+  } catch (error) {
+    return res.status(500).json({ message: "Error! Please try again.", error }); // return error
+  }
+}

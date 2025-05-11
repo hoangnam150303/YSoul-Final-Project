@@ -207,18 +207,19 @@ exports.getNFTByIdService = async (id) => {
 }
 
 // this function is for user, user can buy NFT
-exports.buyNFTService = async (id, addressWallet) => {
+exports.buyNFTService = async (id, userId) => {
   try {
-    const validNFT = await NFTs.findById({id:id,quantity:1});
+    const validNFT = await NFTs.findById(id);  
     if (!validNFT) {
       return { success: false, message: "NFT not found" };
     }
     validNFT.quantity = 0;
     validNFT.save();
     const validUser = await conectPostgresDb.query(
-
-      `SELECT * FROM users WHERE id = ${id}'`
+      `SELECT * FROM users WHERE id = $1`,
+      [userId]
     );
+    
     if (validUser.rows.length === 0) {
       return { success: false, message: "User not found" };
     }
@@ -230,7 +231,7 @@ exports.buyNFTService = async (id, addressWallet) => {
       validUserStore.save();
     }
     return { success: true, data: validNFT };
-  } catch (error) {
+  } catch (error) {    
     return { success: false, message: error.toString() };
   }
 }

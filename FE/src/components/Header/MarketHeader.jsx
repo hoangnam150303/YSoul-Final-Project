@@ -9,11 +9,13 @@ const MarketHeader = () => {
   return (
     <div className="w-4/5 flex justify-between md:jusity-center items-center py-4 mx-auto">
       <div className="md:flex-[0.5] flex-initial justify-center items-center">
-        <img
-          className="w-32 cursor-pointer"
-          src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
-          alt="Logo"
-        />
+        <Link to="/">
+          <img
+            className="w-32 cursor-pointer"
+            src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
+            alt="Logo"
+          />
+        </Link>
       </div>
       <ul className="md:flex-[0.5] text-white md:flex hidden list-none justify-between items-center flex-initial">
         <Link to="/market">

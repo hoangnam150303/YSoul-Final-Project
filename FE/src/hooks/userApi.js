@@ -1,4 +1,5 @@
 
+
 import { axiosClient } from "../ApiConfig/apiConfig";
 const USER_API_ENDPOINT = "/api/v1/user";
 const userApi = {
@@ -29,6 +30,14 @@ const userApi = {
   getDetailUser:(id) =>{
     const url = `${USER_API_ENDPOINT}/getDetailUser/${id}`; // update album by id
     return axiosClient.get(url);
-  }
+  },
+  getUserStore:() =>{
+    const url = `${USER_API_ENDPOINT}/getUserStore`; // update album by id
+    return axiosClient.get(url);
+  },
+  updateAvatarNFT:(data) =>{
+    const url = `${USER_API_ENDPOINT}/updateUserAvatarNFT`; // update album by id
+    return axiosClient.put(url,data);
+  },
 };
 export default userApi;

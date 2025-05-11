@@ -1,6 +1,7 @@
 const { conectPostgresDb } = require("../../configs/database");
 const passwordHelpers = require("../../helpers/passWordHelpers");
 const Post = require("../../models/SocialModel/post")
+const userStore = require("../../models/UserModel/userStore");
 exports.getUserService = async (id) => {
   try {
     const user = await conectPostgresDb.query(
@@ -210,4 +211,33 @@ exports.getDetailUserService = async (id) => {
   }
 }
 
+exports.getUserStoreService = async (id)=>{
+  try {
+    const validUserStore = await userStore.find({user_id:id}).populate("NFTs","name image");
+    if (!validUserStore) {
+      return { success: false, message: "User not found" };
+    }
+    return { success: true, data: validUserStore };
+  } catch (error) {
+    return { success: false, message: "Error! Please try again.", error };
+  }
+}
 
+exports.updateAvatarNFTService = async (id,image) => {
+  try {
+    const user = await conectPostgresDb.query(
+      "SELECT * FROM users WHERE id = $1",
+      [id]
+    );
+    if (user.rows.length === 0) {
+      return { success: false, error: "User not found" };
+    }
+    await conectPostgresDb.query(
+      "UPDATE users SET avatar = $1 WHERE id = $2",
+      [image, id]
+    );
+    return { success: true };
+  } catch (error) {
+    return { success: false, error };
+  }
+};

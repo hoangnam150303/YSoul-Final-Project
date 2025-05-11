@@ -16,8 +16,7 @@ import { AlbumPage } from "../pages/MusicPages/AlbumPage";
 import { CRUDMusicPage } from "../pages/AdminPages/CRUDMusicPage";
 import { ArtistPage } from "../pages/MusicPages/ArtistPage";
 import UserProfilePage from "../pages/GeneralPages/UserProfilePage";
-import { useDispatch, useSelector } from "react-redux";
-import { getUserRequest } from "../reducers/user";
+import { useSelector } from "react-redux";
 import LoadingPage from "../components/Loading/LoadingPage";
 import { Suspense } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
@@ -35,62 +34,49 @@ import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 import SinglePage from "../pages/MusicPages/SinglePage";
 
 function App() {
-  const dispatch = useDispatch();
-  dispatch(getUserRequest());
-  const isVip = useSelector((state) => state.user.vip);
-  const is_admin = useSelector((state) => state.user.is_admin);
+  const { userId, vip: isVip, is_admin } = useSelector((state) => state.user);
 
   return (
     <Suspense fallback={<LoadingPage />}>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<MovieHomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/watchPage/:movieId" element={<WatchPage />} />
         <Route path="/search" element={<SearchPage />} />
-        <Route path="/*" element={<NotFoundPage />} />
-
-        <Route
-          path="/payment"
-          element={isVip ? <Navigate to="/" /> : <PaymentPage />}
-        />
         <Route
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}
         />
 
-        {is_admin && (
+        {/* WatchPage - chỉ cho người đã đăng nhập */}
+        <Route
+          path="/watchPage/:movieId"
+          element={userId !== "" ? <WatchPage /> : <Navigate to="/login" />}
+        />
+
+        {/* PaymentPage - nếu đã là VIP thì không cho vào */}
+        <Route
+          path="/payment"
+          element={isVip ? <Navigate to="/" /> : <PaymentPage />}
+        />
+
+        {/* Admin Routes */}
+        {is_admin ? (
           <>
             <Route path="/homePageAdmin" element={<AdminHomePage />} />
             <Route path="/movieAdmin" element={<CRUDFilmPage />} />
             <Route path="/musicAdmin" element={<CRUDMusicPage />} />
             <Route path="/userAccount" element={<AccountPage />} />
           </>
-        )}
+        ) : null}
 
-        {isVip ? (
-          <>
-            <Route path="/musicHomePage" element={<MusicHomePage />} />
-            <Route path="/userProfile" element={<UserProfilePage />} />
-            <Route path="/album/:id" element={<AlbumPage />} />
-            <Route path="/singlePage/:id" element={<SinglePage />} />
-            <Route path="/artist/:id" element={<ArtistPage />} />
-            <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
-            <Route path="/searchPageMuscic" element={<MusicSearchPage />} />
-            <Route path="/market" element={<HomePageMarket />} />
-            <Route path="/store/:id?" element={<StoreProfile />} />
-            <Route path="/socialHomePage" element={<SocialHomePage />} />
-            <Route path="/notification" element={<NotificationPage />} />
-            <Route path="/network" element={<NetworkPage />} />
-            <Route path="/profile/:id" element={<ProfileSocialPage />} />
-            <Route path="/post/:id" element={<PostPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/NFTs" element={<NFTsPage />} />
-            <Route path="/ArtistNFTs" element={<ArtistNFTsPage />} />
-          </>
-        ) : (
-          <Route path="*" element={<Navigate to="/payment" />} />
-        )}
+        {/* VIP Routes */}
+        {/* Routes yêu cầu VIP */}
+        <Route
+          path="/*"
+          element={isVip ? <VIPRoutes /> : <Navigate to="/payment" />}
+        />
       </Routes>
       <Footer />
     </Suspense>
@@ -98,3 +84,28 @@ function App() {
 }
 
 export default App;
+
+const VIPRoutes = () => (
+  <Routes>
+    <Route path="/musicHomePage" element={<MusicHomePage />} />
+    <Route path="/userProfile" element={<UserProfilePage />} />
+    <Route path="/album/:id" element={<AlbumPage />} />
+    <Route path="/singlePage/:id" element={<SinglePage />} />
+    <Route path="/artist/:id" element={<ArtistPage />} />
+    <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
+    <Route path="/searchPageMuscic" element={<MusicSearchPage />} />
+    <Route path="/market" element={<HomePageMarket />} />
+    <Route path="/store/:id?" element={<StoreProfile />} />
+    <Route path="/socialHomePage" element={<SocialHomePage />} />
+    <Route path="/notification" element={<NotificationPage />} />
+    <Route path="/network" element={<NetworkPage />} />
+    <Route path="/profile/:id" element={<ProfileSocialPage />} />
+    <Route path="/post/:id" element={<PostPage />} />
+    <Route path="/chat" element={<ChatPage />} />
+    <Route path="/NFTs" element={<NFTsPage />} />
+    <Route path="/ArtistNFTs" element={<ArtistNFTsPage />} />
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes>
+);
+
+export { VIPRoutes };
