@@ -57,8 +57,6 @@ exports.getAllArtistNFT = async (req, res) => {
       const {search,page,limit} = req.query;
       const response = await artistNFTService.getAllArtistNFT(search,page,limit);
       if (!response.success) {
-        console.log(response);
-        
           return res.status(400).json("Fail to get all artistNFT")
       }
       return res.status(200).json(response);

@@ -15,7 +15,7 @@ exports.createArtistService = async (name, avatar) => {
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -55,7 +55,7 @@ exports.updateArtistService = async (id, name, avatar) => {
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -81,7 +81,7 @@ exports.activeOrDeactiveArtistService = async (id) => {
     await conectPostgresDb.query(query); // update artist to database
     return { success: true };
   } catch (error) {
-    console.log(error);
+      return { success: false, message: error.toString() };
   }
 };
 
@@ -144,7 +144,7 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
     }
     return { success: true, artists: artists.rows }; // return success message and artists
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -175,7 +175,7 @@ exports.getArtistByIdService = async (id) => {
       albums: albums.rows,
     };
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -240,7 +240,7 @@ exports.interactArtistService = async (id, userId, type) => {
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
-    throw error;
+
+       return { success: false, message: error.toString() };
   }
 };

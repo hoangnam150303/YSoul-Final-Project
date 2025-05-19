@@ -65,7 +65,6 @@ exports.sendMessage = async (req, res) => {
     }
     const response = await messageService.sendMessageService(userId, id, text,image); // call sendMessageService from messageService
     if (!response.success) { // if response is not success
-      console.log(response);
       
       return res.status(400).json({ message: response.message }); // return error message
     }

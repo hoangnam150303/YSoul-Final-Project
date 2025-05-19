@@ -29,7 +29,7 @@ exports.createAlbumService = async (title, artistId, image, releaseYear) => {
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
+      return { success: false, message: error.toString() };
   }
 };
 
@@ -73,7 +73,7 @@ exports.updateAlbumService = async (
     );
     return { success: true };
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -102,7 +102,7 @@ exports.activeOrDeactiveAlbumService = async (id) => {
     );
     return { success: true }; // return success message
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -170,7 +170,7 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
     }
     return { success: true, albums: albums.rows };
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -199,7 +199,7 @@ exports.getAlbumByIdService = async (id) => {
       artist: artist.rows[0],
     };
   } catch (error) {
-    console.log(error);
+        return { success: false, message: error.toString() };
   }
 };
 
@@ -242,6 +242,6 @@ exports.interactAlbumService = async (id, type, userId) => {
 
     return { success: true };
   } catch (error) {
-    console.log(error);
+     return { success: false, message: error.toString() };
   }
 };

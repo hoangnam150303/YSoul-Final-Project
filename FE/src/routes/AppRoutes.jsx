@@ -18,7 +18,7 @@ import { ArtistPage } from "../pages/MusicPages/ArtistPage";
 import UserProfilePage from "../pages/GeneralPages/UserProfilePage";
 import { useSelector } from "react-redux";
 import LoadingPage from "../components/Loading/LoadingPage";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
 import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
@@ -34,8 +34,14 @@ import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 import SinglePage from "../pages/MusicPages/SinglePage";
 
 function App() {
-  const { userId, vip: isVip, is_admin } = useSelector((state) => state.user);
-
+  const {
+    id: userId,
+    vip: isVip,
+    is_admin,
+  } = useSelector((state) => state.user);
+  useEffect(() => {
+    console.log("User ID:", isVip);
+  }, [userId]);
   return (
     <Suspense fallback={<LoadingPage />}>
       <Routes>

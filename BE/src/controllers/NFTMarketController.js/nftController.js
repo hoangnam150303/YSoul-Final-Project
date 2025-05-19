@@ -3,9 +3,7 @@ const nftService = require('../../services/NFTService/nftService');
 // this function is for artist NFTs, artist can create new NFT
 exports.createNFT = async (req, res) => {
     try {
-        const { addressWallet, name, description, price } = req.body; // get addressWallet, name, description, price from body
-        console.log(`createNFT`, req.body); // log createNFT and req.body
-        
+        const { addressWallet, name, description, price } = req.body; // get addressWallet, name, description, price from body        
         const userId = req.user.id; // get userId from user
         const image = req.file.path; // get image from file
         if (!userId || !addressWallet || !image || !name || !description || !price) { // if userId, addressWallet, image, name, description, price is empty
@@ -113,8 +111,6 @@ exports.buyNFT = async (req, res) => {
         }
         const response = await nftService.buyNFTService(id, userId); // call buyNFTService from nftService
         if (!response.success) { // if response is not success
-            console.log(response);
-            
             return res.status(401).json({ message: "Error! Please try again." });
         }
         return res.status(200).json(response); // return response

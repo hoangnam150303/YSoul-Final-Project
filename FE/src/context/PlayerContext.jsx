@@ -9,10 +9,11 @@ const PlayerContextProvider = (props) => {
   const seekBg = useRef();
   const seekBar = useRef();
   const songId = useRef();
-
+  const loopedSongId = useRef(null);
   const [track, setTrack] = useState("");
   const [information, setInformation] = useState({});
   const [playStatus, setPlayStatus] = useState(false);
+
   const [listSong, setListSong] = useState(() => {
     const savedList = localStorage.getItem(contants.LIST_SONG);
     return savedList ? JSON.parse(savedList) : [];
@@ -84,22 +85,24 @@ const PlayerContextProvider = (props) => {
       console.log(error);
     }
   };
-  
 
   // Hàm chuyển đổi chế độ loop
   const handleSongLoop = () => {
     setSongLoop((prev) => {
       const newLoopState = !prev;
-      // Sử dụng key đồng nhất với useState: contants.IS_LOOP
       localStorage.setItem(contants.IS_LOOP, newLoopState);
+
+      if (newLoopState) {
+        loopedSongId.current = songId.current; // Ghi lại bài hiện tại khi bật loop
+      } else {
+        loopedSongId.current = null; // Tắt loop => reset
+      }
+
       return newLoopState;
     });
-    // Lưu ý: songLoop ở đây chưa được cập nhật ngay do setState bất đồng bộ
-  
   };
 
   // Dùng useEffect để log giá trị mới khi songLoop thay đổi
-
 
   useEffect(() => {
     localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
@@ -156,8 +159,12 @@ const PlayerContextProvider = (props) => {
         };
         // Khi bài nhạc kết thúc
         audioRef.current.onended = () => {
-
+          if (songLoop) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play();
+          } else {
             nextSong();
+          }
         };
       };
     }

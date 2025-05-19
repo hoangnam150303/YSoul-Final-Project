@@ -21,7 +21,6 @@ exports.getUserService = async (id) => {
     };
    
   } catch (error) {
-    console.log(error);
     return { success: false, error };
   }
 }
@@ -73,7 +72,7 @@ exports.getAllUsersService = async (filter, search,typeUser) => {
     
     return { success: true, users: sanitizedUsers };
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -99,7 +98,7 @@ exports.activeOrDeactiveUserService = async (id) => {
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -156,7 +155,6 @@ exports.updateUserProfileService = async (
     }
     return { success: true };
   } catch (error) {
-    console.log(error);
     return { success: false, error: error.message };
   }
 };
@@ -172,7 +170,7 @@ exports.getUserProfileService = async (id) => {
     }
     return { success: true, user: user.rows[0] };
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
     
   }
 }
@@ -206,7 +204,7 @@ exports.getDetailUserService = async (id) => {
     
     return { success: true, data:data};
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() };
     
   }
 }

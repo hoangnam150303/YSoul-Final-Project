@@ -12,7 +12,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const [loginComplete, setLoginComplete] = useState(false);
-
+  const user_id = useSelector((state) => state.user.id);
   const is_admin = useSelector((state) => state.user.is_admin);
 
   const navigate = useNavigate();
@@ -34,6 +34,8 @@ export const LoginPage = () => {
   };
   useEffect(() => {
     if (loginComplete) {
+      console.log(user_id);
+      
       if (is_admin) {
         navigate("/homePageAdmin");
       } else {

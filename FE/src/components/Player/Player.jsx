@@ -1,5 +1,4 @@
 import {
-
   CaretRightOutlined,
   HeartFilled,
   PauseOutlined,
@@ -26,12 +25,10 @@ export const Player = () => {
     isLoop,
   } = useContext(PlayerContext);
 
-  // Xử lý kéo chuột để tua
   const handleSeekMouseDown = (e) => {
     const rect = seekBg.current.getBoundingClientRect();
     const onMouseMove = (eMove) => {
       const offsetX = eMove.clientX - rect.left;
-      // Giới hạn giá trị từ 0 đến chiều rộng của thanh
       const percent = Math.max(0, Math.min(1, offsetX / rect.width));
       seekBar.current.style.width = percent * 100 + "%";
     };
@@ -50,59 +47,78 @@ export const Player = () => {
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  const formatTime = (minute, second) => {
+    const mm = minute?.toString().padStart(2, "0") || "00";
+    const ss = second?.toString().padStart(2, "0") || "00";
+    return `${mm}:${ss}`;
+  };
+
   return (
-    <div className="h-[10%] w-full bg-black flex justify-between items-center text-white px-96">
-      <div className="hidden lg:flex items-center gap-4">
-        <img className="w-12" src={information?.data?.image} alt="" />
-        <div>
-          <p>{information?.data?.title}</p>
-          <p>{information?.artistName}</p>
+    <div className="h-[90px] w-full bg-black text-white flex items-center justify-between px-10 lg:px-20 shadow-lg">
+      {/* Left: Song Info */}
+      <div className="flex items-center gap-4 w-[20%] min-w-[150px]">
+        <img
+          className="w-14 h-14 rounded object-cover"
+          src={information?.data?.image}
+          alt=""
+        />
+        <div className="flex flex-col">
+          <p className="text-sm font-semibold truncate w-[120px]">
+            {information?.data?.title}
+          </p>
+          <p className="text-xs text-gray-400 truncate w-[120px]">
+            {information?.artistName}
+          </p>
         </div>
       </div>
-      <div className="flex flex-col items-center gap-1 m-auto">
-        <div className="flex gap-4">
+
+      {/* Center: Controls & Seekbar */}
+      <div className="flex flex-col items-center w-[60%] max-w-[600px]">
+        {/* Controls */}
+        <div className="flex gap-4 items-center justify-center mb-2">
           <i className="bi bi-shuffle text-white cursor-pointer"></i>
-          <StepBackwardOutlined onClick={prevSong} className="w-4 cursor-pointer" />
+          <StepBackwardOutlined onClick={prevSong} className="cursor-pointer" />
           {playStatus ? (
-            <PauseOutlined onClick={pause} className="w-4 cursor-pointer" />
+            <PauseOutlined onClick={pause} className="cursor-pointer text-xl" />
           ) : (
-            <CaretRightOutlined onClick={play} className="w-4 cursor-pointer" />
-          )}
-          <StepForwardOutlined onClick={nextSong} className="w-4 cursor-pointer" />
-          {isLoop ? (
-            <RetweetOutlined
-              onClick={handleSongLoop}
-              className="w-4 cursor-pointer text-green-600"
-            />
-          ) : (
-            <RetweetOutlined
-              onClick={handleSongLoop}
-              className="w-4 cursor-pointer text-white"
+            <CaretRightOutlined
+              onClick={play}
+              className="cursor-pointer text-xl"
             />
           )}
+          <StepForwardOutlined onClick={nextSong} className="cursor-pointer" />
+          <RetweetOutlined
+            onClick={handleSongLoop}
+            className={`cursor-pointer ${
+              isLoop ? "text-green-500" : "text-white"
+            }`}
+          />
         </div>
-        <div className="flex items-center gap-5">
-          <p>
-            {time.currentTime?.minute}:{time.currentTime?.seconds}
+
+        {/* Seek bar */}
+        <div className="flex items-center gap-3 w-full">
+          <p className="text-xs w-[40px] text-right">
+            {formatTime(time.currentTime?.minute, time.currentTime?.seconds)}
           </p>
           <div
             ref={seekBg}
             onMouseDown={handleSeekMouseDown}
-            className="w-[60vw] max-w-[500px] bg-gray-300 rounded-full cursor-pointer"
+            className="flex-grow h-1 bg-gray-400 rounded-full cursor-pointer relative"
           >
-            <hr
+            <div
               ref={seekBar}
-              className="h-1 border-none w-0 bg-green-800 rounded-full"
+              className="h-full bg-green-600 rounded-full w-0"
             />
           </div>
-          <p>
-            {time.totalTime?.minute}:{time.totalTime?.seconds}
+          <p className="text-xs w-[40px] text-left">
+            {formatTime(time.totalTime?.minute, time.totalTime?.seconds)}
           </p>
         </div>
       </div>
-      <div className="hidden lg:flex items-center gap-2 opacity-75">
-      
-        <HeartFilled style={{ fontSize: "24px", color: "red" }} />
+
+      {/* Right: Like / Options */}
+      <div className="flex items-center justify-end gap-2 w-[20%] min-w-[100px]">
+        <HeartFilled style={{ fontSize: "22px", color: "red" }} />
       </div>
     </div>
   );

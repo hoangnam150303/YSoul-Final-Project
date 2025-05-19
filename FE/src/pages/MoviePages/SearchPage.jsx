@@ -129,7 +129,6 @@ export const SearchPage = () => {
     handleSearch();
     handleTypeChange(type);
     console.log(status);
-    
   }, [category, type, searchTerm, status]);
   return (
     <div className="bg-black min-h-screen text-white">
@@ -191,12 +190,12 @@ export const SearchPage = () => {
             size="large"
           />
         </div>
-        <Checkbox.Group
-          options={options}
-          defaultValue={["Pear"]}
-          onChange={onChange}
-          className="mb-4 bg-white p-4 rounded"
-        />
+        <div className="mb-4 bg-white p-4 rounded overflow-x-auto">
+          <div className="flex flex-wrap gap-4 min-w-[400px] text-black">
+            <Checkbox.Group options={options} onChange={onChange} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {results.length > 0 &&
             results.map((film, index) => (
