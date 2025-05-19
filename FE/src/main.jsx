@@ -12,6 +12,7 @@ import { TransactionProvider } from "./context/TransactionContext";
 import { ArtistNFTProvier } from "./context/ArtistNFTContext";
 import { SocketProvider } from "./context/SocketContext";
 import { ChatProvider } from "./context/ChatContext";
+
 const store = configStore();
 
 const clientId = import.meta.env.VITE_CLIENT_ID;

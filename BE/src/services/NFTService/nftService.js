@@ -16,14 +16,13 @@ exports.createNFTService = async (userId, addressWallet, image, name, descriptio
             price:price,
             description:description,
             name:name});
-          console.log(nft);
           
         if (nft) {
             return {success:true,message:"Create Success!"} // return success
         }
         return {success:false,message:"Create Fail!"} // return fail
     } catch (error) {
-        console.log(error);
+        return {success:false,message:error.toString()} // return error
         
     }
 }
@@ -74,7 +73,6 @@ exports.getAllNFTsService = async (filter, search, page, limit) => {
     }
     return { success: false, message: "Fail to get NFTs" };
   } catch (error) {
-    console.log(error);
     return { success: false, message: error.toString() };
   }
 };
@@ -146,7 +144,6 @@ exports.getNFTByArtistService = async (filter, search, typeUser, artistId, page,
       }
       return { success: false, message: "Fail to get NFTs" };
     } catch (error) {
-      console.log(error);
       return { success: false, message: error.toString() };
     }
   };
@@ -173,7 +170,6 @@ exports.updateNFTService = async (id, image, name, description, price) => {
   validNFT.save();
   return { success: true, data: validNFT };
   } catch (error) {
-    console.log(error);
     return { success: false, message: error.toString() };
     
   }
@@ -201,7 +197,7 @@ exports.getNFTByIdService = async (id) => {
     }
     return { success: true, data: validNFT };
   } catch (error) {
-   console.log(error);
+    return { success: false, message: error.toString() };
     
   }
 }

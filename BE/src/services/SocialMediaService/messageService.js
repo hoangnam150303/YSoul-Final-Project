@@ -47,8 +47,6 @@ exports.getAllConversationService = async (userId) => {
     
     return {success:true,data:conversation}
   } catch (error) {
-    console.log(error);
-    
     return {success:false,message: "Internal server error"}
   }
 }

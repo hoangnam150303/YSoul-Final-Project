@@ -7,6 +7,8 @@ const getUserRequest = () => {
     try {
       const response = await userApi.getUser();
       const user = response.data;      
+      console.log(user);
+      
       dispatch(getUser(user));
     } catch (error) {
       throw error;
@@ -16,7 +18,7 @@ const getUserRequest = () => {
 
 const logoutUser = () => {
   // Xóa thông tin người dùng trong localStorage
-  localStorage.removeItem("access_token"); // Hoặc token bạn lưu trữ
+  localStorage.clear();
   return {
     type: LOGOUT_USER,
   };

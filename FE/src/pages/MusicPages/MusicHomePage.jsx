@@ -77,6 +77,15 @@ export const MusicHomePage = () => {
                   <SingleSlider category={item.name} key={item.id} />
                 ))}
               </div>
+            ) : selectedType === "Album" ? (
+              <div className="mt-6">
+                <h4 className="w-full items-center font-semibold text-2xl pt-10 pl-60 pb-5">
+                  Album
+                </h4>
+                {category.map((item) => (
+                  <AlbumSlider category={item.name} key={item.id} />
+                ))}
+              </div>
             ) : (
               <div className="mt-6">
                 <h4 className="w-full items-center font-semibold text-2xl pt-10 pl-60 pb-5">

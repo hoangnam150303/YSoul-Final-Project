@@ -79,7 +79,6 @@ exports.getAllArtistNFT = async (search,page,limit) =>{
             }
             return {success:false,message:"Artist NFTs not found"} // return fail
     } catch (error) {
-        console.log(error);
         
         throw new Error(error); // return error
     }

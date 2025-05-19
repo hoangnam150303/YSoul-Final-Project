@@ -86,7 +86,6 @@ exports.updatePostService = async (id,content,film_id,single_id,image) =>{
         }
         return {success:false,message: "Post not updated"}; // return error message
     } catch (error) {
-        console.log(error);
         return {success:false,message: "Internal server"};
         
     }
@@ -183,7 +182,6 @@ exports.getPostByIdService = async (id) => {
         
         return {success:true,result}; // return success and result
     } catch (error) {
-        console.log(error);
         return {success:false,message: "Internal server error"};
     }
 }

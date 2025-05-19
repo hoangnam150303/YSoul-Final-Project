@@ -163,7 +163,10 @@ export const WatchPage = () => {
           <h3 className="text-3xl font-bold">Similar Movies/Tv Show</h3>
           <div className="flex overflow-x-scroll scrollbar-hide gap-4 pb-4 group">
             {relatedFilm.slice(0, 10).map((film, index) => (
-              <Link className="min-w-45 flex-none" key={index}>
+              <Link
+                className="min-w-45 flex-none"
+                to={`/watchPage/${film._id}`}
+              >
                 <img
                   src={film?.small_image}
                   alt="small poster"

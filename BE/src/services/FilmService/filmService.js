@@ -238,8 +238,6 @@ exports.updateFilmByIdService = async (
       }
       
       for (let i = 0; i < parsedTitle.length; i++) {
-        console.log(parsedTitle[i]);
-        
         if (parsedTitle[i].trim() !== "") {
           const episode = await Episode.create({
             title: parsedTitle[i],

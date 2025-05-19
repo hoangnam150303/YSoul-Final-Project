@@ -45,7 +45,7 @@ exports.createSingleService = async (
     }
     return { success: true }; // if single created, return success message
   } catch (error) {
-    console.log(error);
+       return { success: false, message: error.toString() };
   }
 };
 
@@ -107,7 +107,6 @@ exports.updateSingleService = async (
 
     return { success: true }; // if single created, return success message
   } catch (error) {
-    console.log(error);
 
     return { success: false, message: error.message };
   }
@@ -142,8 +141,6 @@ exports.activeOrDeactiveSingleService = async (id) => {
     }
     return { success: true }; // if single updated, return success message
   } catch (error) {
-    console.log(error);
-
     throw new Error(error.message);
   }
 };
@@ -172,7 +169,7 @@ exports.getSingleByIdService = async (id) => {
       artistName: artistName.rows[0].name,
     }; // if single exists, return single
   } catch (error) {
-    console.log(error);
+      return { success: false, message: error.toString() };
   }
 };
 
@@ -225,7 +222,6 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
         );
       }
     } else if (typeUser === "user") {
-      console.log(filterOptions);
       
       // if typeUser is user
       singles = await conectPostgresDb.query(
@@ -241,7 +237,7 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
     }
     return { success: true, singles: singles.rows }; // return success message and artists
   } catch (error) {
-    console.log(error);
+
 
     throw new Error("Error get all single");
   }
@@ -282,7 +278,7 @@ exports.interactSingleService = async (id, status, userId) => {
     }
     return { success: true }; // return success
   } catch (error) {
-    console.log(error);
+    return { success: false, message: error.toString() }; // return error
   }
 };
 
@@ -315,6 +311,6 @@ exports.nextSingleService = async (id) => {
       artistName: artistName.rows[0].name,
     };
   } catch (error) {
-    console.log(error);
+      return { success: false, message: error.toString() };
   }
 };
