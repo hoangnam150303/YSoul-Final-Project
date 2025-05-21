@@ -1,35 +1,49 @@
 import React, { useEffect, useState } from "react";
 import nftApi from "../../hooks/nftApi";
 import { BuyNFT } from "../BuyNFT/BuyNFT";
-import { Input, Pagination } from "antd";
+import { Input, message, Pagination } from "antd";
 import { Link } from "react-router-dom";
+import { HeartOutlined } from "@ant-design/icons"; // ✅ Thêm icon Heart
+import wishListApi from "../../hooks/wishListApi";
 const Artwork = ({ filter, isHomePage }) => {
   const [nfts, setNFTs] = useState([]);
   const [selectedNFTId, setSelectedNFTId] = useState(null);
   const [isBuyModalVisible, setIsBuyModalVisible] = useState(false);
-  const [search, setSearch] = useState(""); // Default search is empty string
+  const [search, setSearch] = useState("");
   const { Search } = Input;
-  const [page, setPage] = useState(1); // Default page is 1
-  const [limit, setLimit] = useState(8); // Default limit is 10
-  const [totalNFT, setTotalNFT] = useState(0); // Default totalNFT is 0
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(8);
+  const [totalNFT, setTotalNFT] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  
   const fetchNFTs = async () => {
     try {
-      const response = await nftApi.getAllNFTs(search, filter, page, limit); // ← thêm page, limit
+      const response = await nftApi.getAllNFTs(search, filter, page, limit);
       if (response.status === 200) {
         setNFTs(response.data.data);
         if (setTotalNFT) {
-          setTotalNFT(response.data.totalNft); // ← cập nhật tổng NFT
+          setTotalNFT(response.data.totalNft);
         }
       }
     } catch (error) {
       console.log(error);
     }
   };
+  const addToWishList = async (nftId) => {
+    try {
+      const response = await wishListApi.addToWishList("nft",nftId);
+      if (response.status === 200) {
+        setIsFavorite(true);
+        message.success("Add to wishlist successfully");
+      }
+    } catch (error) {
+      message.error("Failed to add to wishlist");
+    }
+  }
   useEffect(() => {
     fetchNFTs();
-  }, [search, filter, page, limit]); // Fetch NFTs whenever search or filter changes
+  }, [search, filter, page, limit]);
 
-  // Component Card hiển thị thông tin NFT
   const Card = ({ nft }) => (
     <div className="w-full shadow-xl shadow-black rounded-md overflow-hidden bg-gray-800 my-2 p-3">
       <img
@@ -51,15 +65,20 @@ const Artwork = ({ filter, isHomePage }) => {
           <small className="text-xs">Current Price</small>
           <p className="text-sm font-semibold">{nft.price || "0"} ETH</p>
         </div>
-        <button
-          className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1"
-          onClick={() => {
-            setSelectedNFTId(nft._id);
-            setIsBuyModalVisible(true);
-          }}
-        >
-          View Details
-        </button>
+        <div className="flex items-center gap-2">
+          {/* ❤️ icon trái tim */}
+          <HeartOutlined className="text-pink-500 text-base hover:scale-110 cursor-pointer" onClick={()=>addToWishList(nft._id)} />
+          {/* Nút View Details */}
+          <button
+            className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1"
+            onClick={() => {
+              setSelectedNFTId(nft._id);
+              setIsBuyModalVisible(true);
+            }}
+          >
+            View Details
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -71,7 +90,7 @@ const Artwork = ({ filter, isHomePage }) => {
           Latest Artworks
         </h4>
 
-        {isHomePage ? null : (
+        {!isHomePage && (
           <div className="flex justify-center my-6">
             <Search
               placeholder="Tìm kiếm NFT bạn yêu thích..."
@@ -128,7 +147,8 @@ const Artwork = ({ filter, isHomePage }) => {
           </div>
         )}
       </div>
-      {/* Render modal BuyNFT khi isBuyModalVisible là true */}
+
+      {/* Modal mua NFT */}
       {isBuyModalVisible && (
         <BuyNFT
           id={selectedNFTId}

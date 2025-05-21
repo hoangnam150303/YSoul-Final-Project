@@ -39,9 +39,6 @@ function App() {
     vip: isVip,
     is_admin,
   } = useSelector((state) => state.user);
-  useEffect(() => {
-    console.log("User ID:", isVip);
-  }, [userId]);
   return (
     <Suspense fallback={<LoadingPage />}>
       <Routes>

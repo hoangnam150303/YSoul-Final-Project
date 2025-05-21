@@ -6,9 +6,10 @@ import {
   StepBackwardOutlined,
   StepForwardOutlined,
 } from "@ant-design/icons";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { PlayerContext } from "../../context/PlayerContext";
-
+import wishListApi from "../../hooks/wishListApi";
+import { message } from "antd";
 export const Player = () => {
   const {
     audioRef,
@@ -24,7 +25,7 @@ export const Player = () => {
     handleSongLoop,
     isLoop,
   } = useContext(PlayerContext);
-
+  const [isFavorite, setIsFavorite] = useState(false);
   const handleSeekMouseDown = (e) => {
     const rect = seekBg.current.getBoundingClientRect();
     const onMouseMove = (eMove) => {
@@ -52,7 +53,41 @@ export const Player = () => {
     const ss = second?.toString().padStart(2, "0") || "00";
     return `${mm}:${ss}`;
   };
+  const addToWishList = async () => {
+    try {
+      console.log(information.data.id);
 
+      const response = await wishListApi.addToWishList(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        message.success("Added to wishlist");
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      message.error("Failed to add to wishlist");
+    }
+  };
+  const checkIsFavorite = async () => {
+    try {
+      const response = await wishListApi.checkIsFavourite(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+        setIsFavorite(response.data.isFavorite);
+      }
+    } catch (error) {
+      message.error("Failed to check wishlist status");
+    }
+  };
+  useEffect(() => {
+    if (information?.data?.id) {
+      checkIsFavorite();
+    }
+  }, [information]);
   return (
     <div className="h-[90px] w-full bg-black text-white flex items-center justify-between px-10 lg:px-20 shadow-lg">
       {/* Left: Song Info */}
@@ -118,7 +153,10 @@ export const Player = () => {
 
       {/* Right: Like / Options */}
       <div className="flex items-center justify-end gap-2 w-[20%] min-w-[100px]">
-        <HeartFilled style={{ fontSize: "22px", color: "red" }} />
+        <HeartFilled
+          style={{ fontSize: "22px", color: isFavorite ? "red" : "white" }}
+          onClick={() => addToWishList()}
+        />
       </div>
     </div>
   );

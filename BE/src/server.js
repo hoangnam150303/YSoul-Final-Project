@@ -22,7 +22,7 @@ const notificationRoute = require("./routes/SocialRoute/notificationRoutes");
 const authRoute = require("./routes/AuthenticateRoute/authenticateRoutes");
 const reviewerRoute = require("./routes/SocialRoute/reviewrRoutes");
 const messageRoute = require("./routes/SocialRoute/messageRoutes")
-
+const wishListRoute = require("./routes/WishListRoute/WishListRoute");
 
 const corsConfig = require("./configs/corsConfig");
 const { app, server } = require("./utils/socket");
@@ -64,6 +64,7 @@ app.use("/api/v1/post",postRoute);
 app.use("/api/v1/comment",commentRoute);
 app.use("/api/v1/notification",notificationRoute);
 app.use("/api/v1/message",messageRoute)
+app.use("/api/v1/wishList", wishListRoute);
 // Start server
 server.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
