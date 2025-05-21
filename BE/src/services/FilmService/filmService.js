@@ -1,5 +1,4 @@
 const Film = require("../../models/FilmModel/film");
-const wishList = require("../../models/wishList");
 const Episode = require("../../models/FilmModel/episode");
 exports.createFilmService = async (
   name,
@@ -324,9 +323,7 @@ exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
     } else if (type === "click") {
       film.countClick = (film.countClick || 0) + 1;
       await film.save();
-    } else if (type === "favourite") {
-      await wishList.create({ user_id: data, film_id: filmId });
-    }
+    } 
 
     return { success: true };
   } catch (error) {

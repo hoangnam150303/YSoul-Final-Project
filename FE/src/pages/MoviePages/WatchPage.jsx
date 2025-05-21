@@ -8,9 +8,10 @@ import {
 } from "@ant-design/icons";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
-import { Pagination, Rate } from "antd";
+import { message, Pagination, Rate } from "antd";
 import filmApi from "../../hooks/filmApi";
 import { useSelector } from "react-redux";
+import wishListApi from "../../hooks/wishListApi";
 export const WatchPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [favorite, setFavorite] = useState(false);
@@ -34,7 +35,7 @@ export const WatchPage = () => {
   const backHome = () => {
     navigate(`/`);
   };
-  const fetchFilm = async (id) => {
+  const fetchFilm = async (id) => {    
     const respone = await filmApi.getFilmById(id);
     setVideo(respone.data.data.video);
     setFilm(respone.data.data);
@@ -79,7 +80,33 @@ export const WatchPage = () => {
       }
     }
   }, [video, isVip]);
+  const addToWishList = async (id) => {
+    try {
+      const response = await wishListApi.addToWishList("film", id);
+      if (response.status === 200) {
+        message.success("Added to wishlist successfully");
+        setFavorite(true);
+      }
+    } catch (error) {
+      message.error("Failed to add to wishlist");
+    }
+  };
 
+  const checkIsFavorite = async (id) => {
+    try {
+      const response = await wishListApi.checkIsFavourite("film", id);
+      if (response.status === 200) {
+        setFavorite(response.data.isFavorite);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    if (movieId !== null && movieId !== undefined) {
+      checkIsFavorite(movieId);
+    }
+  }, [movieId]);
   return (
     <div className="bg-black min-h-screen text-white">
       <div className="z-50">
@@ -106,7 +133,7 @@ export const WatchPage = () => {
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled
               style={{ fontSize: "24px", color: favorite ? "red" : "white" }}
-              onClick={() => setFavorite((prev) => !prev)}
+              onClick={() => addToWishList(film?._id)}
             />
             <ShareAltOutlined style={{ fontSize: "24px" }} />
             <Link to={`/socialHomePage`}>
