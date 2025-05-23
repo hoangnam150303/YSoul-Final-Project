@@ -6,7 +6,6 @@ import { Footer } from "../components/Footer/Footer";
 import { WatchPage } from "../pages/MoviePages/WatchPage";
 import { SearchPage } from "../pages/MoviePages/SearchPage";
 import { NotFoundPage } from "../pages/GeneralPages/404";
-import { FavouriteMoviePage } from "../pages/MoviePages/FavouriteMoviePage";
 import { AdminHomePage } from "../pages/AdminPages/AdminHomePage";
 import { CRUDFilmPage } from "../pages/AdminPages/CRUDFilmPage";
 import PaymentPage from "../pages/GeneralPages/PaymentPage";
@@ -32,6 +31,7 @@ import ChatPage from "../pages/SocialMediaPage/ChatPage";
 import NFTsPage from "../pages/NFTMarketPlacePage/NFTsPage";
 import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 import SinglePage from "../pages/MusicPages/SinglePage";
+import FavouritePage from "../pages/GeneralPages/FavouritePage";
 
 function App() {
   const {
@@ -57,7 +57,7 @@ function App() {
           path="/watchPage/:movieId"
           element={userId !== "" ? <WatchPage /> : <Navigate to="/login" />}
         />
-
+        <Route path="/singlePage/:id" element={<SinglePage />} />
         {/* PaymentPage - nếu đã là VIP thì không cho vào */}
         <Route
           path="/payment"
@@ -93,9 +93,9 @@ const VIPRoutes = () => (
     <Route path="/musicHomePage" element={<MusicHomePage />} />
     <Route path="/userProfile" element={<UserProfilePage />} />
     <Route path="/album/:id" element={<AlbumPage />} />
-    <Route path="/singlePage/:id" element={<SinglePage />} />
+
     <Route path="/artist/:id" element={<ArtistPage />} />
-    <Route path="/favouriteMovie" element={<FavouriteMoviePage />} />
+    <Route path="/favourite" element={<FavouritePage />} />
     <Route path="/searchPageMuscic" element={<MusicSearchPage />} />
     <Route path="/market" element={<HomePageMarket />} />
     <Route path="/store/:id?" element={<StoreProfile />} />

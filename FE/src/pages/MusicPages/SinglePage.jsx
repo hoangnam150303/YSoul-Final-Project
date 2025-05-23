@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Button } from "antd";
 import {
   PlayCircleOutlined,
@@ -11,6 +11,7 @@ import {
   CopyOutlined,
 } from "@ant-design/icons";
 import { PlayerContext } from "../../context/PlayerContext";
+import { useParams } from "react-router-dom";
 
 const SinglePage = () => {
   const {
@@ -26,8 +27,10 @@ const SinglePage = () => {
     prevSong,
     handleSongLoop,
     isLoop,
+    updateSong,
+    track,
   } = useContext(PlayerContext);
-
+  const id = useParams().id;
   // Xử lý kéo seekBar
   const handleSeekMouseDown = (e) => {
     const rect = seekBg.current.getBoundingClientRect();
@@ -49,7 +52,9 @@ const SinglePage = () => {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   };
-
+  useEffect(() => {
+    updateSong(id);
+  }, [id]);
   return (
     <div className="min-h-screen bg-gray-800 flex flex-col items-center justify-center p-4">
       {/* Image */}
@@ -133,6 +138,7 @@ const SinglePage = () => {
         <CopyOutlined />
         <MenuOutlined />
       </div>
+      <audio preload="auto" ref={audioRef} src={track}></audio>
     </div>
   );
 };

@@ -15,7 +15,7 @@ const Artwork = ({ filter, isHomePage }) => {
   const [limit, setLimit] = useState(8);
   const [totalNFT, setTotalNFT] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
-  
+
   const fetchNFTs = async () => {
     try {
       const response = await nftApi.getAllNFTs(search, filter, page, limit);
@@ -29,17 +29,6 @@ const Artwork = ({ filter, isHomePage }) => {
       console.log(error);
     }
   };
-  const addToWishList = async (nftId) => {
-    try {
-      const response = await wishListApi.addToWishList("nft",nftId);
-      if (response.status === 200) {
-        setIsFavorite(true);
-        message.success("Add to wishlist successfully");
-      }
-    } catch (error) {
-      message.error("Failed to add to wishlist");
-    }
-  }
   useEffect(() => {
     fetchNFTs();
   }, [search, filter, page, limit]);
@@ -66,9 +55,6 @@ const Artwork = ({ filter, isHomePage }) => {
           <p className="text-sm font-semibold">{nft.price || "0"} ETH</p>
         </div>
         <div className="flex items-center gap-2">
-          {/* ❤️ icon trái tim */}
-          <HeartOutlined className="text-pink-500 text-base hover:scale-110 cursor-pointer" onClick={()=>addToWishList(nft._id)} />
-          {/* Nút View Details */}
           <button
             className="shadow-lg shadow-black text-sm bg-[#e32970] hover:bg-[#bd255f] rounded-full px-1.5 py-1"
             onClick={() => {
