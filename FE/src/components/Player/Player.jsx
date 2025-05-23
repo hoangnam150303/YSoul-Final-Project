@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { PlayerContext } from "../../context/PlayerContext";
 import wishListApi from "../../hooks/wishListApi";
 import { message } from "antd";
-export const Player = () => {
+export const Player = ({invisible}) => {
   const {
     audioRef,
     seekBar,

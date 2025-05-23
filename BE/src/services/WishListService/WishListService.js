@@ -68,6 +68,8 @@ exports.getWishListService = async (user_id) => {
         }
         return {success:true, data: wishList}; // Return the wishlist data
     } catch (error) {
+        console.log(error);
+        
         return {success: false}; // If an error occurs, return false
     }
 }

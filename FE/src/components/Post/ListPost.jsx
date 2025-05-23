@@ -499,30 +499,25 @@ export const ListPost = ({ type }) => {
             {/* Hiển thị link phim hoặc nhạc */}
             {post.film_id ? (
               <div className="mt-3">
-                <a
-                  href={`http://localhost:5173/watchPage/${post.film_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center  hover:text-blue-400 transition duration-200"
-                >
+                <Link to={`/singlePage/${post.single_id}`}>
                   🎬
                   <span className="ml-2 underline text-white">
                     Click here to explore
                   </span>
-                </a>
+                </Link>
               </div>
             ) : (
               <div className="mt-3">
                 <a
-                  // href={mediaLink.url}
+                  href={`http://localhost:5173/singlePage/${post.single_id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center  hover:text-blue-400 transition duration-200"
                 >
-                  {/* {mediaLink.type === "movie" ? "🎬" : "🎵"}{" "} */}
-                  {/* <span className="ml-2 underline text-white">
-                    {mediaLink.title} Click here to explore
-                  </span> */}
+                  🎵
+                  <span className="ml-2 underline text-white">
+                    Click here to explore
+                  </span>
                 </a>
               </div>
             )}

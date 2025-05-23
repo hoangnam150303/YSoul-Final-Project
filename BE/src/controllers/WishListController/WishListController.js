@@ -40,6 +40,8 @@ exports.getWishList = async (req, res) => {
         const user_id = req.user.id; // Extracting user ID from the request object
         const response = await WishListService.getWishListService(user_id); // Calling the service to get the wishlist
         if (!response.success) { // If the response is false, it means the wishlist was not retrieved successfully
+            console.log(response);
+            
             return res.status(400).json({
                 status: false,
                 message: "Error retrieving wishlist",
