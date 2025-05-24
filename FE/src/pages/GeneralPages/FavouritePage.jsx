@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import wishListApi from "../../hooks/wishListApi";
 import { Card, Spin, message } from "antd";
-
+import { Link } from "react-router-dom";
 const FavouritePage = () => {
   const [films, setFilms] = useState([]);
   const [singles, setSingles] = useState([]);
@@ -15,6 +15,7 @@ const FavouritePage = () => {
         const data = response.data.data;
         setFilms(data.film_id || []);
         setSingles(data.single || []);
+        console.log(data.single);
       } else {
         message.error("Failed to load wishlist");
       }
@@ -43,19 +44,21 @@ const FavouritePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {films.length > 0 ? (
                 films.map((film, idx) => (
-                  <Card
-                    key={idx}
-                    title={<span className="text-white">{film.name}</span>}
-                    cover={
-                      <img
-                        alt={film.name}
-                        src={film.small_image}
-                        className="h-48 object-cover rounded-t"
-                      />
-                    }
-                    className="bg-gray-800 text-white"
-                    bordered={false}
-                  />
+                  <Link to={`/watchPage/${film._id}`}>
+                    <Card
+                      key={idx}
+                      title={<span className="text-white">{film.name}</span>}
+                      cover={
+                        <img
+                          alt={film.name}
+                          src={film.small_image}
+                          className="h-48 object-cover rounded-t"
+                        />
+                      }
+                      className="bg-gray-800 text-white"
+                      bordered={false}
+                    />
+                  </Link>
                 ))
               ) : (
                 <p className="text-gray-400">No favorite films yet.</p>
@@ -68,19 +71,21 @@ const FavouritePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
               {singles.length > 0 ? (
                 singles.map((single, idx) => (
-                  <Card
-                    key={idx}
-                    title={<span className="text-white">{single.title}</span>}
-                    cover={
-                      <img
-                        alt={single.title}
-                        src={single.image}
-                        className="h-48 object-cover rounded-t"
-                      />
-                    }
-                    className="bg-gray-800 text-white"
-                    bordered={false}
-                  />
+                  <Link to={`/singlePage/${single.single_id}`}>
+                    <Card
+                      key={idx}
+                      title={<span className="text-white">{single.title}</span>}
+                      cover={
+                        <img
+                          alt={single.title}
+                          src={single.image}
+                          className="h-48 object-cover rounded-t"
+                        />
+                      }
+                      className="bg-gray-800 text-white"
+                      bordered={false}
+                    />
+                  </Link>
                 ))
               ) : (
                 <p className="text-gray-400">No favorite music yet.</p>
