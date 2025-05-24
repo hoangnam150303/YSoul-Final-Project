@@ -10,7 +10,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { PlayerContext } from "../../context/PlayerContext";
 import wishListApi from "../../hooks/wishListApi";
 import { message } from "antd";
-export const Player = ({invisible}) => {
+export const Player = ({ invisible }) => {
   const {
     audioRef,
     seekBar,
@@ -55,8 +55,6 @@ export const Player = ({invisible}) => {
   };
   const addToWishList = async () => {
     try {
-      console.log(information.data.id);
-
       const response = await wishListApi.addToWishList(
         "single",
         information.data.id
@@ -79,8 +77,20 @@ export const Player = ({invisible}) => {
         console.log(response.data);
         setIsFavorite(response.data.isFavorite);
       }
+    } catch (error) {}
+  };
+  const deleteItemFromWishList = async () => {
+    try {
+      const response = await wishListApi.deleteItemFromWishList(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        message.success("Removed from wishlist");
+        setIsFavorite(false);
+      }
     } catch (error) {
-      message.error("Failed to check wishlist status");
+      message.error("Failed to remove from wishlist");
     }
   };
   useEffect(() => {
@@ -155,7 +165,9 @@ export const Player = ({invisible}) => {
       <div className="flex items-center justify-end gap-2 w-[20%] min-w-[100px]">
         <HeartFilled
           style={{ fontSize: "22px", color: isFavorite ? "red" : "white" }}
-          onClick={() => addToWishList()}
+          onClick={() => {
+            isFavorite ? deleteItemFromWishList() : addToWishList();
+          }}
         />
       </div>
     </div>

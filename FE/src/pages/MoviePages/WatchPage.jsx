@@ -35,7 +35,7 @@ export const WatchPage = () => {
   const backHome = () => {
     navigate(`/`);
   };
-  const fetchFilm = async (id) => {    
+  const fetchFilm = async (id) => {
     const respone = await filmApi.getFilmById(id);
     setVideo(respone.data.data.video);
     setFilm(respone.data.data);
@@ -62,6 +62,20 @@ export const WatchPage = () => {
   const handlePageChange = (pageNumber) => {
     setPage(pageNumber);
   };
+  const deleteItemFromWishList = async () => {
+    try {
+      const response = await wishListApi.deleteItemFromWishList(
+        "film",
+        movieId
+      );
+      if (response.status === 200) {
+        message.success("Removed from wishlist");
+        setFavorite(false);
+      }
+    } catch (error) {
+      message.error("Failed to remove from wishlist");
+    }
+  };
   useEffect(() => {
     fetchFilm(movieId);
     if (category !== "") {
@@ -80,9 +94,9 @@ export const WatchPage = () => {
       }
     }
   }, [video, isVip]);
-  const addToWishList = async (id) => {
+  const addToWishList = async () => {
     try {
-      const response = await wishListApi.addToWishList("film", id);
+      const response = await wishListApi.addToWishList("film", movieId);
       if (response.status === 200) {
         message.success("Added to wishlist successfully");
         setFavorite(true);
@@ -133,7 +147,7 @@ export const WatchPage = () => {
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled
               style={{ fontSize: "24px", color: favorite ? "red" : "white" }}
-              onClick={() => addToWishList(film?._id)}
+              onClick={favorite ? deleteItemFromWishList : addToWishList}
             />
             <ShareAltOutlined style={{ fontSize: "24px" }} />
             <Link to={`/socialHomePage`}>

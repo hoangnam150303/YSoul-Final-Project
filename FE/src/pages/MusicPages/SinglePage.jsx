@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import { Button } from "antd";
+import React, { useContext, useEffect, useState } from "react";
+import { Button, message } from "antd";
 import {
   PlayCircleOutlined,
   PauseCircleOutlined,
@@ -9,9 +9,13 @@ import {
   MenuOutlined,
   MinusOutlined,
   CopyOutlined,
+  RetweetOutlined,
+  HeartFilled,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { PlayerContext } from "../../context/PlayerContext";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import wishListApi from "../../hooks/wishListApi";
 
 const SinglePage = () => {
   const {
@@ -31,6 +35,7 @@ const SinglePage = () => {
     track,
   } = useContext(PlayerContext);
   const id = useParams().id;
+  const [isFavorite, setIsFavorite] = useState(false);
   // Xử lý kéo seekBar
   const handleSeekMouseDown = (e) => {
     const rect = seekBg.current.getBoundingClientRect();
@@ -52,6 +57,53 @@ const SinglePage = () => {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   };
+  const addToWishList = async () => {
+    try {
+      const response = await wishListApi.addToWishList(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        message.success("Added to wishlist");
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      message.error("Failed to add to wishlist");
+    }
+  };
+  const checkIsFavorite = async () => {
+    try {
+      const response = await wishListApi.checkIsFavourite(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        console.log(response.data);
+        setIsFavorite(response.data.isFavorite);
+      }
+    } catch (error) {
+      message.error("Failed to check wishlist status");
+    }
+  };
+  const deleteItemFromWishList = async () => {
+    try {
+      const response = await wishListApi.deleteItemFromWishList(
+        "single",
+        information.data.id
+      );
+      if (response.status === 200) {
+        message.success("Removed from wishlist");
+        setIsFavorite(false);
+      }
+    } catch (error) {
+      message.error("Failed to remove from wishlist");
+    }
+  };
+  useEffect(() => {
+    if (information?.data?.id) {
+      checkIsFavorite();
+    }
+  }, [information]);
   useEffect(() => {
     updateSong(id);
   }, [id]);
@@ -108,7 +160,10 @@ const SinglePage = () => {
 
       {/* Controls */}
       <div className="flex items-center justify-between w-full max-w-md text-white mt-4">
-        <HeartOutlined className="text-2xl" />
+        <HeartFilled
+          style={{ fontSize: "22px", color: isFavorite ? "red" : "white" }}
+          onClick={isFavorite ? deleteItemFromWishList : addToWishList}
+        />
         <StepBackwardOutlined
           onClick={prevSong}
           className="text-2xl cursor-pointer"
@@ -130,12 +185,20 @@ const SinglePage = () => {
           onClick={nextSong}
           className="text-2xl cursor-pointer"
         />
-        <MinusOutlined className="text-2xl" />
+        <RetweetOutlined
+          className={`cursor-pointer ${
+            isLoop ? "text-green-500" : "text-white"
+          }`}
+          onClick={handleSongLoop}
+        />
       </div>
 
       {/* Bottom Icons */}
       <div className="flex items-center justify-between w-full max-w-md text-gray-400 text-xl mt-6">
-        <CopyOutlined />
+        <Link to={"/musicHomePage"}>
+          <HomeOutlined />
+        </Link>
+
         <MenuOutlined />
       </div>
       <audio preload="auto" ref={audioRef} src={track}></audio>

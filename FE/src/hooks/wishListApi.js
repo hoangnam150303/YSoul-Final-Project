@@ -14,5 +14,9 @@ const wishListApi = {
     const url = `${WISHLIST_API_ENDPOINT}/getWishList`;
     return axiosClient.get(url);
   },
+  deleteItemFromWishList: (type, id) => {
+    const url = `${WISHLIST_API_ENDPOINT}/deleteWishList/${type}/${id}`;
+    return axiosClient.put(url);
+  },
 };
 export default wishListApi;
