@@ -15,9 +15,9 @@ import { AlbumPage } from "../pages/MusicPages/AlbumPage";
 import { CRUDMusicPage } from "../pages/AdminPages/CRUDMusicPage";
 import { ArtistPage } from "../pages/MusicPages/ArtistPage";
 import UserProfilePage from "../pages/GeneralPages/UserProfilePage";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import LoadingPage from "../components/Loading/LoadingPage";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { AccountPage } from "../pages/AdminPages/AccountPage";
 import { MusicSearchPage } from "../pages/MusicPages/MusicSearchPage";
 import HomePageMarket from "../pages/NFTMarketPlacePage/HomePageMarket";
@@ -33,16 +33,38 @@ import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 import SinglePage from "../pages/MusicPages/SinglePage";
 import FavouritePage from "../pages/GeneralPages/FavouritePage";
 
-function App() {
-  const {
-    id: userId,
-    vip: isVip,
-    is_admin,
-  } = useSelector((state) => state.user);
+import { getUserRequest } from "../reducers/user";
+function AppRoutes() {
+  const dispatch = useDispatch();
+
+  const [hasFetchedUser, setHasFetchedUser] = useState(false);
+
+  const userId = useSelector((state) => state.user.id);
+  const isVip = useSelector((state) => state.user.vip);
+  const is_admin = useSelector((state) => state.user.is_admin);
+
+  const isLoggedIn = userId !== null && userId !== undefined && userId !== 0;
+
+  // ✅ Sau khi redux-persist khôi phục xong, ta fetch lại user (1 lần duy nhất)
+  useEffect(() => {
+    const fetchUserOnce = async () => {
+      try {
+        await dispatch(getUserRequest());
+        setHasFetchedUser(true);
+      } catch (err) {
+        setHasFetchedUser(true); // vẫn set true để không kẹt mãi
+      }
+    };
+    fetchUserOnce();
+  }, [dispatch]);
+
+  // ⏳ Trong lúc chưa fetch xong user, render loading
+  if (!hasFetchedUser) return <LoadingPage />;
+
   return (
     <Suspense fallback={<LoadingPage />}>
       <Routes>
-        {/* Public Routes */}
+        {/* Public */}
         <Route path="/" element={<MovieHomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
@@ -51,34 +73,52 @@ function App() {
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}
         />
+        <Route path="/singlePage/:id" element={<SinglePage />} />
 
-        {/* WatchPage - chỉ cho người đã đăng nhập */}
+        {/* Login required */}
         <Route
           path="/watchPage/:movieId"
-          element={userId !== "" ? <WatchPage /> : <Navigate to="/login" />}
+          element={isLoggedIn ? <WatchPage /> : <Navigate to="/login" />}
         />
-        <Route path="/singlePage/:id" element={<SinglePage />} />
-        {/* PaymentPage - nếu đã là VIP thì không cho vào */}
         <Route
           path="/payment"
-          element={isVip ? <Navigate to="/" /> : <PaymentPage />}
+          element={
+            isLoggedIn ? (
+              isVip ? (
+                <Navigate to="/" />
+              ) : (
+                <PaymentPage />
+              )
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
 
-        {/* Admin Routes */}
-        {is_admin ? (
+        {/* Admin */}
+        {isLoggedIn && is_admin && (
           <>
             <Route path="/homePageAdmin" element={<AdminHomePage />} />
             <Route path="/movieAdmin" element={<CRUDFilmPage />} />
             <Route path="/musicAdmin" element={<CRUDMusicPage />} />
             <Route path="/userAccount" element={<AccountPage />} />
           </>
-        ) : null}
+        )}
 
-        {/* VIP Routes */}
-        {/* Routes yêu cầu VIP */}
+        {/* VIP */}
         <Route
           path="/*"
-          element={isVip ? <VIPRoutes /> : <Navigate to="/payment" />}
+          element={
+            isLoggedIn ? (
+              isVip ? (
+                <VIPRoutes />
+              ) : (
+                <Navigate to="/payment" />
+              )
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
         />
       </Routes>
       <Footer />
@@ -86,14 +126,14 @@ function App() {
   );
 }
 
-export default App;
+export default AppRoutes;
 
+// VIP-only routes
 const VIPRoutes = () => (
   <Routes>
     <Route path="/musicHomePage" element={<MusicHomePage />} />
     <Route path="/userProfile" element={<UserProfilePage />} />
     <Route path="/album/:id" element={<AlbumPage />} />
-
     <Route path="/artist/:id" element={<ArtistPage />} />
     <Route path="/favourite" element={<FavouritePage />} />
     <Route path="/searchPageMuscic" element={<MusicSearchPage />} />

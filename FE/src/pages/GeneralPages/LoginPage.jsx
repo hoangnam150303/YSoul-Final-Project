@@ -29,13 +29,10 @@ export const LoginPage = () => {
       }
     } catch (error) {
       message.error("Lỗi đăng nhập.");
-      console.log(error, "error");
     }
   };
   useEffect(() => {
     if (loginComplete) {
-      console.log(user_id);
-      
       if (is_admin) {
         navigate("/homePageAdmin");
       } else {
@@ -73,7 +70,7 @@ export const LoginPage = () => {
           message.error("Đăng nhập thất bại, thử lại");
         }
       } catch (error) {
-        console.log(error);
+
 
         if (error.response) {
           message.error(error.response.data.message);

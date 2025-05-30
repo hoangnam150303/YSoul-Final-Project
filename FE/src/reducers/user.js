@@ -6,7 +6,7 @@ const getUserRequest = () => {
   return async (dispatch) => {
     try {
       const response = await userApi.getUser();
-      const user = response.data;        
+      const user = response.data;
       dispatch(getUser(user));
     } catch (error) {
       throw error;
@@ -29,7 +29,13 @@ const getUser = (user) => {
   };
 };
 
-const initialState = { is_admin: false, name: "", id: 0, vip: false,avatar:"" };
+const initialState = {
+  is_admin: false,
+  name: "",
+  id: 0,
+  vip: false,
+  avatar: "",
+};
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {

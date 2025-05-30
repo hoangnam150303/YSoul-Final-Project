@@ -13,10 +13,11 @@ import {
 import { Button, Drawer } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../reducers/user";
-
+import { getUserRequest } from "../../reducers/user";
 export const MovieSideBar = ({ onToggle, isOpen }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const userId = useSelector((state) => state.user.id);
+  const dispatch = useDispatch();
   const Menus = [
     {
       title: "Profile",
@@ -57,10 +58,11 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
   const onCloseDrawer = () => {
     setOpenDrawer(false);
   };
-
+  useEffect(() => {
+    console.log(`User ID: ${userId}`);
+  }, [userId]);
   // Hàm logout tự xử lý
   const handleLogout = () => {
-    console.log(userId);
     dispatch(logoutUser()); // Đầu tiên là reset Redux
     setTimeout(() => {
       window.location.href = "/login"; // Redirect sau vài ms để đảm bảo Redux cập nhật xong
