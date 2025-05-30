@@ -11,6 +11,7 @@ export const SocialHeader = () => {
   const [newNotification, setNewNotification] = useState("");
   const userId = useSelector((state) => state.user.id);
   const socket = useSocket();
+
   const getNotification = async () => {
     try {
       const response = await notificationApi.getNotification("isNotRead");
@@ -19,10 +20,9 @@ export const SocialHeader = () => {
       console.log(error);
     }
   };
+
   useEffect(() => {
     if (socket) {
-      console.log(socket);
-      
       socket.on("new-notification", (notification) => {
         setNewNotification(notification);
       });
@@ -34,77 +34,66 @@ export const SocialHeader = () => {
   }, [newNotification]);
 
   return (
-    <nav className="gradient-bg-hero shadow-md sticky top-0 z-10">
+    <nav className="gradient-bg-hero shadow-md sticky top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
+        <div className="flex flex-wrap justify-between items-center py-3">
           {/* Logo */}
-          <Link to="/">
+          <Link to="/" className="w-24 md:w-36">
             <img
-              className="h-16 w-full rounded"
+              className="h-12 md:h-16 w-auto object-contain rounded"
               src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
               alt="logo"
             />
           </Link>
 
           {/* Navigation Icons */}
-          <div className="flex items-center gap-5 md:gap-6">
-            {/* Home */}
-            <Link
-              to="/socialHomePage"
-              className="flex flex-col items-center text-white"
-            >
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 items-center text-white text-sm">
+            <Link to="/socialHomePage" className="flex flex-col items-center">
               <HomeOutlined style={{ fontSize: "20px" }} />
-              <span className="text-xs hidden md:block">Home</span>
+              <span className="hidden md:block text-xs">Home</span>
             </Link>
 
-            {/* My Network */}
-            <Link
-              to="/network"
-              className="flex flex-col items-center text-white relative"
-            >
-              <i className="bi bi-people" style={{ fontSize: "20px" }}></i>
-              <span className="text-xs hidden md:block">My Network</span>
+            <Link to="/network" className="flex flex-col items-center relative">
+              <i className="bi bi-people text-lg"></i>
+              <span className="hidden md:block text-xs">Network</span>
             </Link>
-            {/* My Chat */}
-            <Link
-              to="/chat"
-              className="flex flex-col items-center text-white relative"
-            >
-              <i className="bi bi-chat-dots" style={{ fontSize: "20px" }}></i>
-              <span className="text-xs hidden md:block">My Chat</span>
+
+            <Link to="/chat" className="flex flex-col items-center relative">
+              <i className="bi bi-chat-dots text-lg"></i>
+              <span className="hidden md:block text-xs">Chat</span>
             </Link>
-            {/* Notifications */}
+
+            {/* Notification */}
             <div
               className="relative"
               onMouseEnter={() => setShowNotifications(true)}
               onMouseLeave={() => setShowNotifications(false)}
             >
-              <Link
-                to="/notification"
-                className="flex flex-col items-center text-white relative"
-              >
+              <Link to="/notification" className="flex flex-col items-center relative">
                 <BellOutlined style={{ fontSize: "20px" }} />
-                <span className="text-xs hidden md:block">Notifications</span>
-                <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {notification.length}
-                </span>
+                <span className="hidden md:block text-xs">Notification</span>
+                {notification.length > 0 && (
+                  <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {notification.length}
+                  </span>
+                )}
               </Link>
 
-              {/* Submenu hiển thị khi hover */}
+              {/* Dropdown */}
               {showNotifications && notification.length > 0 && (
-                <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg p-2 z-20">
-                  <ul className="text-gray-700">
+                <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg p-2 z-50 max-h-96 overflow-y-auto">
+                  <ul className="text-gray-700 text-sm">
                     {notification.slice(0, 5).map((item) => (
                       <li
                         key={item._id}
-                        className="p-2 border-b hover:bg-gray-200 cursor-pointer flex items-center gap-2"
+                        className="p-2 border-b hover:bg-gray-100 cursor-pointer flex items-center gap-2"
                       >
                         <img
                           src={item.content.avatar}
                           alt="avatar"
                           className="w-8 h-8 rounded-full"
                         />
-                        <span className="text-sm font-semibold">
+                        <span className="text-sm">
                           {item.type === "follow" &&
                             `${item.content.username} is now following you.`}
                           {item.type === "reply" &&
@@ -121,22 +110,14 @@ export const SocialHeader = () => {
               )}
             </div>
 
-            {/* Profile */}
-            <Link
-              to={`/profile/${userId}`}
-              className="flex flex-col items-center text-white"
-            >
+            <Link to={`/profile/${userId}`} className="flex flex-col items-center">
               <UserOutlined style={{ fontSize: "20px" }} />
-              <span className="text-xs hidden md:block">Me</span>
+              <span className="hidden md:block text-xs">Me</span>
             </Link>
 
-            {/* Logout */}
-            <button className="flex flex-col items-center text-white">
-              <i
-                className="bi bi-box-arrow-in-right"
-                style={{ fontSize: "20px" }}
-              ></i>
-              <span className="text-xs hidden md:block">Logout</span>
+            <button className="flex flex-col items-center">
+              <i className="bi bi-box-arrow-in-right text-lg"></i>
+              <span className="hidden md:block text-xs">Logout</span>
             </button>
           </div>
         </div>
