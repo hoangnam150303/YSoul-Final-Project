@@ -65,7 +65,7 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
   const handleLogout = () => {
     dispatch(logoutUser()); // Đầu tiên là reset Redux
     setTimeout(() => {
-      window.location.href = "/login"; // Redirect sau vài ms để đảm bảo Redux cập nhật xong
+      window.location.href = "/"; // Redirect sau vài ms để đảm bảo Redux cập nhật xong
     }, 100); // 100ms là an toàn
   };
 

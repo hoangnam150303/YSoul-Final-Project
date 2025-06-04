@@ -24,7 +24,7 @@ export const AccountPage = () => {
   const [filter, setFilter] = useState("All");
   const fetchUsers = async () => {
     try {
-      const response = await userApi.getAllUsers(filter,searchTerm);
+      const response = await userApi.getAllUsers(filter, searchTerm, "admin");
       setUsers(response.data.users);
     } catch (error) {
       console.error(error);
@@ -79,7 +79,7 @@ export const AccountPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [filter,searchTerm]);
+  }, [filter, searchTerm]);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -207,7 +207,9 @@ export const AccountPage = () => {
           >
             <Option value="all">All</Option>
             <Option value="unactive">Unactive</Option>
-            <Option value="Active">Active</Option>
+            <Option value="active">Active</Option>
+            <Option value="isVip">Vip User</Option>
+            <Option value="normalUser">Normal User</Option>
             <Option value="recent_login">Recent Login</Option>
           </Select>
 
