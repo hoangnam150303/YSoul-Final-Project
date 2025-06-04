@@ -1,6 +1,6 @@
 const { conectPostgresDb } = require("../../configs/database");
 const passwordHelpers = require("../../helpers/passWordHelpers");
-const Post = require("../../models/SocialModel/post")
+const Post = require("../../models/SocialModel/post");
 const userStore = require("../../models/UserModel/userStore");
 exports.getUserService = async (id) => {
   try {
@@ -16,62 +16,86 @@ exports.getUserService = async (id) => {
       name: user.rows[0].name,
       is_admin: user.rows[0].is_admin,
       vip: user.rows[0].vip,
-      avatar:user.rows[0].avatar,
+      avatar: user.rows[0].avatar,
       success: true,
     };
-   
   } catch (error) {
     return { success: false, error };
   }
-}
+};
 // this function is register account with email, password and user name.
-exports.getAllUsersService = async (filter, search,typeUser) => {
+exports.getAllUsersService = async (filter, search, typeUser) => {
   try {
-    let filterOptions = "";
-    let sortOrder = "DESC"; 
+    let sortColumn = "id";
+    let sortOrder = "DESC";
     const searchValue = search ? `%${search}%` : "%";
+
+    // Xác định cột sắp xếp
     switch (filter) {
       case "recent_login":
-        filterOptions = "lastlogin";
-        break;
-      case "unactive":
-        filterOptions = "status = true";
+        sortColumn = "lastlogin";
         break;
       case "Active":
-        filterOptions = "status = false";
+      case "unactive":
+      case "isVip":
+        sortColumn = "created_at"; // sắp xếp ổn định
         break;
       default:
-        filterOptions = "id";
+        sortColumn = "id";
     }
-    
+
     let users;
-  if (typeUser === "admin") {
-    if (filter === "Active") {
-      users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name ILIKE  $1 AND status = true ORDER BY ${filterOptions} ${sortOrder}`,
-        [searchValue]
-      );
-    } else if (filter === "unactive") {
-      users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name ILIKE  $1 AND status = false ORDER BY ${filterOptions} ${sortOrder}`,
-        [searchValue]
-      );
-  }
+
+    const baseQuery = `
+      SELECT * FROM users 
+      WHERE name ILIKE $1 
+        AND is_admin = false
+    `;
+
+    if (typeUser === "admin") {
+      if (filter === "active") {
+        users = await conectPostgresDb.query(
+          `${baseQuery} AND status = true ORDER BY ${sortColumn} ${sortOrder}`,
+          [searchValue]
+        );
+      } else if (filter === "unactive") {
+        users = await conectPostgresDb.query(
+          `${baseQuery} AND status = false ORDER BY ${sortColumn} ${sortOrder}`,
+          [searchValue]
+        );
+      } else if (filter === "isVip") {
+        users = await conectPostgresDb.query(
+          `${baseQuery} AND vip = true ORDER BY ${sortColumn} ${sortOrder}`,
+          [searchValue]
+        );
+      } else if (filter === "normalUser") {
+        users = await conectPostgresDb.query(
+          `${baseQuery} AND vip = false ORDER BY ${sortColumn} ${sortOrder}`,
+          [searchValue]
+        );
+      } else {
+        users = await conectPostgresDb.query(
+          `${baseQuery} ORDER BY ${sortColumn} ${sortOrder}`,
+          [searchValue]
+        );
+      }
     } else {
+      // Người dùng không phải admin → chỉ thấy tài khoản hoạt động
       users = await conectPostgresDb.query(
-        `SELECT * FROM users WHERE name LIKE $1 AND status = true ORDER BY ${filterOptions} ${sortOrder}`,
+        `${baseQuery} AND status = true ORDER BY ${sortColumn} ${sortOrder}`,
         [searchValue]
       );
     }
-    
-    // Loại bỏ thuộc tính password khỏi mỗi user
-    const sanitizedUsers = users.rows.map(user => {
+
+    // Xóa password khỏi kết quả trả về
+    const sanitizedUsers = users.rows.map((user) => {
       delete user.password;
       return user;
     });
-    
+
     return { success: true, users: sanitizedUsers };
   } catch (error) {
+    console.error("Error in getAllUsersService:", error);
     return { success: false, message: error.toString() };
   }
 };
@@ -90,7 +114,7 @@ exports.activeOrDeactiveUserService = async (id) => {
         "UPDATE users SET status = true  WHERE id = $1",
         [id]
       );
-    }else if (user.rows[0].status === true) {
+    } else if (user.rows[0].status === true) {
       await conectPostgresDb.query(
         "UPDATE users SET status = false  WHERE id = $1",
         [id]
@@ -130,14 +154,12 @@ exports.updateUserProfileService = async (
 
     // Nếu password được gửi (không phải chuỗi rỗng), cập nhật password
     if (password && password.trim() !== "") {
-      
-        const isMatch = await passwordHelpers.comparePassword(
-          oldPassword,
-          user.rows[0].password
-        )
- 
-        
-        if (!isMatch) {
+      const isMatch = await passwordHelpers.comparePassword(
+        oldPassword,
+        user.rows[0].password
+      );
+
+      if (!isMatch) {
         throw new Error("Old password is incorrect");
       } else {
         const hashPassword = await passwordHelpers.hashPassword(password, 10);
@@ -170,10 +192,9 @@ exports.getUserProfileService = async (id) => {
     }
     return { success: true, user: user.rows[0] };
   } catch (error) {
-       return { success: false, message: error.toString() };
-    
+    return { success: false, message: error.toString() };
   }
-}
+};
 
 exports.getDetailUserService = async (id) => {
   try {
@@ -185,7 +206,7 @@ exports.getDetailUserService = async (id) => {
       return { success: false, error: "User not found" };
     }
     // Loại bỏ thuộc tính password khỏi user
-    const sanitizedUsers = user.rows.map(user => {
+    const sanitizedUsers = user.rows.map((user) => {
       delete user.password;
       delete user.vip;
       delete user.status;
@@ -197,21 +218,21 @@ exports.getDetailUserService = async (id) => {
       delete user.email;
       return user;
     });
-    const validPost = await Post.find({user_id:id});
+    const validPost = await Post.find({ user_id: id });
     const numberOfPosts = validPost.length;
-    const data = [...sanitizedUsers,numberOfPosts]
+    const data = [...sanitizedUsers, numberOfPosts];
 
-    
-    return { success: true, data:data};
+    return { success: true, data: data };
   } catch (error) {
     return { success: false, message: error.toString() };
-    
   }
-}
+};
 
-exports.getUserStoreService = async (id)=>{
+exports.getUserStoreService = async (id) => {
   try {
-    const validUserStore = await userStore.find({user_id:id}).populate("NFTs","name image");
+    const validUserStore = await userStore
+      .find({ user_id: id })
+      .populate("NFTs", "name image");
     if (!validUserStore) {
       return { success: false, message: "User not found" };
     }
@@ -219,9 +240,9 @@ exports.getUserStoreService = async (id)=>{
   } catch (error) {
     return { success: false, message: "Error! Please try again.", error };
   }
-}
+};
 
-exports.updateAvatarNFTService = async (id,image) => {
+exports.updateAvatarNFTService = async (id, image) => {
   try {
     const user = await conectPostgresDb.query(
       "SELECT * FROM users WHERE id = $1",
@@ -230,10 +251,10 @@ exports.updateAvatarNFTService = async (id,image) => {
     if (user.rows.length === 0) {
       return { success: false, error: "User not found" };
     }
-    await conectPostgresDb.query(
-      "UPDATE users SET avatar = $1 WHERE id = $2",
-      [image, id]
-    );
+    await conectPostgresDb.query("UPDATE users SET avatar = $1 WHERE id = $2", [
+      image,
+      id,
+    ]);
     return { success: true };
   } catch (error) {
     return { success: false, error };

@@ -2,7 +2,7 @@ const { connectPostgresDb } = require("../../configs/database");
 
 const createArtistTableQuery = `
  CREATE TABLE IF NOT EXISTS artists  (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(100) NOT NULL,
     avatar VARCHAR(200),
     is_deleted BOOLEAN DEFAULT false,

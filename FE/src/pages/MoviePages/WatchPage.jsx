@@ -146,9 +146,12 @@ export const WatchPage = () => {
           />
           <div className="flex gap-10 mt-4 cursor-pointer">
             <HeartFilled
-              style={{ fontSize: "24px", color: favorite ? "red" : "white" }}
+              className={`text-2xl cursor-pointer ${
+                favorite ? "text-red-500" : "text-white"
+              }`}
               onClick={favorite ? deleteItemFromWishList : addToWishList}
             />
+
             <ShareAltOutlined style={{ fontSize: "24px" }} />
             <Link to={`/socialHomePage`}>
               <CommentOutlined style={{ fontSize: "24px" }} />
@@ -175,6 +178,7 @@ export const WatchPage = () => {
               total={totalPage}
               showSizeChanger={false}
               pageSize={1}
+              className="text-white [&_.ant-pagination-item]:border-none [&_.ant-pagination-item]:bg-transparent [&_.ant-pagination-item]:text-white [&_.ant-pagination-item-active]:bg-white/20 [&_.ant-pagination-item-active]:text-white [&_.ant-pagination-prev]:text-white [&_.ant-pagination-next]:text-white"
             />
           )}
         </div>

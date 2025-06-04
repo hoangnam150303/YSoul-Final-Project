@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mongodb:
@@ -18,13 +18,26 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ysoul_db
+      POSTGRES_DB: ${PG_DB}
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - ysoul_postgres_data:/var/lib/postgresql/data
 
-
+  backend:
+    build: .
+    container_name: ysoul_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - postgres
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm run dev
 
 volumes:
   ysoul_mongo_data:
