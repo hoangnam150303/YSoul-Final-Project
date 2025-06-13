@@ -66,6 +66,7 @@ const filmSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+  
 );
 
 const Film = mongoose.model("Film", filmSchema);

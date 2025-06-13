@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MovieSideBar } from "../../components/SideBar/MovieSideBar";
 import {
   CaretLeftFilled,
+  CaretRightOutlined,
   CommentOutlined,
   HeartFilled,
   ShareAltOutlined,
@@ -28,6 +29,8 @@ export const WatchPage = () => {
   const [category, setCategory] = useState("");
   const isVip = useSelector((state) => state.user.vip);
   const userId = useSelector((state) => state.user.id);
+  const [showTrailer, setShowTrailer] = useState(true); // Mặc định mở khi vào trang
+
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open
   };
@@ -106,6 +109,16 @@ export const WatchPage = () => {
     }
   };
 
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/watchPage/${movieId}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      message.success("Copied link to clipboard!");
+    } catch (err) {
+      message.error("Failed to copy link.");
+    }
+  };
+
   const checkIsFavorite = async (id) => {
     try {
       const response = await wishListApi.checkIsFavourite("film", id);
@@ -126,16 +139,27 @@ export const WatchPage = () => {
       <div className="z-50">
         <MovieSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />
       </div>
-      <div className="mx-auto container px-4 py-8 h-full">
-        <div className="flex justify-between pl-5 items-center mb-4">
-          <button
-            className="bg-gray-500/70 hovver:bg-gray-500 text-white py-2 px-4 rounded"
-            onClick={backHome}
-          >
-            <CaretLeftFilled size={24} />
-          </button>
+      {showTrailer && film?.trailer && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex justify-center items-center">
+          <div className="relative w-[90%] md:w-[60%] lg:w-[50%] bg-black rounded-lg overflow-hidden shadow-lg">
+            <ReactPlayer
+              url={film.trailer}
+              controls
+              playing
+              width="100%"
+              height="400px"
+            />
+            <button
+              onClick={() => setShowTrailer(false)}
+              className="absolute top-2 right-2 text-white bg-slate-500 hover:bg-red-700 px-3 py-1 rounded-md"
+            >
+              X
+            </button>
+          </div>
         </div>
+      )}
 
+      <div className="mx-auto container px-4 py-8 h-full">
         <div className="aspect-video mb-8 p-2 sm:px-10 md:px-32">
           <ReactPlayer
             controls={true}
@@ -152,7 +176,10 @@ export const WatchPage = () => {
               onClick={favorite ? deleteItemFromWishList : addToWishList}
             />
 
-            <ShareAltOutlined style={{ fontSize: "24px" }} />
+            <ShareAltOutlined
+              style={{ fontSize: "24px" }}
+              onClick={handleShare}
+            />
             <Link to={`/socialHomePage`}>
               <CommentOutlined style={{ fontSize: "24px" }} />
             </Link>
@@ -160,7 +187,12 @@ export const WatchPage = () => {
               allowHalf
               key={film.totalRating}
               defaultValue={film.totalRating}
-              style={{ fontSize: "24px", color: "red" }}
+              style={{
+                fontSize: "24px",
+                color: "red",
+                backgroundColor: "#a9a9a9",
+                borderRadius: "4px",
+              }}
               onChange={(value) =>
                 handleUpdateStatus(film?._id, "rating", value)
               }
@@ -171,15 +203,23 @@ export const WatchPage = () => {
             </span>
           </div>
           {!isMovie && (
-            <Pagination
-              align="end"
-              current={page}
-              onChange={handlePageChange}
-              total={totalPage}
-              showSizeChanger={false}
-              pageSize={1}
-              className="text-white [&_.ant-pagination-item]:border-none [&_.ant-pagination-item]:bg-transparent [&_.ant-pagination-item]:text-white [&_.ant-pagination-item-active]:bg-white/20 [&_.ant-pagination-item-active]:text-white [&_.ant-pagination-prev]:text-white [&_.ant-pagination-next]:text-white"
-            />
+            <div className="flex flex-wrap gap-3 mt-6">
+              {video.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setPage(index + 1)}
+                  className={`px-4 py-2 rounded-md flex items-center gap-2 transition-all
+          ${
+            page === index + 1
+              ? "bg-red-600 text-white font-semibold"
+              : "bg-gray-800 text-white hover:bg-gray-700"
+          }`}
+                >
+                  <CaretRightOutlined />
+                  <span>EP {index + 1}</span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
@@ -188,20 +228,20 @@ export const WatchPage = () => {
           <div className="mb-4 md:mb-0">
             <h2 className="text-5xl font-bold text-balance">
               {!isMovie
-                ? film?.name + " espisode" + episodes[page - 1]?.numberTitle
+                ? film?.name + " espisode " + film.video[page - 1]?.title
                 : film?.name}
             </h2>
 
             <p className="mt-2 text-lg">
               <span>{film?.releaseYear}| </span>
-              <span className="text-green-600">{film?.age}</span>
+              <span className="text-green-600">{film?.age}+</span>
             </p>
             <p className="mt-4 text-lg"> {film?.description}</p>
           </div>
           <img
             src={film?.small_image}
             alt="POSTER"
-            className="max-h[600px] rounded-md"
+            className="h-[300px] w-auto object-cover rounded-md"
           />
         </div>
         <div className="mt-12 max-w-5xl mx-auto relative">
