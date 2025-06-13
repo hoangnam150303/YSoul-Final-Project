@@ -54,14 +54,14 @@ export const MovieSlider = ({ category }) => {
             <Link
               key={movie._id}
               to={`/watchPage/${movie._id}`}
-              className="min-w-[275px] flex-shrink-0 relative group"
+              className="w-[180px] flex-shrink-0 relative group"
               onClick={() => handleUpdateStatus(movie._id, "click", 1)}
             >
               <div className="rounded-lg overflow-hidden">
                 <img
                   src={movie.small_image}
                   alt="small_image"
-                  className="transition-transform duration-300 ease-in-out group-hover:scale-125"
+                  className="w-[180px] h-[260px] object-cover rounded-md transition-transform duration-300 ease-in-out group-hover:scale-110"
                 />
               </div>
               <p className="mt-2 text-center">{movie.name}</p>

@@ -76,10 +76,10 @@ export const CRUDFilmPage = () => {
     const selectedFilm = films.find((film) => film._id === id);
 
     if (selectedFilm) {
-      if (!selectedFilm.movie) {
-        setFilmType("TV Shows");
-      } else {
+      if (selectedFilm.video.length === 1) {
         setFilmType("Movie");
+      } else {
+        setFilmType("TV Shows");
       }
       setFilm(selectedFilm);
       setIsModalEditVisible(true);
@@ -105,6 +105,12 @@ export const CRUDFilmPage = () => {
     } catch (error) {
       console.log(error);
     }
+  };
+  const getImageUrl = (file) => {
+    if (!file) return undefined;
+    if (typeof file === "string") return file; // URL cũ
+    if (file instanceof File) return URL.createObjectURL(file); // preview file mới
+    return undefined;
   };
 
   const handleStatusChangeFilm = async (id) => {
@@ -901,7 +907,7 @@ export const CRUDFilmPage = () => {
               formData.append("trailer", values.trailer);
               formData.append("director", values.director);
               // Với genre, nếu initialValues đã xử lý JSON.parse, thì values.genre đã là mảng, gọi stringify một lần:
-              formData.append("genre", JSON.stringify(values.genre));
+              formData.append("genre", values.genre);
               formData.append("small_image", values.small_image);
               formData.append("large_image", values.large_image);
               formData.append("isSeries", isSeries);
@@ -920,11 +926,15 @@ export const CRUDFilmPage = () => {
                   }
                 });
               } else {
-                if (typeof values.movie === "object") {
-                  values.movie.forEach((file) =>
-                    formData.append("movie", file.originFileObj)
-                  );
-                } else {
+                if (Array.isArray(values.movie)) {
+                  values.movie.forEach((file) => {
+                    const realFile = file.originFileObj || file;
+                    formData.append("movie", realFile);
+                  });
+                } else if (
+                  typeof values.movie === "string" &&
+                  values.movie.trim() !== ""
+                ) {
                   formData.append("movie", values.movie);
                 }
               }
@@ -1152,9 +1162,9 @@ export const CRUDFilmPage = () => {
                           ? [
                               {
                                 uid: "-1",
-                                name: "Small Image",
+                                name: "small Image",
                                 status: "done",
-                                url: values.small_image,
+                                url: getImageUrl(values.small_image),
                               },
                             ]
                           : []
@@ -1164,9 +1174,7 @@ export const CRUDFilmPage = () => {
                           const file = info.fileList[0];
                           setFieldValue(
                             "small_image",
-                            file.originFileObj
-                              ? URL.createObjectURL(file.originFileObj)
-                              : file.url
+                            file.originFileObj || file.url
                           );
                         } else {
                           setFieldValue("small_image", "");
@@ -1207,7 +1215,7 @@ export const CRUDFilmPage = () => {
                                 uid: "-1",
                                 name: "Large Image",
                                 status: "done",
-                                url: values.large_image,
+                                url: getImageUrl(values.large_image),
                               },
                             ]
                           : []
@@ -1217,9 +1225,7 @@ export const CRUDFilmPage = () => {
                           const file = info.fileList[0];
                           setFieldValue(
                             "large_image",
-                            file.originFileObj
-                              ? URL.createObjectURL(file.originFileObj)
-                              : file.url
+                            file.originFileObj || file.url
                           );
                         } else {
                           setFieldValue("large_image", "");
@@ -1259,16 +1265,25 @@ export const CRUDFilmPage = () => {
 
               {/* Hiển thị Upload cho Movie hoặc FieldArray cho TV Shows */}
               {filmType === "Movie" ? (
-                <div className="flex items-start justify-center mt-4">
+                <div className="flex flex-col items-start justify-center mt-4 space-y-4">
                   <label className="label-input-tnvd truncate">Movie:</label>
-                  <div className="w-2/3 flex flex-col items-start">
+                  <div className="w-full flex flex-col items-start">
                     <Upload
+                      listType="text"
                       fileList={
-                        typeof values.movie === "string" && values.movie.trim()
+                        Array.isArray(values.movie)
+                          ? values.movie.map((file, idx) => ({
+                              uid: `${idx}`,
+                              name: file.name || `Video ${idx + 1}`,
+                              status: "done",
+                              url: file.url || URL.createObjectURL(file),
+                            }))
+                          : typeof values.movie === "string" &&
+                            values.movie.trim()
                           ? [
                               {
                                 uid: "-1",
-                                name: "Uploaded File",
+                                name: "Uploaded Movie",
                                 status: "done",
                                 url: values.movie,
                               },
@@ -1276,15 +1291,38 @@ export const CRUDFilmPage = () => {
                           : []
                       }
                       onChange={(info) => {
-                        setFieldValue(
-                          "movie",
-                          info.fileList.map((file) => file.originFileObj)
+                        const files = info.fileList.map((file) =>
+                          file.originFileObj ? file.originFileObj : file
                         );
+                        setFieldValue("movie", files);
+                      }}
+                      onPreview={(file) => {
+                        const videoUrl =
+                          file.url || URL.createObjectURL(file.originFileObj);
+                        window.open(videoUrl, "_blank");
                       }}
                     >
                       <Button icon={<UploadOutlined />}>Upload</Button>
                     </Upload>
                   </div>
+
+                  {/* Preview Movie */}
+                  {typeof values.movie === "string" && values.movie.trim() && (
+                    <video controls width={400} className="rounded shadow mt-2">
+                      <source src={values.movie} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
+
+                  {Array.isArray(values.movie) && values.movie.length > 0 && (
+                    <video controls width={400} className="rounded shadow mt-2">
+                      <source
+                        src={URL.createObjectURL(values.movie[0])}
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
                 </div>
               ) : (
                 // TV Shows: Sử dụng FieldArray để quản lý danh sách video và title

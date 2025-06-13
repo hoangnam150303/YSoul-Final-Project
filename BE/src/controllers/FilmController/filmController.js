@@ -15,29 +15,27 @@ exports.createFilm = async (req, res) => {
       isForAll,
       age,
     } = req.body;
-   
-    
+
     const movieFiles = req.files?.movie.map((file) => file.path).join(", ");
     const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
     const largeImage = req.files?.large_image?.[0]?.path;
 
-    
     const response = await filmService.createFilmService(
-        name,
-        description,
-        smallImage,
-        largeImage,
-        isForAll,
-        trailer,
-        cast,
-        director,
-        genre,
-        releaseYear,
-        title,
-        movieFiles,
-        age
-      );
-  
+      name,
+      description,
+      smallImage,
+      largeImage,
+      isForAll,
+      trailer,
+      cast,
+      director,
+      genre,
+      releaseYear,
+      title,
+      movieFiles,
+      age
+    );
+
     if (!response.success) {
       return res.status(400).json({
         message: "Error creating film",
@@ -57,9 +55,8 @@ exports.createFilm = async (req, res) => {
 // this function can use in many situation, search film, sort film, get all film and Front end can use this function many time with many page.
 exports.getAllFilm = async (req, res) => {
   try {
-    const {typeFilm, category, sort, search,typeUser } = req.query;
+    const { typeFilm, category, sort, search, typeUser } = req.query;
 
-    
     const response = await filmService.getAllFilmService(
       typeFilm,
       category,
@@ -130,43 +127,43 @@ exports.updateFilmById = async (req, res) => {
       isForAll,
       age,
     } = req.body;
+
     const { id } = req.params;
-  
-    
-    const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
+
+    const smallImage = req.files?.small_image?.[0]?.path;
     const largeImage = req.files?.large_image?.[0]?.path;
     const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
+    
+    const response = await filmService.updateFilmByIdService(
+      id,
+      name,
+      description,
+      smallImage,
+      largeImage,
+      trailer,
+      cast,
+      director,
+      genre,
+      releaseYear,
+      title,
+      isForAll,
+      movieFiles,
+      age
+    );
 
-      // Nếu có episode (phim nhiều tập)
-     const response = await filmService.updateFilmByIdService(
-        id,
-        name,
-        description,
-        smallImage,
-        largeImage,
-        trailer,
-        cast,
-        director,
-        genre,
-        releaseYear,
-        title,
-        isForAll,
-        movieFiles,
-        age,
-      );
-  
     if (!response.success) {
       return res.status(400).json({
-        message: "Error creating film",
+        message: "Error updating film",
         error: response.error,
       });
     }
 
     return res.status(200).json({
       message: "Film updated successfully",
+      data: response.data,
     });
   } catch (err) {
-    console.error("Error in createFilm controller:", err.message);
+    console.error("Error in updateFilm controller:", err.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
