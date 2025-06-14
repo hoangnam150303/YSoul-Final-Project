@@ -9,10 +9,11 @@ import {
   SearchOutlined,
   HeartOutlined,
 } from "@ant-design/icons";
-import { Button, Drawer, Dropdown, Menu } from "antd";
+import { Button, Drawer, Dropdown, Menu, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link, NavLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import dashBoardsApi from "../../hooks/dashBoardsApi";
 export const MusicSideBar = ({ onToggle, isOpen }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const userId = useSelector((state) => state.user.id);
@@ -65,7 +66,15 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
       window.location.href = "/login"; // Redirect sau vài ms để đảm bảo Redux cập nhật xong
     }, 100); // 100ms là an toàn
   };
-
+  const handleIncreaseFavouriteCount = (type) => {
+    try {
+      const response = dashBoardsApi.increaseFavouriteCount(type);
+      console.log(response);
+      
+    } catch (error) {
+      message.error("Error increasing favourite count: " + error.message);
+    }
+  };
   return (
     <div className="h-full">
       {/* Sidebar lớn */}
@@ -98,6 +107,16 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
             <NavLink
               key={index}
               to={menu.path}
+              onClick={() => {
+                const typeMap = {
+                  "/": "film",
+                  "/market": "market",
+                  "/socialHomePage": "social",
+                };
+                if (typeMap[menu.path]) {
+                  handleIncreaseFavouriteCount(typeMap[menu.path]);
+                }
+              }}
               className={({ isActive }) =>
                 `flex items-center gap-x-4 py-4 h-16 px-7 text-base ${
                   isActive ? "bg-black text-white" : "text-gray-400"
@@ -160,6 +179,17 @@ export const MusicSideBar = ({ onToggle, isOpen }) => {
               <NavLink
                 key={index}
                 to={menu.path}
+                onClick={() => {
+                  onCloseDrawer(); // đóng drawer trước
+                  const typeMap = {
+                    "/": "film",
+                    "/market": "market",
+                    "/socialHomePage": "social",
+                  };
+                  if (typeMap[menu.path]) {
+                    handleIncreaseFavouriteCount(typeMap[menu.path]);
+                  }
+                }}
                 className={({ isActive }) =>
                   `flex items-center gap-x-4 py-4 h-16 px-7 text-base ${
                     isActive ? "bg-gray-800 text-white" : "text-gray-400"
