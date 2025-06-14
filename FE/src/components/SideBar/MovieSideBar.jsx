@@ -13,7 +13,8 @@ import {
 import { Button, Drawer } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../reducers/user";
-import { getUserRequest } from "../../reducers/user";
+import dashBoardsApi from "../../hooks/dashBoardsApi";
+
 export const MovieSideBar = ({ onToggle, isOpen }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const userId = useSelector((state) => state.user.id);
@@ -53,6 +54,13 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
 
   const showDrawer = () => {
     setOpenDrawer(true);
+  };
+  const handleIncreaseFavouriteCount = async (type) => {
+    try {
+      await dashBoardsApi.increaseFavouriteCount(type);
+    } catch (error) {
+      console.error("Failed to increase count:", error.message);
+    }
   };
 
   const onCloseDrawer = () => {
@@ -101,6 +109,16 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
             <NavLink
               key={index}
               to={menu.path}
+              onClick={() => {
+                const typeMap = {
+                  "/musicHomePage": "music",
+                  "/market": "market",
+                  "/socialHomePage": "social",
+                };
+                if (typeMap[menu.path]) {
+                  handleIncreaseFavouriteCount(typeMap[menu.path]);
+                }
+              }}
               className={({ isActive }) =>
                 `flex items-center gap-x-4 py-4 h-16 px-7 text-base ${
                   isActive ? "bg-black text-white" : "text-gray-400"
@@ -163,6 +181,17 @@ export const MovieSideBar = ({ onToggle, isOpen }) => {
               <NavLink
                 key={index}
                 to={menu.path}
+                onClick={() => {
+                  onCloseDrawer();
+                  const typeMap = {
+                    "/musicHomePage": "music",
+                    "/market": "market",
+                    "/socialHomePage": "social",
+                  };
+                  if (typeMap[menu.path]) {
+                    handleIncreaseFavouriteCount(typeMap[menu.path]);
+                  }
+                }}
                 className={({ isActive }) =>
                   `flex items-center gap-x-4 py-4 h-16 px-7 text-base ${
                     isActive ? "bg-gray-800 text-white" : "text-gray-400"

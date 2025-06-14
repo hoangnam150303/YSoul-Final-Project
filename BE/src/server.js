@@ -21,9 +21,9 @@ const commentRoute = require("./routes/SocialRoute/commentRoutes");
 const notificationRoute = require("./routes/SocialRoute/notificationRoutes");
 const authRoute = require("./routes/AuthenticateRoute/authenticateRoutes");
 const reviewerRoute = require("./routes/SocialRoute/reviewrRoutes");
-const messageRoute = require("./routes/SocialRoute/messageRoutes")
+const messageRoute = require("./routes/SocialRoute/messageRoutes");
 const wishListRoute = require("./routes/WishListRoute/WishListRoute");
-
+const dashBoardsRoute = require("./routes/DashBoardsRoute/DashBoardsRoute");
 const corsConfig = require("./configs/corsConfig");
 const { app, server } = require("./utils/socket");
 const port = process.env.PORT || 8080;
@@ -58,13 +58,14 @@ app.use("/api/v1/invoice", invoiceRoute);
 app.use("/api/v1/artist", artistRoute);
 app.use("/api/v1/album", albumRoute);
 app.use("/api/v1/single", singleRoute);
-app.use("/api/v1/artistNFT",artistNFTRoute);
-app.use("/api/v1/nft",nftRoute);
-app.use("/api/v1/post",postRoute);
-app.use("/api/v1/comment",commentRoute);
-app.use("/api/v1/notification",notificationRoute);
-app.use("/api/v1/message",messageRoute)
+app.use("/api/v1/artistNFT", artistNFTRoute);
+app.use("/api/v1/nft", nftRoute);
+app.use("/api/v1/post", postRoute);
+app.use("/api/v1/comment", commentRoute);
+app.use("/api/v1/notification", notificationRoute);
+app.use("/api/v1/message", messageRoute);
 app.use("/api/v1/wishList", wishListRoute);
+app.use("/api/v1/dashBoards", dashBoardsRoute);
 // Start server
 server.listen(port, () => {
   console.log(`Server is working on port: ${port}`);

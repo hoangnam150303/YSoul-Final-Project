@@ -1,7 +1,4 @@
 
-
-
-
 import { axiosClient } from "../ApiConfig/apiConfig";
 
 const NFT_ENDPOINT = "/api/v1/nft";
