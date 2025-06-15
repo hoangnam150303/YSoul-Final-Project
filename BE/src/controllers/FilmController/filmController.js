@@ -126,14 +126,18 @@ exports.updateFilmById = async (req, res) => {
       title,
       isForAll,
       age,
+      isSeries,
     } = req.body;
 
     const { id } = req.params;
 
     const smallImage = req.files?.small_image?.[0]?.path;
     const largeImage = req.files?.large_image?.[0]?.path;
-    const movieFiles = req.files?.movie?.map((file) => file.path).join(", ");
+    console.log(isSeries);
     
+    const movieFiles = req.files?.movie?.map((file) => file.path) || [];
+    const isSeriesBool =
+      req.body.isSeries === "true" || req.body.isSeries === true;
     const response = await filmService.updateFilmByIdService(
       id,
       name,
@@ -148,7 +152,8 @@ exports.updateFilmById = async (req, res) => {
       title,
       isForAll,
       movieFiles,
-      age
+      age,
+      isSeriesBool
     );
 
     if (!response.success) {

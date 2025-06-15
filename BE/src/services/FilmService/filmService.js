@@ -202,102 +202,102 @@ exports.updateFilmByIdService = async (
   director,
   genre,
   releaseYear,
-  title, // JSON string
+  title,
   isForAll,
-  video, // String hoặc comma-separated
+  video,
   age,
-  isSeries // 👈 THÊM dòng này để phân biệt Movie vs Series
+  isSeries
 ) => {
   try {
     const film = await Film.findById(id);
-    if (!film) {
-      throw new Error("Film not found");
+    if (!film) throw new Error("Film not found");
+
+    let videoUrls = [];
+    if (Array.isArray(video)) {
+      videoUrls = video;
+    } else if (typeof video === "string") {
+      videoUrls = video.split(",").map((v) => v.trim());
+    } else if (video) {
+      throw new Error("Video must be a string or an array of URLs.");
     }
 
-    const existingEpisodes = film.video || [];
     let newEpisodeIds = [];
 
-    // === SERIES ===
-    if (isSeries && title && video) {
-      let parsedTitle = [];
+    // ===== XỬ LÝ TV SERIES =====
+    if (isSeries) {
+      let parsedTitle;
       try {
-        parsedTitle = JSON.parse(title);
+        parsedTitle = JSON.parse(title || "[]");
       } catch (err) {
         throw new Error("Title must be a valid JSON array.");
       }
 
-      const videoUrls = video.split(",").map((v) => v.trim());
+      if (!Array.isArray(parsedTitle)) {
+        throw new Error("Title must be an array for series.");
+      }
 
-      if (videoUrls.length !== parsedTitle.length) {
-        throw new Error("Số lượng video và title không khớp.");
+      if (parsedTitle.length !== videoUrls.length) {
+        throw new Error("Số lượng video và tiêu đề không khớp.");
       }
 
       for (let i = 0; i < parsedTitle.length; i++) {
-        if (parsedTitle[i].trim() !== "") {
-          const episode = await Episode.create({
-            title: parsedTitle[i],
-            urlVideo: videoUrls[i],
-          });
-          newEpisodeIds.push(episode._id);
-        }
+        const episode = await Episode.create({
+          title: parsedTitle[i],
+          urlVideo: videoUrls[i],
+        });
+        newEpisodeIds.push(episode._id);
       }
 
-      // === MOVIE ===
-    } else if (!isSeries && video) {
+      film.video = [...(film.video || []), ...newEpisodeIds];
+    }
+
+    // ===== XỬ LÝ MOVIE =====
+    else {
+      if (!videoUrls[0]) throw new Error("Phim lẻ cần ít nhất một video.");
+
+      // Xoá toàn bộ episode cũ nếu có
+      if (film.video && film.video.length > 0) {
+        await Episode.deleteMany({ _id: { $in: film.video } });
+      }
+
       const episode = await Episode.create({
-        urlVideo: video,
+        urlVideo: videoUrls[0],
       });
-      newEpisodeIds.push(episode._id);
+
+      film.video = [episode._id];
     }
 
-    const updatedEpisodeIds = [...existingEpisodes, ...newEpisodeIds];
+    // ===== CẬP NHẬT THÔNG TIN PHIM =====
+    film.name = name;
+    film.description = description;
+    film.trailer = trailer;
+    film.cast = cast;
+    film.director = director;
+    film.genre = genre;
+    film.releaseYear = releaseYear;
+    film.isForAllUsers = isForAll;
+    film.age = age;
+    film.isSeries = isSeries;
 
-    // ===== Chuẩn bị dữ liệu cập nhật =====
-    const updateData = {
-      name,
-      description,
-      trailer,
-      cast,
-      director,
-      genre,
-      releaseYear,
-      isForAllUsers: isForAll,
-      age,
-      isSeries, // 👈 Cập nhật vào DB nếu có trường
-    };
-
-    // ===== Xử lý ảnh nhỏ =====
-    if (smallImage && film.small_image) {
-      await cloudinaryHelpers.removeFile(film.small_image);
-      updateData.small_image = smallImage;
-    } else if (smallImage) {
-      updateData.small_image = smallImage;
+    // ===== ẢNH NHỎ =====
+    if (smallImage) {
+      if (film.small_image) {
+        await cloudinaryHelpers.removeFile(film.small_image);
+      }
+      film.small_image = smallImage;
     }
 
-    // ===== Xử lý ảnh lớn =====
-    if (largeImage && film.large_image) {
-      await cloudinaryHelpers.removeFile(film.large_image);
-      updateData.large_image = largeImage;
-    } else if (largeImage) {
-      updateData.large_image = largeImage;
+    // ===== ẢNH LỚN =====
+    if (largeImage) {
+      if (film.large_image) {
+        await cloudinaryHelpers.removeFile(film.large_image);
+      }
+      film.large_image = largeImage;
     }
 
-    // ===== Cập nhật phim =====
-    const filmUpdate = await Film.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    await film.save();
 
-    if (!filmUpdate) {
-      throw new Error("Film update failed");
-    }
-
-    // ===== Gán danh sách episode mới nếu khác cũ =====
-    if (newEpisodeIds.length > 0) {
-      filmUpdate.video = [...existingEpisodes, ...newEpisodeIds];
-      await filmUpdate.save();
-    }
-
-    return { success: true, data: filmUpdate };
+    return { success: true, data: film };
   } catch (error) {
     console.error("Error updating film:", error.message);
     return { success: false, error: error.message };
