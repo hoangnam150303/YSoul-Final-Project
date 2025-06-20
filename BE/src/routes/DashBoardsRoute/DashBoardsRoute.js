@@ -17,5 +17,9 @@ dashBoardsRoute.get(
   auth.isAdmin,
   dashboardController.getFavouriteCount
 );
-
+dashBoardsRoute.get(
+  "/getRevenue",
+  auth.isAdmin,
+  dashboardController.getRevenue
+);
 module.exports = dashBoardsRoute;

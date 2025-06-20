@@ -149,15 +149,19 @@ exports.nextSingle = async (req, res) => {
     const { id } = req.params; // get current song id
     if (!id) {
       // if id not exist return error. In front-end I will handle if user does not play any song, they can not click button next song.
-      return res.status(400).json("Id fiel is required");
+      return res.status(400).json("Id field is required");
     }
     const response = await singleService.nextSingleService(id); // call function nextSingleService
     if (!response.success) {
       // if response is not success, return error
+      console.log(response);
+
       return res.status(400).json("fail to get next single");
     }
     return res.status(200).json(response); // return response if respone success
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json("fail");
   }
 };

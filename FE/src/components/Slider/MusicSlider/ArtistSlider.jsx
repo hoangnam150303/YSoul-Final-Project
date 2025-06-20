@@ -26,7 +26,7 @@ export const ArtistSlider = ({ category }) => {
     <div className="pl-60 pr-10">
       <h4 className="text-lg font-semibold mb-3">{category}</h4>
       <div className="grid grid-cols-[repeat(auto-fit,_minmax(180px,_1fr))] gap-6">
-        {artist.map((item) => (
+        {artist.slice(0, 8).map((item) => (
           <Link key={item.id} to={`/artist/${item.id}`}>
             <div className="p-2 rounded cursor-pointer hover:bg-gray-700">
               <img

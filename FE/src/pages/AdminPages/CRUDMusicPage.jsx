@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  EditOutlined,
-  PlusOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { EditOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import {
   Layout,
   Popconfirm,
@@ -182,7 +178,6 @@ export const CRUDMusicPage = () => {
     title: Yup.string().required("Title is required"),
     release_year: Yup.string().required("Release Year is required"),
     artist_id: Yup.string().required("Artist is required"),
-    album_id: Yup.string().required("Album is required"),
     image: Yup.mixed().required("Image is required"),
     mp3: Yup.mixed().required("MP3 is required"),
   });
