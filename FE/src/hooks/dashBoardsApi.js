@@ -14,5 +14,9 @@ const dashBoardsApi = {
     const url = `${DASHBOARDS_API_ENDPOINT}/getFavouriteCount`;
     return axiosClient.get(url);
   },
+  getRevenue: () => {
+    const url = `${DASHBOARDS_API_ENDPOINT}/getRevenue`;
+    return axiosClient.get(url);
+  }
 };
 export default dashBoardsApi;

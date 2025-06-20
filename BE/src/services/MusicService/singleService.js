@@ -10,42 +10,54 @@ exports.createSingleService = async (
   album_id
 ) => {
   try {
-    let validSingle = await conectPostgresDb.query(
-      // get single by title and artist_id
+    // ✅ Chuyển "null" string hoặc undefined thành giá trị null thật
+    if (!album_id || album_id === "null" || album_id === "") {
+      album_id = null;
+    }
+
+    // Kiểm tra single đã tồn tại
+    const validSingle = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE title = $1 AND artist_id = $2",
       [title, artist_id]
     );
 
     if (validSingle.rows.length > 0) {
-      // if single already exists, return error message
       throw new Error("Single already exists");
     }
-    let query, values; // create 2 variables query and values
+
+    // Cấu hình câu query và tham số
+    let query, values;
+
     if (album_id) {
-      // if album_id is exist
-      query = ` 
-    INSERT INTO singles (title, image, mp3, release_year, artist_id, album_id) 
-    VALUES ($1, $2, $3, $4, $5, $6) 
-  `;
-      values = [title, image, mp3, release_year, artist_id, album_id]; // create single with album_id
-    } else {
-      // if album_id is not exist, create single without album_id
+      // ✅ Trường hợp có album
       query = `
-    INSERT INTO singles (title, image, mp3, release_year, artist_id)
-    VALUES ($1, $2, $3, $4, $5)
-  `;
+        INSERT INTO singles (title, image, mp3, release_year, artist_id, album_id)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `;
+      values = [title, image, mp3, release_year, artist_id, album_id];
+    } else {
+      // ✅ Trường hợp không có album
+      query = `
+        INSERT INTO singles (title, image, mp3, release_year, artist_id)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
       values = [title, image, mp3, release_year, artist_id];
     }
 
-    // Thực thi câu lệnh insert
-    validSingle = await conectPostgresDb.query(query, values); // create single
-    if (!validSingle.rowCount > 0) {
-      // if single not created, return error message
+    // Thực thi câu query
+    const result = await conectPostgresDb.query(query, values);
+
+    if (result.rowCount <= 0) {
       throw new Error("Single not created");
     }
-    return { success: true }; // if single created, return success message
+
+    return { success: true };
   } catch (error) {
-       return { success: false, message: error.toString() };
+    console.log("Error in createSingleService:", error);
+    return {
+      success: false,
+      message: error.toString(),
+    };
   }
 };
 
@@ -107,7 +119,6 @@ exports.updateSingleService = async (
 
     return { success: true }; // if single created, return success message
   } catch (error) {
-
     return { success: false, message: error.message };
   }
 };
@@ -148,28 +159,40 @@ exports.activeOrDeactiveSingleService = async (id) => {
 // this function is for user, user can get single
 exports.getSingleByIdService = async (id) => {
   try {
-    if (!id || isNaN(id)) {
-      return;
+    // ✅ Nếu dùng UUID, đừng check isNaN
+    if (!id) {
+      return { success: false, message: "Invalid ID" };
     }
-    const single = await conectPostgresDb.query(
+
+    const singleResult = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
       [id]
     );
 
-    if (single.rows.length === 0) {
-      // if single not exists, return error message
+    if (singleResult.rows.length === 0) {
       throw new Error("Single not found");
     }
-    const artistName = await conectPostgresDb.query(
-      `SELECT * FROM artists WHERE id = ${single.rows[0].artist_id}`
+
+    const single = singleResult.rows[0];
+
+    const artistResult = await conectPostgresDb.query(
+      "SELECT name FROM artists WHERE id = $1",
+      [single.artist_id] // ✅ dùng placeholder an toàn
     );
+
+    const artistName =
+      artistResult.rows.length > 0
+        ? artistResult.rows[0].name
+        : "Unknown Artist";
+
     return {
       success: true,
-      data: single.rows[0],
-      artistName: artistName.rows[0].name,
-    }; // if single exists, return single
+      data: single,
+      artistName,
+    };
   } catch (error) {
-      return { success: false, message: error.toString() };
+    console.log("Error in getSingleByIdService:", error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -203,33 +226,29 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
     let singles; // create variable singles
     if (typeUser === "admin") {
       // if typeUser is admin
-     if (filter === "isDeleted") {
-      singles = await conectPostgresDb.query(
-        `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
-        [searchValue]
-      );
-     }
-      else if (filter === "Active") {
+      if (filter === "isDeleted") {
+        singles = await conectPostgresDb.query(
+          `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
+          [searchValue]
+        );
+      } else if (filter === "Active") {
         singles = await conectPostgresDb.query(
           `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
-      }
-      else {
+      } else {
         singles = await conectPostgresDb.query(
           `SELECT * FROM singles WHERE title ILIKE  $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
       }
     } else if (typeUser === "user") {
-      
       // if typeUser is user
       singles = await conectPostgresDb.query(
         // get all singles from database where is_deleted is false
         `SELECT * FROM singles WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`,
         [searchValue]
       );
-      
     }
     if (!singles) {
       // if artists not found, return error message
@@ -237,8 +256,6 @@ exports.getAllSingleService = async (filter, search, typeUser) => {
     }
     return { success: true, singles: singles.rows }; // return success message and artists
   } catch (error) {
-
-
     throw new Error("Error get all single");
   }
 };
@@ -285,32 +302,37 @@ exports.interactSingleService = async (id, status, userId) => {
 // this function is for user,  user can forward to another song
 exports.nextSingleService = async (id) => {
   try {
-    if (!id || isNaN(id)) {
-      return;
-    }
     const currentSingle = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
       [id]
     );
     if (currentSingle.rows.length === 0) {
-      // if current single is not exist return error
       throw new Error("Single not found");
     }
+
     const singles = await conectPostgresDb.query(
-      // get all music except current music
-      `SELECT * from singles where id != ${currentSingle.rows[0].id}`
+      "SELECT * FROM singles WHERE id != $1",
+      [id]
     );
-    const randomIndex = Math.floor(Math.random() * singles.rows.length); // create randomIndex and set it equal one number random from singles.rows.length
-    const randomSingle = singles.rows[randomIndex]; // create randomeSingle and set it equal result from singles which has index equal randomIndex
+    if (singles.rows.length === 0) {
+      throw new Error("No other singles available");
+    }
+
+    const randomIndex = Math.floor(Math.random() * singles.rows.length);
+    const randomSingle = singles.rows[randomIndex];
+
     const artistName = await conectPostgresDb.query(
-      `SELECT * FROM artists WHERE id = ${randomSingle.artist_id}`
+      "SELECT name FROM artists WHERE id = $1",
+      [randomSingle.artist_id]
     );
+
     return {
       success: true,
       data: randomSingle,
-      artistName: artistName.rows[0].name,
+      artistName: artistName.rows[0]?.name || "Unknown",
     };
   } catch (error) {
-      return { success: false, message: error.toString() };
+    console.log("Error in nextSingleService:", error);
+    return { success: false, message: error.toString() };
   }
 };

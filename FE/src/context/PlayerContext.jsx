@@ -4,171 +4,168 @@ import contants from "../constants/contants";
 
 export const PlayerContext = createContext();
 
-const PlayerContextProvider = (props) => {
+const PlayerContextProvider = ({ children }) => {
   const audioRef = useRef();
   const seekBg = useRef();
   const seekBar = useRef();
   const songId = useRef();
   const loopedSongId = useRef(null);
+
   const [track, setTrack] = useState("");
   const [information, setInformation] = useState({});
   const [playStatus, setPlayStatus] = useState(false);
 
   const [listSong, setListSong] = useState(() => {
-    const savedList = localStorage.getItem(contants.LIST_SONG);
-    return savedList ? JSON.parse(savedList) : [];
+    const saved = localStorage.getItem(contants.LIST_SONG);
+    return saved ? JSON.parse(saved) : [];
   });
+
   const [currentSong, setCurrentSong] = useState(() => {
-    const savedCurrentSong = localStorage.getItem(contants.CURRENT_SONG);
-    return savedCurrentSong ? savedCurrentSong : null;
+    return localStorage.getItem(contants.CURRENT_SONG) || null;
   });
-  // Đồng nhất key với contants.IS_LOOP
+
   const [songLoop, setSongLoop] = useState(() => {
-    const savedSongLoop = localStorage.getItem(contants.IS_LOOP);
-    return savedSongLoop === "true";
+    return localStorage.getItem(contants.IS_LOOP) === "true";
   });
+
   const [time, setTime] = useState({
     currentTime: { seconds: 0, minute: 0 },
     totalTime: { seconds: 0, minute: 0 },
   });
 
-  // Function lấy thông tin bài hát dựa trên songId hiện tại
+  // Lấy bài hát theo ID
   const getSong = async () => {
     if (!currentSong) return;
     try {
+      console.log("🔁 Fetching song:", currentSong);
       const response = await singleApi.getSingleById(currentSong);
-      setInformation(response.data);
-      setTrack(response.data.data.mp3);
+      const song = response.data?.data;
+      if (!song) return;
 
-      if (!listSong.includes(response.data.data.id)) {
-        setListSong((prevList) => [...prevList, response.data.data.id]);
-      }
-    } catch (error) {
-      console.log(error);
+      setInformation(response.data);
+      setTrack(song.mp3);
+
+      setListSong((prevList) => {
+        if (prevList.includes(song.id)) return prevList;
+        return [...prevList, song.id];
+      });
+    } catch (err) {
+      console.error("❌ Error fetching song:", err);
     }
   };
 
-  const prevSong = async () => {
-    try {
-      const storedList = JSON.parse(localStorage.getItem(contants.LIST_SONG));
-      const newList = [...storedList];
-      newList.pop(); // Loại bỏ bài hiện tại
-      let prevSongId = newList[newList.length - 1];
-      if (prevSongId === songId.current) {
-        prevSongId = newList[newList.length - 1];
-      }
-      setListSong(newList);
-      updateSong(prevSongId);
-    } catch (error) {
-      console.log(error);
+  const updateSong = (id) => {
+    if (id === currentSong) return; // ✅ Tránh lặp nếu ID giống
+    songId.current = id;
+    setCurrentSong(id);
+    localStorage.setItem(contants.CURRENT_SONG, id);
+  };
+
+  const prevSong = () => {
+    const list = [...listSong];
+    const idx = list.indexOf(currentSong);
+    if (idx > 0) {
+      const prevId = list[idx - 1];
+      updateSong(prevId);
     }
   };
 
   const nextSong = async () => {
-    try {
-      if (songLoop) {
-        // Nếu bật loop, reset lại thời gian và phát lại bài hiện tại
-        if (audioRef.current) {
-          audioRef.current.currentTime = 0;
-          audioRef.current.play();
-        }
-      } else {
-        const response = await singleApi.nextSingle(songId.current);
-        const newTrack = response.data.data.mp3;
-        setInformation(response.data); // Lưu thông tin bài nhạc
-        setTrack(newTrack);
-        if (!listSong.includes(response.data.data.id)) {
-          setListSong((prevList) => [...prevList, response.data.data.id]);
-        }
+    if (songLoop) {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
       }
-    } catch (error) {
-      console.log(error);
+    } else {
+      try {
+        const response = await singleApi.nextSingle(songId.current);
+        const next = response.data?.data;
+        if (!next) return;
+        setInformation(response.data);
+        setTrack(next.mp3);
+
+        setListSong((prevList) => {
+          if (prevList.includes(next.id)) return prevList;
+          return [...prevList, next.id];
+        });
+
+        songId.current = next.id;
+        setCurrentSong(next.id);
+        localStorage.setItem(contants.CURRENT_SONG, next.id);
+      } catch (err) {
+        console.error("❌ Error nextSong:", err);
+      }
     }
   };
 
-  // Hàm chuyển đổi chế độ loop
   const handleSongLoop = () => {
     setSongLoop((prev) => {
-      const newLoopState = !prev;
-      localStorage.setItem(contants.IS_LOOP, newLoopState);
-
-      if (newLoopState) {
-        loopedSongId.current = songId.current; // Ghi lại bài hiện tại khi bật loop
-      } else {
-        loopedSongId.current = null; // Tắt loop => reset
-      }
-
-      return newLoopState;
+      const state = !prev;
+      localStorage.setItem(contants.IS_LOOP, state);
+      loopedSongId.current = state ? songId.current : null;
+      return state;
     });
   };
 
-  // Dùng useEffect để log giá trị mới khi songLoop thay đổi
+  const play = () => {
+    audioRef.current?.play();
+    setPlayStatus(true);
+  };
 
-  useEffect(() => {
-    localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
-  }, [listSong]);
+  const pause = () => {
+    audioRef.current?.pause();
+    setPlayStatus(false);
+  };
 
+  // Gán track vào audio
   useEffect(() => {
     if (track && audioRef.current) {
-      audioRef.current.src = track; // Đảm bảo audio element nhận src mới
+      audioRef.current.src = track;
       audioRef.current.load();
       audioRef.current.play();
       setPlayStatus(true);
     }
   }, [track]);
 
-  // Function cập nhật songId và gọi getSong
-  const updateSong = (id) => {
-    songId.current = id;
-    setCurrentSong(id);
-    localStorage.setItem(contants.CURRENT_SONG, id);
-    getSong();
-  };
-
-  const play = () => {
-    audioRef.current.play();
-    setPlayStatus(true);
-  };
-
-  const pause = () => {
-    audioRef.current.pause();
-    setPlayStatus(false);
-  };
-
+  // Lấy dữ liệu bài hát mỗi khi currentSong đổi
   useEffect(() => {
     getSong();
-    if (audioRef.current) {
-      audioRef.current.onloadedmetadata = () => {
-        audioRef.current.ontimeupdate = () => {
-          if (audioRef.current.duration && !isNaN(audioRef.current.duration)) {
-            const progress = Math.floor(
-              (audioRef.current.currentTime / audioRef.current.duration) * 100
-            );
-            seekBar.current.style.width = progress + "%";
-            setTime({
-              currentTime: {
-                seconds: Math.floor(audioRef.current.currentTime % 60),
-                minute: Math.floor(audioRef.current.currentTime / 60),
-              },
-              totalTime: {
-                seconds: Math.floor(audioRef.current.duration % 60),
-                minute: Math.floor(audioRef.current.duration / 60),
-              },
-            });
-          }
-        };
-        // Khi bài nhạc kết thúc
-        audioRef.current.onended = () => {
-          if (songLoop) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
-          } else {
-            nextSong();
-          }
-        };
+  }, [currentSong]);
+
+  // Lưu danh sách vào localStorage
+  useEffect(() => {
+    localStorage.setItem(contants.LIST_SONG, JSON.stringify(listSong));
+  }, [listSong]);
+
+  // Cập nhật thời gian, kết thúc bài
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    audioRef.current.onloadedmetadata = () => {
+      audioRef.current.ontimeupdate = () => {
+        const audio = audioRef.current;
+        if (!audio.duration || isNaN(audio.duration)) return;
+
+        const progress = Math.floor((audio.currentTime / audio.duration) * 100);
+        if (seekBar.current) seekBar.current.style.width = `${progress}%`;
+
+        setTime({
+          currentTime: {
+            seconds: Math.floor(audio.currentTime % 60),
+            minute: Math.floor(audio.currentTime / 60),
+          },
+          totalTime: {
+            seconds: Math.floor(audio.duration % 60),
+            minute: Math.floor(audio.duration / 60),
+          },
+        });
       };
-    }
-  }, [audioRef, currentSong, songLoop]);
+
+      audioRef.current.onended = () => {
+        songLoop ? play() : nextSong();
+      };
+    };
+  }, [songLoop,currentSong]);
 
   const contextValue = {
     audioRef,
@@ -187,12 +184,12 @@ const PlayerContextProvider = (props) => {
     nextSong,
     prevSong,
     handleSongLoop,
-    isLoop: songLoop, // Đặt tên thống nhất cho context
+    isLoop: songLoop,
   };
 
   return (
     <PlayerContext.Provider value={contextValue}>
-      {props.children}
+      {children}
     </PlayerContext.Provider>
   );
 };

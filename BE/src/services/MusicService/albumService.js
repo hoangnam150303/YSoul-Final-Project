@@ -3,33 +3,37 @@ const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
 // this function is for admin, admin can create new album
 exports.createAlbumService = async (title, artistId, image, releaseYear) => {
   try {
-    let validAlbum = await conectPostgresDb.query(
-      // check if album already exists
-      `SELECT * FROM albums WHERE title = '${title}' AND artist_id = ${artistId}`
+    // Check if album already exists
+    const validAlbum = await conectPostgresDb.query(
+      `SELECT * FROM albums WHERE title = $1 AND artist_id = $2`,
+      [title, artistId]
     );
     if (validAlbum.rows.length > 0) {
-      // if album already exists, return error message
       throw new Error("Album already exists");
     }
-    const validArtitst = await conectPostgresDb.query(
-      // check if artist already exists
-      `SELECT * FROM artists WHERE id = ${artistId}`
+
+    // Check if artist exists
+    const validArtist = await conectPostgresDb.query(
+      `SELECT * FROM artists WHERE id = $1`,
+      [artistId]
     );
-    if (validArtitst.rows.length === 0) {
-      // if artist not exists, return error message
+    if (validArtist.rows.length === 0) {
       throw new Error("Artist not exists");
     }
-    validAlbum = await conectPostgresDb.query(
-      // insert new album to database
-      `INSERT INTO albums (title, artist_id, image, release_year) VALUES ('${title}', ${artistId}, '${image}', '${releaseYear}')`
+
+    // Insert album
+    const insertedAlbum = await conectPostgresDb.query(
+      `INSERT INTO albums (title, artist_id, image, release_year)
+       VALUES ($1, $2, $3, $4)`,
+      [title, artistId, image, releaseYear]
     );
-    if (!validAlbum.rowCount > 0) {
-      // if album not created, return error message
+    if (insertedAlbum.rowCount === 0) {
       throw new Error("Album not created");
     }
+
     return { success: true };
   } catch (error) {
-      return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -73,7 +77,7 @@ exports.updateAlbumService = async (
     );
     return { success: true };
   } catch (error) {
-       return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -102,13 +106,13 @@ exports.activeOrDeactiveAlbumService = async (id) => {
     );
     return { success: true }; // return success message
   } catch (error) {
-       return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
 // this function is for user, admin, user or admin can get all albums
 exports.getAllAlbumService = async (filter, search, typeUser) => {
-  try {    
+  try {
     let filterOptions = ""; // set filterOptions to empty string
     let sortOrder = "ASC"; // set sortOrder to DESC
     const searchValue = search ? `%${search}%` : "%"; // set searchValue to search or to empty string
@@ -121,9 +125,9 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
-        case "newest":
-          filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
-          break;
+      case "newest":
+        filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
+        break;
       case "newest":
         filterOptions = "release_year"; // if filter is newest, set filterOptions to release_year
         break;
@@ -142,15 +146,13 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
           `SELECT * FROM albums WHERE title ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions}`,
           [searchValue]
         );
-      }
-     else if (filter === "Active") {
+      } else if (filter === "Active") {
         albums = await conectPostgresDb.query(
           // get all albums from database
           `SELECT * FROM albums WHERE title ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions}`,
           [searchValue]
         );
-      }
-      else {
+      } else {
         albums = await conectPostgresDb.query(
           // get all albums from database
           `SELECT * FROM albums WHERE title ILIKE  $1 ORDER BY ${filterOptions}`,
@@ -170,7 +172,7 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
     }
     return { success: true, albums: albums.rows };
   } catch (error) {
-       return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -199,7 +201,7 @@ exports.getAlbumByIdService = async (id) => {
       artist: artist.rows[0],
     };
   } catch (error) {
-        return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -242,6 +244,6 @@ exports.interactAlbumService = async (id, type, userId) => {
 
     return { success: true };
   } catch (error) {
-     return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };

@@ -1,5 +1,6 @@
 const { conectPostgresDb } = require("../../configs/database");
 const FavouriteEntertainment = require("../../models/DashBoardsModel/FavoriteEntertainment");
+const Invoice = require("../../models/PaymentModel/invoice");
 // this function is to get the number of users by type (normal and VIP)
 exports.getNumberOfTypeUserService = async () => {
   try {
@@ -76,6 +77,26 @@ exports.getFavouriteCountService = async () => {
     };
   } catch (error) {
     return {
+      success: false,
+      message: error.toString(),
+    };
+  }
+};
+
+// this function is to get the number of payments
+exports.getRevenuesService = async () => {
+  try {
+    const payments = await Invoice.find({}).where("isSuccess").equals(true); // get all payments
+    return {
+      // return the result
+      success: true,
+      data: payments,
+    };
+  } catch (error) {
+    console.log("Error in getRevenuesService:", error);
+
+    return {
+      // return error message
       success: false,
       message: error.toString(),
     };

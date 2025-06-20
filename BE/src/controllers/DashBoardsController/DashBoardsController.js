@@ -49,10 +49,30 @@ exports.increaseFavouriteCount = async (req, res) => {
 
 // this function is to get the favourite count of entertainment
 exports.getFavouriteCount = async (req, res) => {
-  try { 
+  try {
     const response = await dashboardService.getFavouriteCountService(); // call getFavouriteCountService from dashboardService
-    if (!response.success) { // check if the response is not successful
-      return res.status(500).json({ 
+    if (!response.success) {
+      // check if the response is not successful
+      return res.status(500).json({
+        success: false,
+        message: response.message,
+      });
+    }
+    return res.status(200).json(response); // return the response with status 200
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.toString(),
+    });
+  }
+};
+
+// this function is to get the number of payments
+exports.getRevenue = async (req, res) => {
+  try {
+    const response = await dashboardService.getRevenuesService(); // call getNumberOfPaymentsService from dashboardService
+    if (!response.success) {
+      return res.status(500).json({
         success: false,
         message: response.message,
       });

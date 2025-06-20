@@ -17,12 +17,8 @@ import {
   Line,
 } from "recharts";
 import dashBoardsApi from "../../hooks/dashBoardsApi";
-
+import dayjs from "dayjs";
 const { Content } = Layout;
-
-
-
-
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -39,6 +35,8 @@ const accountPurchaseData = [
 
 export const AdminHomePage = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [revenueData, setRevenueData] = useState([]);
+
   const [vipUsers, setVipUsers] = useState(0);
   const [normalUsers, setNormalUsers] = useState(0);
   const [film, setFilm] = useState(0);
@@ -73,20 +71,55 @@ export const AdminHomePage = () => {
       message.error("Error fetching favourite count: " + error.message);
     }
   };
+  const fetchRevenue = async () => {
+    try {
+      const response = await dashBoardsApi.getRevenue();
+      if (response.status === 200) {
+        const rawData = response.data.data;
+
+        // Nhóm theo tháng (yyyy-MM) và cộng tổng
+        const groupedByMonth = rawData.reduce((acc, item) => {
+          const month = dayjs(item.createdAt).format("YYYY-MM");
+          const price = parseFloat(item.price || 0);
+
+          if (!acc[month]) {
+            acc[month] = price;
+          } else {
+            acc[month] += price;
+          }
+          return acc;
+        }, {});
+
+        // Định dạng lại để render biểu đồ
+        const revenueArray = Object.entries(groupedByMonth).map(
+          ([month, total]) => ({
+            month,
+            revenue: total,
+          })
+        );
+
+        setRevenueData(revenueArray);
+      }
+    } catch (error) {
+      message.error("Error fetching revenue: " + error.message);
+    }
+  };
+
   useEffect(() => {
     fetchNumberOfTypeUser();
     fetchFavouriteCount();
+    fetchRevenue();
   }, []);
   const userData = [
     { type: "Normal", count: normalUsers },
     { type: "VIP", count: vipUsers },
   ];
   const trafficData = [
-  { name: "Film", value: film },
-  { name: "Music", value: music },
-  { name: "Social", value: social },
-  { name: "Market", value: market },
-];
+    { name: "Film", value: film },
+    { name: "Music", value: music },
+    { name: "Social", value: social },
+    { name: "Market", value: market },
+  ];
   return (
     <Layout>
       <AdminSideBar />
@@ -154,18 +187,18 @@ export const AdminHomePage = () => {
 
           {/* Biểu đồ line bên dưới */}
           <div style={{ marginTop: 60 }}>
-            <h3>Account Purchases Over Time</h3>
+            <h3>Revenue by Month</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={accountPurchaseData}>
+              <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="purchases"
-                  stroke="#82ca9d"
+                  dataKey="revenue"
+                  stroke="#00bcd4"
                   strokeWidth={3}
                 />
               </LineChart>
