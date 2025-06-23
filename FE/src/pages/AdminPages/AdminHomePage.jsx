@@ -22,17 +22,6 @@ const { Content } = Layout;
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-// Dữ liệu biểu đồ đường
-const accountPurchaseData = [
-  { date: "Mon", purchases: 10 },
-  { date: "Tue", purchases: 20 },
-  { date: "Wed", purchases: 15 },
-  { date: "Thu", purchases: 25 },
-  { date: "Fri", purchases: 18 },
-  { date: "Sat", purchases: 30 },
-  { date: "Sun", purchases: 22 },
-];
-
 export const AdminHomePage = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [revenueData, setRevenueData] = useState([]);
@@ -91,12 +80,12 @@ export const AdminHomePage = () => {
         }, {});
 
         // Định dạng lại để render biểu đồ
-        const revenueArray = Object.entries(groupedByMonth).map(
-          ([month, total]) => ({
+        const revenueArray = Object.entries(groupedByMonth)
+          .map(([month, total]) => ({
             month,
             revenue: total,
-          })
-        );
+          }))
+          .sort((a, b) => new Date(a.month) - new Date(b.month));
 
         setRevenueData(revenueArray);
       }
