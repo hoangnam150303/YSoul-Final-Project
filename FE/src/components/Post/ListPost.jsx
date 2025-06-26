@@ -499,7 +499,7 @@ export const ListPost = ({ type }) => {
             {/* Hiển thị link phim hoặc nhạc */}
             {post.film_id ? (
               <div className="mt-3">
-                <Link to={`/singlePage/${post.single_id}`}>
+                <Link to={`/watchPage/${post.film_id}`}>
                   🎬
                   <span className="ml-2 underline text-white">
                     Click here to explore

@@ -20,6 +20,7 @@ export const ArtistPage = () => {
     const fetchArtist = async () => {
       try {
         const response = await artistApi.getArtistById(id);
+        console.log(response.data);
         setArtistSelected(response.data.artist);
         setListSong(response.data.singles);
         setListAlbum(response.data?.albums);
@@ -71,7 +72,8 @@ export const ArtistPage = () => {
     key: song.id,
     image: song.image,
     title: song.title,
-    album: listAlbum.find((album) => album.id === song.album_id)?.title || "N/A",
+    album:
+      listAlbum.find((album) => album.id === song.album_id)?.title || "N/A",
     dateAdded: song.createdAt,
     clock: song.duration,
   }));

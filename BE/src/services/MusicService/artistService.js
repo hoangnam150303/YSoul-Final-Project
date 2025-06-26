@@ -152,32 +152,31 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
 exports.getArtistByIdService = async (id) => {
   try {
     const artist = await conectPostgresDb.query(
-      // get artist by id
-      `SELECT * FROM artists WHERE id = ${id}`
+      `SELECT * FROM artists WHERE id = $1`, [id]
     );
     const singles = await conectPostgresDb.query(
-      // get singles by artist_id
-      `SELECT * FROM singles WHERE artist_id = ${id}`
+      `SELECT * FROM singles WHERE artist_id = $1`, [id]
     );
     const albums = await conectPostgresDb.query(
-      // get albums by artist_id
-      `SELECT * FROM albums WHERE artist_id = ${id}`
+      `SELECT * FROM albums WHERE artist_id = $1`, [id]
     );
-    if (!artist) {
-      // if artist not found, return error message
+
+    if (!artist.rows.length) {
       throw new Error("No artist found");
     }
+
     return {
-      // return artist, singles and albums
       success: true,
       artist: artist.rows[0],
       singles: singles.rows,
       albums: albums.rows,
     };
   } catch (error) {
-       return { success: false, message: error.toString() };
+    console.log("Error in getArtistByIdService:", error);
+    return { success: false, message: error.toString() };
   }
 };
+
 
 // this function is for user, user can interact with artist
 exports.interactArtistService = async (id, userId, type) => {

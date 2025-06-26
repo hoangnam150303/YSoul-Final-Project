@@ -1,7 +1,6 @@
 import { Image, ImageBackground, Text, View } from 'react-native'
 import React from 'react'
 import { Tabs } from 'expo-router'
-import { router } from 'expo-router';
 const _layout = () => {
     const TabIcon = ({ focused, icon, title }: any) => {
         if (focused) {
@@ -92,18 +91,8 @@ const _layout = () => {
                     )
                 }}
             />
-            <Tabs.Screen
-                name="LoginPage"
-                options={{
-                    title: 'Login',
-                    headerShown: false,
-                    tabBarIcon: ({ focused }) => (
-                        <>
-                            <TabIcon focused={focused} icon='https://res.cloudinary.com/dnv7bjvth/image/upload/v1750571924/account_wwflfb.png' title='Login' />
-                        </>
-                    )
-                }}
-            />
+
+
         </Tabs>
     )
 }

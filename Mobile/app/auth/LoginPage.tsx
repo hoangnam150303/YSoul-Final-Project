@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
-
+import { router } from 'expo-router';
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -61,11 +61,13 @@ const LoginPage = () => {
                 {/* Đăng ký */}
                 <Text className="text-white text-center mt-6">
                     Don’t have any account?
-                    <Text className="text-red-400 font-semibold"> Sign Up</Text>
+                    <Text className="text-red-400 font-semibold" onPress={() => router.push('/auth/SignUpPage')}> Sign Up</Text>
                 </Text>
             </View>
         </ImageBackground>
     );
 };
-
+export const options = {
+    headerShown: false,
+};
 export default LoginPage;
