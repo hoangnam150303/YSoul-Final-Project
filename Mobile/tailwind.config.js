@@ -1,14 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./app/**/*.{js,jsx,ts,tsx}", // ✔ dùng cho Expo Router
-    "./components/**/*.{js,jsx,ts,tsx}", // nếu có
-  ],
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./Components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
       colors: {
-        primary: "#030014",
+        primary: "black",
         secondary: "#151312",
         light: {
           100: "#D6C6FF",

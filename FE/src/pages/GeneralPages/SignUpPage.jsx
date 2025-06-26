@@ -68,7 +68,7 @@ export const SignUpPage = () => {
     }
   };
   return (
-    <div className="h-screen w-full hero-bg">
+    <div className="h-full w-full hero-bg">
       <header className="max-w-6x1 max-auto flex items-center justify-between p-4">
         <Link to={"/"}>
           <img

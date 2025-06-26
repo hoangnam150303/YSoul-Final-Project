@@ -179,28 +179,38 @@ exports.getAllAlbumService = async (filter, search, typeUser) => {
 // this function is for user, admin, user or admin can get album by id
 exports.getAlbumByIdService = async (id) => {
   try {
+    // Get album by id
     const validAlbum = await conectPostgresDb.query(
-      `SELECT * FROM albums WHERE id = ${id}`
-    ); // get album by id from database
-    if (!validAlbum.rows.length > 0) {
-      // if album not exists, return error message
+      `SELECT * FROM albums WHERE id = $1`,
+      [id]
+    );
+
+    if (validAlbum.rows.length === 0) {
       throw new Error("Album not found");
     }
+
+    const album = validAlbum.rows[0];
+
+    // Get singles by album_id
     const singles = await conectPostgresDb.query(
-      // find singles by album id
-      `SELECT * FROM singles WHERE album_id = ${id}`
+      `SELECT * FROM singles WHERE album_id = $1`,
+      [id]
     );
+
+    // Get artist by artist_id
     const artist = await conectPostgresDb.query(
-      // find artist by album id
-      `SELECT * FROM artists WHERE id = ${validAlbum.rows[0].artist_id}`
+      `SELECT * FROM artists WHERE id = $1`,
+      [album.artist_id]
     );
+
     return {
       success: true,
-      album: validAlbum.rows[0],
+      album,
       singles: singles.rows,
-      artist: artist.rows[0],
+      artist: artist.rows[0] || null,
     };
   } catch (error) {
+    console.error("Error in getAlbumByIdService:", error);
     return { success: false, message: error.toString() };
   }
 };
