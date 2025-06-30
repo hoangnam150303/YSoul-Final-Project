@@ -77,24 +77,29 @@ exports.activeOrDeactiveSingle = async (req, res) => {
       return res.status(401).json({ message: "Error! Please try again." });
     }
     return res.status(200).json(response); // return response
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ message: "Error! Please try again." });
+  }
 };
 
 // this function is for user, user can get single
 exports.getSingleById = async (req, res) => {
   try {
     const { id } = req.params; // get id single from params
-    if (!id) {
+    if (!id || id === "undefined") {
       // if id is not exist, return status 401
       return res.status(401).json({ message: "Single id is required." });
     }
+
     const response = await singleService.getSingleByIdService(id); // if id exist, call getSingleByIdService from singleService
     if (!response.success) {
       // if response is not success, return error message
       return res.status(401).json({ message: "Error! Please try again." });
     }
     return res.status(200).json(response); // return response
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ message: "Error! Please try again." });
+  }
 };
 
 // this function for user and admin, user and admin can get all single

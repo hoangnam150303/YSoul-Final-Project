@@ -3,19 +3,28 @@ import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image } from 
 import { router } from 'expo-router';
 import authApi from '@/Hooks/auth_api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const LoginPage = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const handleLogin = async () => {
         try {
             const response = await authApi.postLoginLocal({ email, password });
-
             // Giả sử token trả về từ backend là response.data.token
-            const accessToken = response.data.token;
-
-            // Lưu vào AsyncStorage
-            await AsyncStorage.setItem('access_token', accessToken);
 
             // Chuyển hướng sang trang chính (home/dashboard)
-            router.replace('/');
+
+
+            if (response.data.success === true) {
+
+                const accessToken = response.data.access_token;
+
+                // Lưu vào AsyncStorage
+                await AsyncStorage.setItem('access_token', accessToken);
+
+                // Chuyển hướng sang trang chính (home/dashboard)
+                router.replace('/(tabs)');
+            }
 
 
         } catch (error: any) {
@@ -24,8 +33,7 @@ const LoginPage = () => {
         }
     };
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+
 
     return (
         <ImageBackground
