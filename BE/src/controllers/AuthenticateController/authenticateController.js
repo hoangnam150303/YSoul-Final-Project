@@ -85,7 +85,6 @@ exports.sendCode = async (req, res) => {
 exports.loginLocal = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("LoginLocal Request Body:", req.body); // ✅ Log request body for debugging
 
     if (!email || !password) {
       return res
@@ -97,6 +96,7 @@ exports.loginLocal = async (req, res) => {
       email,
       password
     );
+    console.log(respone);
 
     if (!respone.success) {
       const statusMap = {
