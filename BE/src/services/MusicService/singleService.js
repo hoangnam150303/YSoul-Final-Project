@@ -159,6 +159,8 @@ exports.activeOrDeactiveSingleService = async (id) => {
 // this function is for user, user can get single
 exports.getSingleByIdService = async (id) => {
   try {
+    console.log(id);
+    
     const singleResult = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
       [id]
