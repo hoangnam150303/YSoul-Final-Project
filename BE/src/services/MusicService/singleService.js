@@ -159,11 +159,6 @@ exports.activeOrDeactiveSingleService = async (id) => {
 // this function is for user, user can get single
 exports.getSingleByIdService = async (id) => {
   try {
-    // ✅ Nếu dùng UUID, đừng check isNaN
-    if (!id) {
-      return { success: false, message: "Invalid ID" };
-    }
-
     const singleResult = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
       [id]
