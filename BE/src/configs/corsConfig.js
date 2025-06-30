@@ -1,24 +1,24 @@
+const allowedOrigins = [
+  process.env.CLIENT_URL, // Web dev
+  "exp://192.168.1.101:8081", // Mobile Expo Go
+  "http://192.168.1.101:8081", // Mobile dùng fetch, axios
+];
+
 const corsConfig = {
-  // Configures the Access-Control-Allow-Origin
-  origin: process.env.CLIENT_URL,
-
-  // Configures the Access-Control-Allow-Methods
+  origin: (origin, callback) => {
+    console.log("CORS Origin:", origin); // 👀 Debug
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS: " + origin));
+    }
+  },
+  credentials: true,
   methods: "GET, POST, OPTIONS, PUT, PATCH, DELETE",
-
-  // Configures the Access-Control-Allow-Headers
   allowedHeaders:
     "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Authorization",
-
-  // Configures the Access-Control-Allow-Credentials
-  credentials: true,
-
-  // Configures the Access-Control-Expose-Headers
   exposedHeaders: "Content-Range,X-Content-Range,Authorization",
-
-  // Provides a status code to use for successful OPTIONS requests
   optionsSuccessStatus: 200,
-
-  // Configures the Cross-Origin-Opener-Policy
   crossOriginOpenerPolicy: "same-origin",
 };
 

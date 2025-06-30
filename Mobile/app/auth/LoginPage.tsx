@@ -1,7 +1,29 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { router } from 'expo-router';
+import authApi from '@/Hooks/auth_api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const LoginPage = () => {
+    const handleLogin = async () => {
+        try {
+            const response = await authApi.postLoginLocal({ email, password });
+
+            // Giả sử token trả về từ backend là response.data.token
+            const accessToken = response.data.token;
+
+            // Lưu vào AsyncStorage
+            await AsyncStorage.setItem('access_token', accessToken);
+
+            // Chuyển hướng sang trang chính (home/dashboard)
+            router.replace('/');
+
+
+        } catch (error: any) {
+            console.error('Login failed:', error.response?.data || error.message);
+            alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
+        }
+    };
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -49,9 +71,10 @@ const LoginPage = () => {
                 />
 
                 {/* Login button */}
-                <TouchableOpacity className="bg-red-600 py-3 rounded-md mb-4">
+                <TouchableOpacity className="bg-red-600 py-3 rounded-md mb-4" onPress={handleLogin}>
                     <Text className="text-white text-center font-semibold">Login</Text>
                 </TouchableOpacity>
+
 
                 {/* Google login */}
                 <TouchableOpacity className="flex-row items-center justify-center bg-red-500 py-3 rounded-md">
