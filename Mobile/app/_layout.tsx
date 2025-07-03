@@ -8,6 +8,8 @@ export default function RootLayout() {
       <Stack >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/LoginPage" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/SignUpPage" options={{ headerShown: false }} />
       </Stack>
     </>
   )

@@ -11,8 +11,10 @@ const authApi = {
   postRegister: (data: {
     email: string;
     password: string;
-    fullName: string;
-    // thêm các field nếu cần
+    name: string;
+    confirmPassword: string;
+    otp: string;
+    verifyToken: string | null;
   }) => {
     const url = `${AUTH_API_ENDPOINT}/register`;
     return axiosClient.post(url, data);

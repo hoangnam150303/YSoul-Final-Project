@@ -44,6 +44,7 @@ const MovieDetails = () => {
                     shouldPlay
                     onError={(err) => {
                         console.log('Video error:', err);
+
                         // Có thể hiển thị fallback UI nếu muốn
                     }}
                     style={{ width: '100%', height: '100%' }}
@@ -51,8 +52,6 @@ const MovieDetails = () => {
 
 
             </View>
-
-
             {/* Episode List */}
             <FlatList
                 data={episodes}
