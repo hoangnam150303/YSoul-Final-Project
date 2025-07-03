@@ -1,9 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { API_URL } from '@env'; // lấy biến môi trường từ .env
-// console.log(API_URL);
+
 const axiosClient = axios.create({
-  baseURL: process.env.API_URL,
+  baseURL: "http://192.168.1.101:8080",
   headers: {
     'Content-Type': 'application/json',
     accept: 'application/json',

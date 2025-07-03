@@ -52,8 +52,6 @@ const MovieDetails = () => {
 
 
             </View>
-
-
             {/* Episode List */}
             <FlatList
                 data={episodes}
