@@ -4,11 +4,24 @@ import SearchBar from "@/Components/SearchBar";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import MovieCard from "@/Components/MovieCard";
+import filmApi from "@/Hooks/film_api";
 
 export default function Index() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const fetchFilms = async (category: string) => {
+    try {
+      const response = await filmApi.getAllFilm({
+        typeUser: "user",
+        category: category
+      })
+      console.log(response.data.data.data);
 
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
   const newestMovies = [
     {
       id: 1,
@@ -110,22 +123,74 @@ export default function Index() {
         ) : (
           <View className="flex-1 mt-20">
 
-            <Text className="text-white text-lg font-bold mt-8 mb-3">
-              Newest Movies
-            </Text>
+            <View>
+              <Text className="text-white text-lg font-bold mt-8 mb-3">
+                Newest
+              </Text>
 
-            <FlatList
-              data={newestMovies.slice(0, 10)} // lấy tối đa 10
-              renderItem={({ item, index }) => (
-                <MovieCard {...item} index={index} />
-              )}
-              keyExtractor={(item) => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
-              contentContainerStyle={{ paddingRight: 16 }}
-            />
+              <FlatList
+                data={newestMovies.slice(0, 10)} // lấy tối đa 10
+                renderItem={({ item, index }) => (
+                  <MovieCard {...item} index={index} />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+                contentContainerStyle={{ paddingRight: 16 }}
+              />
+            </View>
+            <View>
+              <Text className="text-white text-lg font-bold mt-8 mb-3">
+                Top Rated
+              </Text>
 
+              <FlatList
+                data={newestMovies.slice(0, 10)} // lấy tối đa 10
+                renderItem={({ item, index }) => (
+                  <MovieCard {...item} index={index} />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+                contentContainerStyle={{ paddingRight: 16 }}
+              />
+            </View>
+            <View>
+              <Text className="text-white text-lg font-bold mt-8 mb-3">
+                Popular
+              </Text>
+
+              <FlatList
+                data={newestMovies.slice(0, 10)} // lấy tối đa 10
+                renderItem={({ item, index }) => (
+                  <MovieCard {...item} index={index} />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+                contentContainerStyle={{ paddingRight: 16 }}
+              />
+            </View>
+            <View>
+              <Text className="text-white text-lg font-bold mt-8 mb-3">
+                Trending
+              </Text>
+
+              <FlatList
+                data={newestMovies.slice(0, 10)} // lấy tối đa 10
+                renderItem={({ item, index }) => (
+                  <MovieCard {...item} index={index} />
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+                contentContainerStyle={{ paddingRight: 16 }}
+              />
+            </View>
           </View>
         )}
       </ScrollView>
