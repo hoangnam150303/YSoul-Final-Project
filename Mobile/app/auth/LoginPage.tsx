@@ -10,22 +10,11 @@ const LoginPage = () => {
     const handleLogin = async () => {
         try {
             const response = await authApi.postLoginLocal({ email, password });
-
-            console.log(response);
-
-
             if (response.data.success === true) {
-                console.log(111111);
                 const accessToken = response.data.access_token;
-
-
                 await AsyncStorage.setItem('access_token', accessToken);
-
-
                 router.replace('/(tabs)');
             }
-
-
         } catch (error: any) {
             console.error('Login failed:', error.response?.data || error.message);
             alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
