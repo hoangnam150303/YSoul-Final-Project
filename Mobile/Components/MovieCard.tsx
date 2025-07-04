@@ -28,8 +28,6 @@ const MovieCard = ({ id, title, image, index }: Movie) => {
                         }}
                         resizeMode='cover'
                     />
-
-                    {/* Số thứ tự to góc trái dưới */}
                     <Text
                         style={{
                             position: 'absolute',
