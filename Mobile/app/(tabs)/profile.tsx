@@ -4,14 +4,10 @@ import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UpdateProfileModal from '../../Components/UpdateProfileModal';
 import { router } from 'expo-router';
+import userApi from '@/Hooks/user_api';
 const Profile = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState({
-    name: 'hoang nam',
-    email: 'hoangnam150303@gmail.com',
-    avatar: 'https://cdn-icons-png.flaticon.com/512/147/147144.png',
-    vip: true
-  });
+  const [userInfo, setUserInfo] = useState<any>();
 
   const [nfts, setNfts] = useState<string[]>([
     'https://cdn-icons-png.flaticon.com/512/2922/2922510.png',
@@ -26,10 +22,21 @@ const Profile = () => {
     };
     getToken();
   }, []);
+  const fetchUserProfile = async () => {
+    try {
+      const response = await userApi.getUserProfile();
+      
+      setUserInfo(response.data.user);
+    } catch (error) {
 
-  const handleSetAvatar = (uri: string) => {
-    setUserInfo((prev) => ({ ...prev, avatar: uri }));
-  };
+    }
+  }
+  useEffect(() => {
+    fetchUserProfile();
+  }, [])
+  // const handleSetAvatar = (uri: string) => {
+  //   setUserInfo((prev) => ({ ...prev, avatar: uri }));
+  // };
 
   if (!accessToken) {
     return (
@@ -40,6 +47,24 @@ const Profile = () => {
         </TouchableOpacity>
       </View>
     );
+  }
+
+  if (!accessToken) {
+    return (
+      <View className="flex-1 bg-[#0f0d23] items-center justify-center px-5">
+        <Text className="text-white text-lg mb-5">Bạn chưa đăng nhập</Text>
+        <TouchableOpacity
+          className="bg-red-500 py-3 px-8 rounded-lg"
+          onPress={() => router.push('/auth/LoginPage')}
+        >
+          <Text className="text-white font-semibold text-base">Đăng nhập</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!userInfo) {
+    return null; // hoặc spinner
   }
 
   return (
@@ -56,12 +81,12 @@ const Profile = () => {
       </View>
 
       <View className="flex-row space-x-4 mb-4">
-        <UpdateProfileModal />
+        <UpdateProfileModal userId={userInfo.id} email={userInfo.email} name={userInfo.name} avatar={userInfo.avatar} vip={userInfo.vip}  onProfileUpdated={fetchUserProfile} />
         <TouchableOpacity
           className="bg-red-600 py-3 px-6 rounded-lg"
           onPress={async () => {
             await AsyncStorage.removeItem('access_token');
-            setAccessToken(null); // cập nhật UI ngay
+            setAccessToken(null);
           }}
         >
           <Text className="text-white font-bold text-base">Logout</Text>
@@ -77,7 +102,7 @@ const Profile = () => {
             keyExtractor={(item, index) => index.toString()}
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleSetAvatar(item)} className="relative mr-3">
+              <TouchableOpacity className="relative mr-3">
                 <Image source={{ uri: item }} className="w-24 h-24 rounded-xl border border-gray-600" />
                 <View className="absolute bottom-1 w-full px-1">
                   <Text className="bg-black/50 text-white text-center text-xs py-1 rounded-md">
@@ -91,6 +116,7 @@ const Profile = () => {
       )}
     </View>
   );
+
 };
 
 export default Profile;

@@ -2,13 +2,13 @@ import { axiosClient } from "../ApiConfig/apiConfig";
 
 const FILM_API_ENDPOINT = "/api/v1/film";
 const filmApi = {
-  getAllFilm: ({typeFilm, category, sort, search,typeUser }) => {
+  getAllFilm: ({ typeFilm, category, sort, search, typeUser }) => {
     const queryParams = new URLSearchParams({
       typeFilm,
       category,
       sort,
       search,
-      typeUser
+      typeUser,
     }).toString();
     const url = `${FILM_API_ENDPOINT}/getAllFilm?${queryParams}`;
     return axiosClient.get(url);
@@ -32,8 +32,6 @@ const filmApi = {
   },
 
   postUpdateStatusFilm: (id, type, data, userId) => {
-    console.log(id, type, data);
-
     const url = `${FILM_API_ENDPOINT}/updateStatusFilmById/${id}/${type}/${userId}`;
     return axiosClient.put(url, { data });
   },
