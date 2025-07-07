@@ -22,6 +22,12 @@ const filmApi = {
     const res = await axiosClient.get(url);
     return res.data;
   },
+  postUpdateStatusFilm: (id: string, type: string, data: any, userId: string) => {
+    console.log(id, type, data, userId);
+    
+    const url = `${FILM_API_ENDPOINT}/updateStatusFilmById/${id}/${type}/${userId}`;
+    return axiosClient.put(url, { data });
+  },
 };
 
 export default filmApi;

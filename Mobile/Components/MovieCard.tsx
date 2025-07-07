@@ -3,13 +3,13 @@ import React from 'react'
 import { Link } from 'expo-router';
 
 interface Movie {
-    id: number;
-    title: string;
-    image: string;
+    id: string;
+    name: string;
+    small_image: string;
     index?: number;
 }
 
-const MovieCard = ({ id, title, image, index }: Movie) => {
+const MovieCard = ({ id, name, small_image, index }: Movie) => {
     return (
         <Link href={`/movies/${id}`} asChild>
             <TouchableOpacity
@@ -21,7 +21,7 @@ const MovieCard = ({ id, title, image, index }: Movie) => {
             >
                 <View style={{ position: 'relative', width: '100%', height: 190, borderRadius: 10, overflow: 'hidden' }}>
                     <Image
-                        source={{ uri: image || 'https://placehold.com/600x400/1a1a1a/fffff.png' }}
+                        source={{ uri: small_image || 'https://placehold.com/600x400/1a1a1a/fffff.png' }}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -56,7 +56,7 @@ const MovieCard = ({ id, title, image, index }: Movie) => {
                     }}
                     numberOfLines={2}
                 >
-                    {title}
+                    {name}
                 </Text>
             </TouchableOpacity>
         </Link>

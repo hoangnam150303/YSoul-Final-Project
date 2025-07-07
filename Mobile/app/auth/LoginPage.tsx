@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ImageBackground, Image } from 
 import { router } from 'expo-router';
 import authApi from '@/Hooks/auth_api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import userApi from '@/Hooks/user_api';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -13,10 +14,15 @@ const LoginPage = () => {
             if (response.data.success === true) {
                 const accessToken = response.data.access_token;
                 await AsyncStorage.setItem('access_token', accessToken);
+                const user = await userApi.getUser();
+                console.log(user);
+                
+                await AsyncStorage.setItem('userId', user.data.id);
+                await AsyncStorage.setItem('vip', user.data.vip.toString());
                 router.replace('/(tabs)');
             }
         } catch (error: any) {
-            console.error('Login failed:', error.response?.data || error.message);
+            console.error('Login failed:',error);
             alert('Login failed: ' + (error.response?.data?.message || 'Unknown error'));
         }
     };

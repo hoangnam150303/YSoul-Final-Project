@@ -49,8 +49,8 @@ export default function index() {
         renderItem={({ item, index }) => (
           <MovieCard
             id={item._id}
-            title={item.name}
-            image={item.small_image}
+            name={item.name}
+            small_image={item.small_image}
             {...(showIndex ? { index } : {})} // chỉ truyền index nếu showIndex = true
           />
         )}
