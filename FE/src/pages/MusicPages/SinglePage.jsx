@@ -78,12 +78,9 @@ const SinglePage = () => {
         information.data.id
       );
       if (response.status === 200) {
-        console.log(response.data);
         setIsFavorite(response.data.isFavorite);
       }
-    } catch (error) {
-      message.error("Failed to check wishlist status");
-    }
+    } catch (error) {}
   };
   const deleteItemFromWishList = async () => {
     try {

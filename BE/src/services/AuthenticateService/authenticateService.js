@@ -45,8 +45,8 @@ exports.registerService = async (name, email, password, otp, verifyToken) => {
 
     await conectPostgresDb.query(
       // Insert user
-      "INSERT INTO users (name, email, status, authprovider, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [name, email, true, "local", hashPassword]
+      "INSERT INTO users (name, email, status, authprovider, password, vip) VALUES ($1, $2, $3, $4, $5,$6) RETURNING *",
+      [name, email, true, "local", hashPassword, false]
     );
 
     return { success: true };

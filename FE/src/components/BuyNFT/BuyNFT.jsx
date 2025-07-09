@@ -39,7 +39,10 @@ export const BuyNFT = ({ id, visible, onClose, onBought }) => {
   }, [nftData]);
   const handleBuy = async () => {
     try {
-      await sendTransaction(); // Đợi giao dịch xong
+      const res = await sendTransaction(); // Đợi giao dịch xong
+      if (res === false) {
+        return;
+      }
       const response = await nftApi.buyNFT(id); // Sau đó mới gọi API
       if (response.status === 200) {
         if (onBought) onBought(); // Gọi hàm fetch lại dữ liệu

@@ -92,7 +92,9 @@ export const WatchPage = () => {
       setTotalPage(video?.length);
     }
     if (film) {
-      if (isVip === false && film?.isForAllUsers === false) {
+      console.log(isVip, film.isForAllUsers);
+
+      if (isVip === false && film.isForAllUsers === false) {
         navigate("/payment");
       }
     }

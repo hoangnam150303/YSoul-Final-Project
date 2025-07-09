@@ -46,10 +46,10 @@ export const PostCreation = () => {
   };
 
   const handleSubmit = async () => {
-    console.log(11111);
-
     try {
+      console.log(11111);
       const formData = new FormData();
+
       formData.append("content", document.getElementById("content").value);
       if (contentType === "films") {
         formData.append("film_id", selectedItem);
