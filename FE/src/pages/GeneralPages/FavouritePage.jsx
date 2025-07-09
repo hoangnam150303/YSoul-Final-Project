@@ -17,11 +17,11 @@ const FavouritePage = () => {
         setSingles(data.single || []);
         console.log(data.single);
       } else {
-        message.error("Failed to load wishlist");
+        message.error("You dont have any wishlist");
       }
     } catch (error) {
       console.log(error);
-      message.error("Error fetching wishlist");
+      message.error("You dont have any wishlist");
     } finally {
       setLoading(false);
     }

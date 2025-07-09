@@ -234,7 +234,6 @@ const StoreProfile = () => {
   };
   const handleRegister = async () => {
     setFormData((prev) => ({ ...prev, addressWallet: currentAccount }));
-    
     const response = await artistNFTApi.postRegisterArtist(formData);
     if (response.status === 200) {
       message.success("Register Success!");

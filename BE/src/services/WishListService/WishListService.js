@@ -70,7 +70,7 @@ exports.getWishListService = async (user_id) => {
       .populate("NFT_id", "name image"); // Populate the NFT_id field with NFT data
     if (!wishList) {
       // If the wishlist does not exist, return false
-      return { success: false };
+      return { success: false, message: "Wishlist not found" };
     }
     return { success: true, data: wishList }; // Return the wishlist data
   } catch (error) {

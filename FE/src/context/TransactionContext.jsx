@@ -77,7 +77,7 @@ export const TransactionProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to send transaction:", error);
         message.error("Failed to send transaction");
-        return;
+        return false;
       }
 
       try {
@@ -88,7 +88,7 @@ export const TransactionProvider = ({ children }) => {
           urlImage,
           keyword
         );
- 
+
         setFormData({
           addressTo: "",
           amount: "",
@@ -102,9 +102,11 @@ export const TransactionProvider = ({ children }) => {
         return;
       }
       await getAllTransactions();
+      return true;
     } catch (error) {
       console.error(error);
       message.error("An unexpected error occurred");
+      return false;
     }
   };
 

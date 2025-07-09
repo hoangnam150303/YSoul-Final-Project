@@ -17,9 +17,10 @@ import {
   Input,
   Select,
   Upload,
+  Pagination,
 } from "antd";
 import { PostAction } from "./PostAction";
-import { formatDistanceToNow, set } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import commentApi from "../../hooks/commentApi";
 import { useSelector } from "react-redux";
 import postApi from "../../hooks/postApi";
@@ -50,6 +51,9 @@ export const ListPost = ({ type }) => {
   const [commentEdit, setCommentEdit] = useState(null);
   const [editingReplyCommentId, setEditingReplyCommentId] = useState(null);
   const [replyCommentEdit, setReplyCommentEdit] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5);
+  const [totalPosts, setTotalPosts] = useState(0);
   // Menu khi bấm vào nút More
   const getMenu = (user_id, post_id) => (
     <Menu>
@@ -146,26 +150,21 @@ export const ListPost = ({ type }) => {
   const fetchPosts = async () => {
     try {
       if (type === "homepage") {
-        const response = await postApi.getAllPost(search);
+        const response = await postApi.getAllPost(
+          search,
+          currentPage,
+          pageSize
+        );
         setData(response.data.data);
+        setTotalPosts(response.data.total);
       } else if (type === "profile") {
         const response = await postApi.getPostByUser(id);
         const result = response.data.data;
-        setData([
-          {
-            post: result.post,
-            user: result.user[0],
-          },
-        ]);
+        setData([{ post: result.post, user: result.user[0] }]);
       } else if (type === "singlePost") {
-        const response = await postApi.getPostById(id); // gọi API để lấy bài viết theo ID
+        const response = await postApi.getPostById(id);
         const result = response.data.result;
-        setData([
-          {
-            post: [result.post], // ✅ biến object thành array
-            user: result.author[0],
-          },
-        ]);
+        setData([{ post: [result.post], user: result.author[0] }]);
       }
     } catch (error) {
       console.log(error);
@@ -174,7 +173,7 @@ export const ListPost = ({ type }) => {
 
   useEffect(() => {
     fetchPosts();
-  }, [search]);
+  }, [search, currentPage]);
 
   useEffect(() => {
     if (postSelected) {
@@ -455,370 +454,403 @@ export const ListPost = ({ type }) => {
     }
   };
   return (
-    <div className="gradient-bg-hero rounded-lg shadow mb-4">
-      {data.map((item, index) =>
-        item.post.map((post, index) => (
-          <div className="p-4" key={index}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <Link to={`/profile/${item.user?.id}`}>
-                  <img
-                    src={item.user?.avatar}
-                    alt="avatar"
-                    className="size-10 rounded-full mr-3"
-                  />
-                </Link>
-                <div className="text-white">
-                  <Link to={`/profile`}>
-                    <h3 className="font-semibold ">{item.user?.name}</h3>
+    <>
+      {type === "homepage" && (
+        <div className="p-4">
+          <Input.Search
+            placeholder="Search poster name ..."
+            allowClear
+            enterButton="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onSearch={() => setCurrentPage(1)} // reset về trang 1 khi tìm kiếm
+          />
+        </div>
+      )}
+
+      <div className="gradient-bg-hero rounded-lg shadow mb-4">
+        {data.map((item, index) =>
+          item.post.map((post, index) => (
+            <div className="p-4" key={index}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <Link to={`/profile/${item.user?.id}`}>
+                    <img
+                      src={item.user?.avatar}
+                      alt="avatar"
+                      className="size-10 rounded-full mr-3"
+                    />
                   </Link>
-                  <p className="text-xs text-gray-500">
-                    {formatDistanceToNow(new Date(post?.createdAt), {
-                      addSuffix: true,
-                    }).replace("about ", "")}
-                  </p>
+                  <div className="text-white">
+                    <Link to={`/profile`}>
+                      <h3 className="font-semibold ">{item.user?.name}</h3>
+                    </Link>
+                    <p className="text-xs text-gray-500">
+                      {formatDistanceToNow(new Date(post?.createdAt), {
+                        addSuffix: true,
+                      }).replace("about ", "")}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              {/* Nút More với dropdown */}
-              <Dropdown
-                overlay={getMenu(post.user_id, post._id)}
-                trigger={["click"]}
-              >
-                <MoreOutlined className="text-white cursor-pointer text-xl" />
-              </Dropdown>
-            </div>
-            <p className="mb-4 text-white">{post.content}</p>
-            {/* Cố định kích thước ảnh */}
-            <div className="w-full h-[300px] overflow-hidden rounded-lg">
-              <img
-                src={post.image}
-                alt="image-post"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            {/* Hiển thị link phim hoặc nhạc */}
-            {post.film_id ? (
-              <div className="mt-3">
-                <Link to={`/watchPage/${post.film_id}`}>
-                  🎬
-                  <span className="ml-2 underline text-white">
-                    Click here to explore
-                  </span>
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-3">
-                <a
-                  href={`http://localhost:5173/singlePage/${post.single_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center  hover:text-blue-400 transition duration-200"
+                {/* Nút More với dropdown */}
+                <Dropdown
+                  overlay={getMenu(post.user_id, post._id)}
+                  trigger={["click"]}
                 >
-                  🎵
-                  <span className="ml-2 underline text-white">
-                    Click here to explore
-                  </span>
-                </a>
+                  <MoreOutlined className="text-white cursor-pointer text-xl" />
+                </Dropdown>
               </div>
-            )}
-            <div className="flex justify-between  text-white mt-4">
-              <PostAction
-                icon={<LikeOutlined size={18} />}
-                text={`Like (${post.likes?.length})`}
-                onClick={() => handleLikePost(post._id)}
-              />
+              <p className="mb-4 text-white">{post.content}</p>
+              {/* Cố định kích thước ảnh */}
+              {post.image && (
+                <div className="w-full h-[300px] overflow-hidden rounded-lg">
+                  <img
+                    src={post.image}
+                    alt="image-post"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              {/* Hiển thị link phim hoặc nhạc */}
+              {post.film_id ? (
+                <div className="mt-3">
+                  <Link to={`/watchPage/${post.film_id}`}>
+                    🎬
+                    <span className="ml-2 underline text-white">
+                      Click here to explore
+                    </span>
+                  </Link>
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <a
+                    href={`http://localhost:5173/singlePage/${post.single_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center  hover:text-blue-400 transition duration-200"
+                  >
+                    🎵
+                    <span className="ml-2 underline text-white">
+                      Click here to explore
+                    </span>
+                  </a>
+                </div>
+              )}
+              <div className="flex justify-between  text-white mt-4">
+                <PostAction
+                  icon={<LikeOutlined size={18} />}
+                  text={`Like (${post.likes?.length})`}
+                  onClick={() => handleLikePost(post._id)}
+                />
 
-              <PostAction
-                icon={<CommentOutlined size={18} />}
-                text={`Comment (${
-                  post.comments?.length +
-                  post.comments?.reduce(
-                    (total, c) => total + (c.commentReplied?.length || 0),
-                    0
-                  )
-                })`}
-                onClick={() => handleCommentPost(post._id)} // Truyền ID bài viết vào
-              />
+                <PostAction
+                  icon={<CommentOutlined size={18} />}
+                  text={`Comment (${
+                    post.comments?.length +
+                    post.comments?.reduce(
+                      (total, c) => total + (c.commentReplied?.length || 0),
+                      0
+                    )
+                  })`}
+                  onClick={() => handleCommentPost(post._id)} // Truyền ID bài viết vào
+                />
 
-              <PostAction
-                icon={<ShareAltOutlined size={18} />}
-                text={"Share"}
-                onClick={handleLikePost}
-              />
-            </div>
-            {showComments[post._id] && (
-              <div className="px-4 pb-4 text-black mt-5">
-                <div className="mb-4 max-h-60 overflow-y-auto">
-                  {post.comments.map((comment) => (
-                    <div
-                      key={comment._id}
-                      className="mb-2 bg-white p-2 rounded flex items-start"
-                    >
-                      <img
-                        src={comment.avatar}
-                        alt="avatar"
-                        className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
-                      />
-                      <div className="flex-grow">
-                        <div className="flex items-center mb-1">
-                          <span className="font-semibold mr-2">
-                            {comment.username}
-                          </span>
-
-                          {comment && (
-                            <span className="text-xs text-gray-500">
-                              {formatDistanceToNow(
-                                new Date(comment?.createdAt),
-                                {
-                                  addSuffix: true,
-                                }
-                              ).replace("about ", "")}
+                <PostAction
+                  icon={<ShareAltOutlined size={18} />}
+                  text={"Share"}
+                  onClick={handleLikePost}
+                />
+              </div>
+              {showComments[post._id] && (
+                <div className="px-4 pb-4 text-black mt-5">
+                  <div className="mb-4 max-h-60 overflow-y-auto">
+                    {post.comments.map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="mb-2 bg-white p-2 rounded flex items-start"
+                      >
+                        <img
+                          src={comment.avatar}
+                          alt="avatar"
+                          className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
+                        />
+                        <div className="flex-grow">
+                          <div className="flex items-center mb-1">
+                            <span className="font-semibold mr-2">
+                              {comment.username}
                             </span>
-                          )}
-                          <Dropdown
-                            overlay={getCommentMenu(
-                              comment.user_id,
-                              comment._id,
-                              post._id,
-                              comment.content
-                            )}
-                            trigger={["click"]}
-                            className="justify-end"
-                          >
-                            <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
-                          </Dropdown>
-                        </div>
 
-                        <div className="flex flex-col">
-                          {isEdit &&
-                          isEdit &&
-                          editingCommentId === comment._id ? (
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={commentEdit}
-                                onChange={(e) => setCommentEdit(e.target.value)}
-                                className="flex-1 border p-2 rounded"
-                              />
-                              <Button
-                                onClick={() =>
-                                  handleSubmitEditComment(post._id)
-                                }
-                                className="size-10"
-                              >
-                                Save
-                              </Button>
-                            </div>
-                          ) : (
-                            <p>{comment.content}</p>
-                          )}
-                          {/* Nút show reply comments */}
-                          <div
-                            className="text-sm text-gray-500 cursor-pointer ml-auto mt-1 hover:underline"
-                            onClick={() => toggleReplyComments(comment._id)}
-                          >
-                            {showReplyComments[comment._id]
-                              ? "Hide replies"
-                              : "Show reply comments"}
-                          </div>
-                          {/* Hiển thị danh sách reply comments */}
-                          {showReplyComments[comment._id] &&
-                            comment.commentReplied && (
-                              <div className="ml-6 mt-2 border-l-2 border-gray-300 pl-3">
-                                {comment.commentReplied.map((reply) => (
-                                  <div
-                                    key={reply._id}
-                                    className="bg-gray-100 p-2 rounded mb-1"
-                                  >
-                                    <div className="flex items-center">
-                                      <img
-                                        src={reply.avatar}
-                                        alt="avatar"
-                                        className="w-6 h-6 rounded-full mr-2"
-                                      />
-                                      <span className="font-semibold text-sm mr-2">
-                                        {reply.username}
-                                      </span>
-                                      {reply && (
-                                        <span className="text-xs text-gray-500">
-                                          {formatDistanceToNow(
-                                            new Date(reply?.createdAt),
-                                            {
-                                              addSuffix: true,
-                                            }
-                                          ).replace("about ", "")}
-                                        </span>
-                                      )}
-                                      <Dropdown
-                                        overlay={getCommentReplyMenu(
-                                          reply.user_id,
-                                          comment._id,
-                                          post._id,
-                                          reply._id,
-                                          reply.content
-                                        )}
-                                        trigger={["click"]}
-                                        className="justify-end"
-                                      >
-                                        <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
-                                      </Dropdown>
-                                    </div>
-                                    {isEdit &&
-                                    isEdit &&
-                                    editingReplyCommentId === reply._id ? (
-                                      <div className="flex items-center gap-2">
-                                        <input
-                                          type="text"
-                                          value={replyCommentEdit}
-                                          onChange={(e) =>
-                                            setReplyCommentEdit(e.target.value)
-                                          }
-                                          className="flex-1 border p-2 rounded"
-                                        />
-                                        <Button
-                                          onClick={() =>
-                                            handleSubmitEditReplyComment(
-                                              post._id,
-                                              comment._id
-                                            )
-                                          }
-                                          className="size-10"
-                                        >
-                                          Save
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <p className="text-sm mt-1">
-                                        {reply.content}
-                                      </p>
-                                    )}
-                                  </div>
-                                ))}
-                                <form
-                                  className="flex items-center"
-                                  onSubmit={(e) =>
-                                    handleAddReplyComment(
-                                      e,
-                                      post._id,
-                                      comment._id
-                                    )
+                            {comment && (
+                              <span className="text-xs text-gray-500">
+                                {formatDistanceToNow(
+                                  new Date(comment?.createdAt),
+                                  {
+                                    addSuffix: true,
                                   }
-                                >
-                                  <input
-                                    type="text"
-                                    placeholder="Add a comment..."
-                                    value={newReplyComment}
-                                    onChange={(e) =>
-                                      setNewReplyComment(e.target.value)
-                                    }
-                                    className="flex-grow p-2 rounded-l-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                                  />
-                                  <button
-                                    type="submit"
-                                    className="text-white p-2 rounded-r-full bg-blue-500 h-full hover:bg-primary-dark transition duration-300"
-                                    onClick={() => setIsPending(true)}
-                                  >
-                                    {isPending ? (
-                                      <LoadingOutlined />
-                                    ) : (
-                                      <SendOutlined />
-                                    )}
-                                  </button>
-                                </form>
-                              </div>
+                                ).replace("about ", "")}
+                              </span>
                             )}
+                            <Dropdown
+                              overlay={getCommentMenu(
+                                comment.user_id,
+                                comment._id,
+                                post._id,
+                                comment.content
+                              )}
+                              trigger={["click"]}
+                              className="justify-end"
+                            >
+                              <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
+                            </Dropdown>
+                          </div>
+
+                          <div className="flex flex-col">
+                            {isEdit &&
+                            isEdit &&
+                            editingCommentId === comment._id ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={commentEdit}
+                                  onChange={(e) =>
+                                    setCommentEdit(e.target.value)
+                                  }
+                                  className="flex-1 border p-2 rounded"
+                                />
+                                <Button
+                                  onClick={() =>
+                                    handleSubmitEditComment(post._id)
+                                  }
+                                  className="size-10"
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            ) : (
+                              <p>{comment.content}</p>
+                            )}
+                            {/* Nút show reply comments */}
+                            <div
+                              className="text-sm text-gray-500 cursor-pointer ml-auto mt-1 hover:underline"
+                              onClick={() => toggleReplyComments(comment._id)}
+                            >
+                              {showReplyComments[comment._id]
+                                ? "Hide replies"
+                                : "Show reply comments"}
+                            </div>
+                            {/* Hiển thị danh sách reply comments */}
+                            {showReplyComments[comment._id] &&
+                              comment.commentReplied && (
+                                <div className="ml-6 mt-2 border-l-2 border-gray-300 pl-3">
+                                  {comment.commentReplied.map((reply) => (
+                                    <div
+                                      key={reply._id}
+                                      className="bg-gray-100 p-2 rounded mb-1"
+                                    >
+                                      <div className="flex items-center">
+                                        <img
+                                          src={reply.avatar}
+                                          alt="avatar"
+                                          className="w-6 h-6 rounded-full mr-2"
+                                        />
+                                        <span className="font-semibold text-sm mr-2">
+                                          {reply.username}
+                                        </span>
+                                        {reply && (
+                                          <span className="text-xs text-gray-500">
+                                            {formatDistanceToNow(
+                                              new Date(reply?.createdAt),
+                                              {
+                                                addSuffix: true,
+                                              }
+                                            ).replace("about ", "")}
+                                          </span>
+                                        )}
+                                        <Dropdown
+                                          overlay={getCommentReplyMenu(
+                                            reply.user_id,
+                                            comment._id,
+                                            post._id,
+                                            reply._id,
+                                            reply.content
+                                          )}
+                                          trigger={["click"]}
+                                          className="justify-end"
+                                        >
+                                          <MoreOutlined className="text-gray-500 cursor-pointer ml-2" />
+                                        </Dropdown>
+                                      </div>
+                                      {isEdit &&
+                                      isEdit &&
+                                      editingReplyCommentId === reply._id ? (
+                                        <div className="flex items-center gap-2">
+                                          <input
+                                            type="text"
+                                            value={replyCommentEdit}
+                                            onChange={(e) =>
+                                              setReplyCommentEdit(
+                                                e.target.value
+                                              )
+                                            }
+                                            className="flex-1 border p-2 rounded"
+                                          />
+                                          <Button
+                                            onClick={() =>
+                                              handleSubmitEditReplyComment(
+                                                post._id,
+                                                comment._id
+                                              )
+                                            }
+                                            className="size-10"
+                                          >
+                                            Save
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <p className="text-sm mt-1">
+                                          {reply.content}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <form
+                                    className="flex items-center"
+                                    onSubmit={(e) =>
+                                      handleAddReplyComment(
+                                        e,
+                                        post._id,
+                                        comment._id
+                                      )
+                                    }
+                                  >
+                                    <input
+                                      type="text"
+                                      placeholder="Add a comment..."
+                                      value={newReplyComment}
+                                      onChange={(e) =>
+                                        setNewReplyComment(e.target.value)
+                                      }
+                                      className="flex-grow p-2 rounded-l-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    <button
+                                      type="submit"
+                                      className="text-white p-2 rounded-r-full bg-blue-500 h-full hover:bg-primary-dark transition duration-300"
+                                      onClick={() => setIsPending(true)}
+                                    >
+                                      {isPending ? (
+                                        <LoadingOutlined />
+                                      ) : (
+                                        <SendOutlined />
+                                      )}
+                                    </button>
+                                  </form>
+                                </div>
+                              )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-                <form
-                  onSubmit={(e) => handleAddComment(e, post._id)}
-                  className="flex items-center"
-                >
-                  <input
-                    type="text"
-                    placeholder="Add a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="flex-grow p-2 rounded-l-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <button
-                    type="submit"
-                    className="text-white p-2 rounded-r-full bg-blue-500 h-full hover:bg-primary-dark transition duration-300"
-                    onClick={() => setIsPending(true)}
+                    ))}
+                  </div>
+                  <form
+                    onSubmit={(e) => handleAddComment(e, post._id)}
+                    className="flex items-center"
                   >
-                    {isPending ? <LoadingOutlined /> : <SendOutlined />}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-        ))
-      )}
-      {postSelected && (
-        <Modal
-          title="Edit Post"
-          visible={modalOpen}
-          onCancel={handleCancel}
-          onOk={handleSubmit}
-        >
-          <div className="flex flex-col gap-4">
-            <Input.TextArea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Edit content..."
-            />
+                    <input
+                      type="text"
+                      placeholder="Add a comment..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="flex-grow p-2 rounded-l-full bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <button
+                      type="submit"
+                      className="text-white p-2 rounded-r-full bg-blue-500 h-full hover:bg-primary-dark transition duration-300"
+                      onClick={() => setIsPending(true)}
+                    >
+                      {isPending ? <LoadingOutlined /> : <SendOutlined />}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
+          ))
+        )}
 
-            <Upload beforeUpload={() => false} onChange={handleImageChange}>
-              <Button icon={<UploadOutlined />}>Upload Image</Button>
-            </Upload>
-
-            {image && (
-              <img
-                src={filePreview || image}
-                alt="Preview"
-                className="w-full h-40 object-cover mt-2"
+        {postSelected && (
+          <Modal
+            title="Edit Post"
+            visible={modalOpen}
+            onCancel={handleCancel}
+            onOk={handleSubmit}
+          >
+            <div className="flex flex-col gap-4">
+              <Input.TextArea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Edit content..."
               />
-            )}
 
-            {postType && (
-              <Select value={postType} onChange={setPostType}>
-                <Select.Option value="Film">Film</Select.Option>
-                <Select.Option value="Music">Music</Select.Option>
-              </Select>
-            )}
+              <Upload beforeUpload={() => false} onChange={handleImageChange}>
+                <Button icon={<UploadOutlined />}>Upload Image</Button>
+              </Upload>
 
-            {postType === "Film" && (
-              <Select
-                value={selectedOption?.name}
-                onChange={setSelectedOption}
-                placeholder="Select a film"
-              >
-                {films.map((film) => (
-                  <Select.Option key={film._id} value={film._id}>
-                    {film.name}
-                  </Select.Option>
-                ))}
-              </Select>
-            )}
+              {image && (
+                <img
+                  src={filePreview || image}
+                  alt="Preview"
+                  className="w-full h-40 object-cover mt-2"
+                />
+              )}
 
-            {postType === "Music" && (
-              <Select
-                value={selectedOption?.title}
-                onChange={setSelectedOption}
-                placeholder="Select a single"
-              >
-                {musics.map((music) => (
-                  <Select.Option key={music.id} value={music.id}>
-                    {music.title}
-                  </Select.Option>
-                ))}
-              </Select>
-            )}
-          </div>
-        </Modal>
+              {postType && (
+                <Select value={postType} onChange={setPostType}>
+                  <Select.Option value="Film">Film</Select.Option>
+                  <Select.Option value="Music">Music</Select.Option>
+                </Select>
+              )}
+
+              {postType === "Film" && (
+                <Select
+                  value={selectedOption?.name}
+                  onChange={setSelectedOption}
+                  placeholder="Select a film"
+                >
+                  {films.map((film) => (
+                    <Select.Option key={film._id} value={film._id}>
+                      {film.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+
+              {postType === "Music" && (
+                <Select
+                  value={selectedOption?.title}
+                  onChange={setSelectedOption}
+                  placeholder="Select a single"
+                >
+                  {musics.map((music) => (
+                    <Select.Option key={music.id} value={music.id}>
+                      {music.title}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+            </div>
+          </Modal>
+        )}
+      </div>
+      {type === "homepage" && (
+        <div className="text-center mt-6 pb-6">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalPosts}
+            onChange={(page) => setCurrentPage(page)}
+            showSizeChanger={false}
+          />
+        </div>
       )}
-    </div>
+    </>
   );
 };
