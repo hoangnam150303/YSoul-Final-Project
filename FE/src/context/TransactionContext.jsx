@@ -40,6 +40,35 @@ export const TransactionProvider = ({ children }) => {
   const logOut = async () => {
     setCurrentAccount("");
   };
+  const switchToHardhat = async () => {
+    try {
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x7A69" }], // 31337 in hex
+      });
+    } catch (switchError) {
+      if (switchError.code === 4902) {
+        await ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: "0x7A69",
+              chainName: "Hardhat",
+              rpcUrls: ["http://127.0.0.1:8545"],
+              nativeCurrency: {
+                name: "ETH",
+                symbol: "ETH",
+                decimals: 18,
+              },
+            },
+          ],
+        });
+      } else {
+        console.error("Không thể chuyển mạng:", switchError);
+      }
+    }
+  };
+
   const connectWallet = async () => {
     try {
       if (!ethereum) return alert("Please install metamask");
@@ -57,7 +86,7 @@ export const TransactionProvider = ({ children }) => {
   const sendTransaction = async () => {
     try {
       if (!ethereum) return alert("Please install metamask");
-
+      await switchToHardhat();
       const { addressTo, amount, keyword, nftName, urlImage } = formData;
       const transactionContract = await getEthereumContract();
       const parsedAmount = ethers.utils.parseEther(amount.toString());
