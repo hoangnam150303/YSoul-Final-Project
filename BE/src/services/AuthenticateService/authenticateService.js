@@ -135,3 +135,56 @@ exports.loginLocalService = async (email, password) => {
     return { success: false, error }; // Return error
   }
 };
+
+exports.forgotPasswordService = async (email) => {
+  try {
+    const user = await conectPostgresDb.query(
+      // Check if user is exist
+      "SELECT * FROM users WHERE email = $1 AND authprovider = $2",
+      [email, "local"]
+    );
+    if (user.rows.length === 0) {
+      // If user is not exist
+      return { success: false, error: "User not found" };
+    }
+    if (user.rows[0].status === false) {
+      // If user is not active
+      return { success: false, error: "Your account is not active" };
+    }
+    const otp = Math.floor(1000 + Math.random() * 90000).toString(); // Generate OTP
+    const verifyToken = jwt.sign({ otp, email }, process.env.VERIFY_TOKEN, {
+      // Generate verify token
+      expiresIn: process.env.VERIFY_TOKEN_EXPIRED,
+    });
+    await mailHelpers.sendForgotPassword(email, user.rows[0].name, otp); // Send email
+    return { success: true, verifyToken };
+  } catch (error) {
+    return { success: false, error };
+  }
+};
+
+exports.resetPasswordService = async (password, verifyToken, otp) => {
+  try {
+    const decoded = jwt.verify(verifyToken, process.env.VERIFY_TOKEN); // Verify token
+    console.log(decoded);
+
+    if (decoded.otp.toString !== otp.toString) {
+      // Check OTP
+      return { success: false, error: "OTP is incorrect." };
+    }
+    const hashPassword = await passwordHelpers.hashPassword(password, 10); // Hash password
+    const updateUser = await conectPostgresDb.query(
+      // Update password
+      "UPDATE users SET password = $1 WHERE email = $2",
+      [hashPassword, decoded.email]
+    );
+    if (updateUser.rowCount === 0) {
+      return { success: false, error: "User not found." };
+    }
+    console.log("Password reset successfully for user:", decoded.email);
+
+    return { success: true }; // Return success
+  } catch (error) {
+    return { success: false, error }; // Return error
+  }
+};

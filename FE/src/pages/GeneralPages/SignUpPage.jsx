@@ -14,7 +14,6 @@ export const SignUpPage = () => {
 
   const onSuccess = async (data) => {
     try {
-      console.log(data);
       if (data.success) {
         message.success("Register success.");
         localStorage.removeItem("verify_token");

@@ -4,13 +4,14 @@ const authController = require("../../controllers/AuthenticateController/authent
 const passport = require("../../passport");
 
 authRoute.post(
-    "/loginGoogle",
-    passport.authenticate("google-token", { session: false }),
-    authController.loginGoogle
-  );
-  
+  "/loginGoogle",
+  passport.authenticate("google-token", { session: false }),
+  authController.loginGoogle
+);
+
 authRoute.post("/register", authController.register);
 authRoute.post("/sendCode", authController.sendCode);
 authRoute.post("/loginLocal", authController.loginLocal);
-
+authRoute.post("/forgotPassword", authController.forgotPassword);
+authRoute.put("/resetPassword", authController.resetPassword);
 module.exports = authRoute;

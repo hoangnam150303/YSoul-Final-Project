@@ -115,3 +115,55 @@ exports.loginLocal = async (req, res) => {
       .json({ success: false, error: "Internal server error" });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Email is required." });
+    }
+    const respone = await authenticateService.forgotPasswordService(email);
+    if (!respone.success) {
+      return res.status(400).json(respone);
+    }
+    return res.status(200).json(respone);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { password, confirmPassword, verifyToken, otp } = req.body;
+    console.log(req.body);
+
+    if (!password || !confirmPassword || !verifyToken || !otp) {
+      return res
+        .status(400)
+        .json({ success: false, error: "All fields are required." });
+    }
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Password and confirm password do not match.",
+      });
+    }
+    const respone = await authenticateService.resetPasswordService(
+      password,
+      verifyToken,
+      otp
+    );
+    if (!respone.success) {
+      return res.status(400).json(respone);
+    }
+    return res.status(200).json(respone);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+};
