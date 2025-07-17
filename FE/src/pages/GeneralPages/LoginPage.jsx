@@ -70,8 +70,6 @@ export const LoginPage = () => {
           message.error("Đăng nhập thất bại, thử lại");
         }
       } catch (error) {
-
-
         if (error.response) {
           message.error(error.response.data.message);
         } else {
@@ -157,6 +155,11 @@ export const LoginPage = () => {
               Sign Up
             </Link>
           </div>
+          <Link to="/sendCode" className="text-center mt-8 ">
+            <div className="text-center text-red-600 font-bold">
+              Forgot Password{" "}
+            </div>
+          </Link>
         </div>
       </div>
     </div>

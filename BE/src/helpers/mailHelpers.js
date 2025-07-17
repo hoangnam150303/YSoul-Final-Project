@@ -139,7 +139,7 @@ const sendForgotPassword = async (email, name, OTP) => {
   await transport.sendMail({
     from: process.env.Gmail,
     to: email,
-    subject: subject,
+    subject: "Your OTP for reset password",
     html,
   });
 };

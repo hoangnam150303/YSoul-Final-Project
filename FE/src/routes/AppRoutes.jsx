@@ -34,6 +34,8 @@ import SinglePage from "../pages/MusicPages/SinglePage";
 import FavouritePage from "../pages/GeneralPages/FavouritePage";
 
 import { getUserRequest } from "../reducers/user";
+import SendCodePage from "../pages/GeneralPages/SendCodePage";
+import { ForgotPasswordPage } from "../pages/GeneralPages/ForgotPasswordPage";
 function AppRoutes() {
   const dispatch = useDispatch();
 
@@ -69,6 +71,9 @@ function AppRoutes() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/sendCode" element={<SendCodePage />} />
+        <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+
         <Route
           path="/paymentSuccess/:invoice_id"
           element={<PaymentSuccess />}
