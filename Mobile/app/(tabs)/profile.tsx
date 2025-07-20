@@ -1,53 +1,51 @@
-// Profile.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, Image, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import UpdateProfileModal from '../../Components/UpdateProfileModal';
 import { router } from 'expo-router';
 import userApi from '@/Hooks/user_api';
+import UpdateProfileModal from '../../Components/UpdateProfileModal';
+
 const Profile = () => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<any>();
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [nfts, setNfts] = useState<string[]>([
+  const [nfts] = useState<string[]>([
     'https://cdn-icons-png.flaticon.com/512/2922/2922510.png',
     'https://cdn-icons-png.flaticon.com/512/2922/2922656.png',
     'https://cdn-icons-png.flaticon.com/512/2922/2922688.png'
   ]);
 
   useEffect(() => {
-    const getToken = async () => {
+    const loadAccessToken = async () => {
       const token = await AsyncStorage.getItem('access_token');
       setAccessToken(token);
     };
-    getToken();
+    loadAccessToken();
   }, []);
-  const fetchUserProfile = async () => {
+
+  const fetchUserProfile = useCallback(async () => {
+    if (!accessToken) return;
     try {
       const response = await userApi.getUserProfile();
-      
       setUserInfo(response.data.user);
     } catch (error) {
-
+      console.log("❌ Error from fetchUserProfile:", error);
+    } finally {
+      setLoading(false);
     }
-  }
-  useEffect(() => {
-    fetchUserProfile();
-  }, [])
-  // const handleSetAvatar = (uri: string) => {
-  //   setUserInfo((prev) => ({ ...prev, avatar: uri }));
-  // };
+  }, [accessToken]);
 
-  if (!accessToken) {
-    return (
-      <View className="flex-1 bg-[#0f0d23] items-center justify-center px-5">
-        <Text className="text-white text-lg mb-5">Bạn chưa đăng nhập</Text>
-        <TouchableOpacity className="bg-red-500 py-3 px-8 rounded-lg">
-          <Text className="text-white font-semibold text-base" onPress={() => router.push('/auth/LoginPage')}>Đăng nhập</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (accessToken) {
+      fetchUserProfile();
+    }
+  }, [accessToken, fetchUserProfile]);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('access_token');
+    setAccessToken(null);
+  };
 
   if (!accessToken) {
     return (
@@ -63,12 +61,32 @@ const Profile = () => {
     );
   }
 
-  if (!userInfo) {
-    return null; // hoặc spinner
+  if (loading) {
+    return (
+      <View className="flex-1 bg-[#0f0d23] items-center justify-center">
+        <ActivityIndicator size="large" color="#ffffff" />
+      </View>
+    );
   }
+
+  if (!userInfo) {
+    return (
+      <View className="flex-1 bg-[#0f0d23] items-center justify-center px-5">
+
+        <TouchableOpacity
+          className="bg-red-500 py-3 px-8 rounded-lg"
+          onPress={() => router.push('/auth/LoginPage')}
+        >
+          <Text className="text-white font-semibold text-base">Đăng nhập</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 
   return (
     <View className="flex-1 bg-[#0f0d23] items-center justify-start pt-10 px-5">
+      {/* Avatar + Thông tin */}
       <View className="items-center mb-6">
         <Image source={{ uri: userInfo.avatar }} className="w-28 h-28 rounded-full" />
         {userInfo.vip && (
@@ -80,19 +98,22 @@ const Profile = () => {
         <Text className="text-gray-300 text-sm mt-1">{userInfo.email}</Text>
       </View>
 
+      {/* Action buttons */}
       <View className="flex-row space-x-4 mb-4">
-        <UpdateProfileModal userId={userInfo.id} email={userInfo.email} name={userInfo.name} avatar={userInfo.avatar} vip={userInfo.vip}  onProfileUpdated={fetchUserProfile} />
-        <TouchableOpacity
-          className="bg-red-600 py-3 px-6 rounded-lg"
-          onPress={async () => {
-            await AsyncStorage.removeItem('access_token');
-            setAccessToken(null);
-          }}
-        >
+        <UpdateProfileModal
+          userId={userInfo.id}
+          email={userInfo.email}
+          name={userInfo.name}
+          avatar={userInfo.avatar}
+          vip={userInfo.vip}
+          onProfileUpdated={fetchUserProfile}
+        />
+        <TouchableOpacity className="bg-red-600 py-3 px-6 rounded-lg" onPress={handleLogout}>
           <Text className="text-white font-bold text-base">Logout</Text>
         </TouchableOpacity>
       </View>
 
+      {/* NFT Collection */}
       {nfts.length > 0 && (
         <View className="w-full mt-6">
           <Text className="text-white text-base font-semibold mb-3">Your NFTs</Text>
@@ -116,7 +137,6 @@ const Profile = () => {
       )}
     </View>
   );
-
 };
 
 export default Profile;
