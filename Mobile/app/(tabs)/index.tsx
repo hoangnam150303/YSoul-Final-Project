@@ -1,14 +1,14 @@
-import { ActivityIndicator, FlatList, Image, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, Linking, ScrollView, Text, View } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import MovieCard from "@/Components/MovieCard";
 import filmApi from "@/Hooks/film_api";
+import SubMenu from "@/Components/SubMenu";
 
 export default function index() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-
   const [newest, setNewest] = useState<any[]>([]);
   const [topRated, setTopRated] = useState<any[]>([]);
   const [popular, setPopular] = useState<any[]>([]);
@@ -66,6 +66,18 @@ export default function index() {
 
   return (
     <View className="flex-1 bg-primary relative">
+      {/* SubMenu fixed top-right */}
+      <View style={{ position: 'absolute', right: 5, zIndex: 50 }}>
+        <SubMenu
+          type="movie"
+          onSelect={(selectedType) => {
+            if (selectedType === 'music') {
+              router.push(`/${selectedType}`);
+            }
+          }}
+        />
+      </View>
+
       {/* Background image */}
       <Image
         style={{
@@ -93,6 +105,7 @@ export default function index() {
         }}
       />
 
+      {/* Content */}
       <ScrollView
         className="flex-1 px-5"
         contentContainerStyle={{ paddingBottom: 100, paddingTop: 80 }}
@@ -118,4 +131,5 @@ export default function index() {
       </ScrollView>
     </View>
   );
+
 }

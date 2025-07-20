@@ -190,6 +190,8 @@ exports.getUserProfileService = async (id) => {
     if (user.rows.length === 0) {
       return { success: false, error: "User not found" };
     }
+
+
     return { success: true, user: user.rows[0] };
   } catch (error) {
     return { success: false, message: error.toString() };

@@ -4,9 +4,6 @@ import { Tabs } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const _layout = () => {
-
-
-
     const TabIcon = ({ focused, icon, title }: any) => {
         if (focused) {
             return (
