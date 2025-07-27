@@ -1,6 +1,6 @@
 import { axiosClient } from "../Config/api";
 
-const ARTIST_API_ENDPOINT = "/api/v1/artist";
+const ARTIST_API_ENDPOINT = "/artist";
 
 const artistApi = {
   getAllArtist: (filter: string, search: string, typeUser: string) => {

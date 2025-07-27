@@ -1,6 +1,6 @@
 import {axiosClient} from "../Config/api";
 
-const AUTH_API_ENDPOINT = '/api/v1/auth';
+const AUTH_API_ENDPOINT = '/auth';
 
 const authApi = {
   postLoginWithGoogle: (accessToken: string) => {

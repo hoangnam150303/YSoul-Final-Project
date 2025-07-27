@@ -159,8 +159,7 @@ exports.activeOrDeactiveSingleService = async (id) => {
 // this function is for user, user can get single
 exports.getSingleByIdService = async (id) => {
   try {
-    console.log(id);
-    
+
     const singleResult = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE id = $1",
       [id]
@@ -196,6 +195,8 @@ exports.getSingleByIdService = async (id) => {
 // this function is for user and admin, user and admin can get all single
 exports.getAllSingleService = async (filter, search, typeUser) => {
   try {
+    console.log(filter, search, typeUser);
+    
     let filterOptions = ""; // set filterOptions to empty string
     let sortOrder = "DESC"; // set sortOrder to DESC
     const searchValue = search ? `%${search}%` : "%"; //  set searchValue to search or to empty string

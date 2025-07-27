@@ -1,7 +1,7 @@
 
 import { axiosClient } from "../Config/api";
 
-const USER_API_ENDPOINT = "/api/v1/user";
+const USER_API_ENDPOINT = "/user";
 
 const userApi = {
   getUser: () => {

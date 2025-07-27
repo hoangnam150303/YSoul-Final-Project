@@ -1,7 +1,7 @@
 // src/api/wishListApi.ts
 import { axiosClient } from "../Config/api";
 
-const WISHLIST_API_ENDPOINT = "/api/v1/wishList";
+const WISHLIST_API_ENDPOINT = "/wishList";
 
 const wishListApi = {
   addToWishList: async (type: string, id: string) => {

@@ -148,6 +148,8 @@ exports.getAllFilmService = async (type, category, sort, search, typeUser) => {
         .sort({ ...sortOption })
         .where({ isDeleted: false });
     }
+
+    
     return {
       success: true,
       data: films,

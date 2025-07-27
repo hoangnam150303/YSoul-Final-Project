@@ -11,6 +11,7 @@ exports.getUserService = async (id) => {
     if (user.rows.length === 0) {
       return { success: false, error: "User not found" };
     }
+
     return {
       id: user.rows[0].id,
       name: user.rows[0].name,
@@ -190,7 +191,6 @@ exports.getUserProfileService = async (id) => {
     if (user.rows.length === 0) {
       return { success: false, error: "User not found" };
     }
-
 
     return { success: true, user: user.rows[0] };
   } catch (error) {
