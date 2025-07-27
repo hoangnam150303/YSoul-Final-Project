@@ -4,31 +4,31 @@ import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 interface Props {
     category: string;
+    search?: string
 }
 interface Single {
     id: string;
     title: string;
     image: string;
 }
-export const SingleSlider = ({ category }: Props) => {
+export const SingleSlider = ({ category,search }: Props) => {
     const [data, setData] = useState<Single[]>([]);
     const fetchSingle = async () => {
         try {
             const response = await singleApi.getAllSingle({
                 filter: category,
-                search: "",
+                search: search || "",
                 typeUser: "user",
             })
 
             setData(response.data.singles);
         } catch (error) {
-            console.log(error);
-
+            console.log("Fetch single error:", error);
         }
     }
     useEffect(() => {
         fetchSingle();
-    }, [category]);
+    }, [category,search]);
     return (
         <View className="mt-2">
             <Text className="text-white text-lg px-4">{category}</Text>

@@ -4,19 +4,20 @@ import { View, Text, ScrollView, Image } from 'react-native';
 
 interface Props {
     category: string;
+    search?: string
 }
 interface Album {
     id: string;
     name: string;
     image: string;
 }
-export const AlbumSlider = ({ category }: Props) => {
+export const AlbumSlider = ({ category,search }: Props) => {
     const [data, setData] = useState<Album[]>([]);
     const fetchAlbums = async () => {
         try {
             const response = await albumApi.getAllAlbum(
                 category,
-                "",
+                search || "",
                 "user",
             )
 
@@ -28,7 +29,7 @@ export const AlbumSlider = ({ category }: Props) => {
     }
     useEffect(() => {
         fetchAlbums();
-    }, [category]);
+    }, [category,search]);
     return (
         <View className="mt-2">
             <Text className="text-white text-lg px-4">{category}</Text>

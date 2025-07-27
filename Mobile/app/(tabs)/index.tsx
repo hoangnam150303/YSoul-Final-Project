@@ -13,9 +13,9 @@ export default function index() {
   const [topRated, setTopRated] = useState<any[]>([]);
   const [popular, setPopular] = useState<any[]>([]);
   const [trending, setTrending] = useState<any[]>([]);
-
   const fetchFilms = async (category: string, setData: React.Dispatch<React.SetStateAction<any[]>>) => {
     try {
+      console.log("🟡 Fetching films...");
       const response = await filmApi.getAllFilm({
         typeUser: "user",
         category: "",
@@ -23,7 +23,7 @@ export default function index() {
       });
       setData(response.data.data);
     } catch (error) {
-      console.log(error);
+      console.log("Fetch films error:", error);
     }
   };
 

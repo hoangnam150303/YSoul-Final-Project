@@ -1,6 +1,6 @@
 import { axiosClient } from "../Config/api";
 
-const ALBUM_API_ENDPOINT = "/api/v1/album";
+const ALBUM_API_ENDPOINT = "/album";
 
 const albumApi = {
   getAllAlbum: (filter: string, search: string, typeUser: string) => {

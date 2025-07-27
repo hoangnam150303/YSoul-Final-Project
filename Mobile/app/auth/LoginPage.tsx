@@ -10,6 +10,8 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const handleLogin = async () => {
         try {
+            console.log(1111);
+            
             const response = await authApi.postLoginLocal({ email, password });
             if (response.data.success === true) {
                 const accessToken = response.data.access_token;
