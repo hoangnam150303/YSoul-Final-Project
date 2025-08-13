@@ -456,7 +456,7 @@ export const ListPost = ({ type }) => {
   return (
     <>
       {type === "homepage" && (
-        <div className="p-4">
+        <div className="p-4" style={{ zIndex: 1000 }}>
           <Input.Search
             placeholder="Search poster name ..."
             allowClear

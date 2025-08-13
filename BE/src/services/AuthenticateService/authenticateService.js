@@ -60,8 +60,8 @@ exports.sendCodeService = async (email, name) => {
   try {
     const validUser = await conectPostgresDb.query(
       // Check if user is exist
-      "SELECT * FROM users WHERE email = $1 AND authprovider = $2",
-      [email, "local"]
+      "SELECT * FROM users WHERE email = $1",
+      [email]
     );
 
     if (validUser.rows.length !== 0) {

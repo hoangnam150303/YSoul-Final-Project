@@ -17,6 +17,7 @@ exports.createPostService = async (
       "SELECT * FROM users WHERE id = $1",
       [user_id]
     ); // check if user_id is valid
+
     if (!validUser) {
       // check if user_id is not valid
       return { success: false, message: "User not found" };
