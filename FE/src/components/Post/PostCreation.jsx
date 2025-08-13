@@ -47,29 +47,31 @@ export const PostCreation = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log(11111);
+      setIsPending(true);
       const formData = new FormData();
-
-      formData.append("content", document.getElementById("content").value);
-      if (contentType === "films") {
+      formData.append(
+        "content",
+        document.getElementById("content").value || ""
+      );
+      if (contentType === "films" && selectedItem)
         formData.append("film_id", selectedItem);
-      } else if (contentType === "musics") {
+      if (contentType === "musics" && selectedItem)
         formData.append("single_id", selectedItem);
-      }
-      if (file) {
-        formData.append("image", file);
-      }
+      if (file) formData.append("image", file);
 
-      const response = await postApi.postCreatePost(formData);
-      if (response.status === 200) {
+      console.log("[createPost] sending..."); // thấy log này mà Network vẫn trống => lỗi axios instance
+      const res = await postApi.postCreatePost(formData); // đảm bảo đây là Promise từ axios
+      if (res?.status === 200) {
         message.success("Post created successfully!");
-        setIsPending(false);
         document.getElementById("content").value = "";
         setFile(null);
         setSelectedItem(null);
       }
-    } catch (error) {
-      console.error("Error creating post", error);
+    } catch (err) {
+      console.error("Error creating post", err);
+      message.error(err?.response?.data?.message || "Create post failed");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -148,22 +150,24 @@ export const PostCreation = () => {
         </button>
 
         <button
-          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 transition-colors duration-200"
-          onClick={() => setIsPending(true)}
+          type="button"
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          onClick={handleSubmit}
+          disabled={isPending}
         >
           {isPending ? (
             <LoadingOutlined className="size-5" />
           ) : (
             <>
-              Share <ShareAltOutlined onClick={handleSubmit} />
+              Share <ShareAltOutlined />
             </>
           )}
         </button>
       </div>
 
       {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 rounded-lg w-96 shadow-lg">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
+          <div className="bg-white p-4 rounded-lg w-96 shadow-lg relative z-[10000]">
             <h2 className="text-lg font-semibold mb-4">Share Film or Music</h2>
             <div className="flex justify-around">
               <button

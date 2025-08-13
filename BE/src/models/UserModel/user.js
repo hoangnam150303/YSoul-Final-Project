@@ -13,7 +13,7 @@ const createUserTableQuery = `
     google_id VARCHAR(50),
     avatar VARCHAR(200),
     vip BOOLEAN,
-    is_admin BOOLEAN,
+    is_admin BOOLEAN DEFAULT FALSE,
     user_follow INTEGER[] DEFAULT '{}',
     user_followed INTEGER[] DEFAULT '{}',
     is_online BOOLEAN DEFAULT FALSE

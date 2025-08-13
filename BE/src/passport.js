@@ -23,8 +23,8 @@ passport.use(
         const avatar = profile._json.picture || "";
         // Kiểm tra người dùng có tồn tại không
         const res = await conectPostgresDb.query(
-          "SELECT * FROM users WHERE authprovider = $1 AND email = $2",
-          ["google", email]
+          "SELECT * FROM users WHERE  email = $1",
+          [email]
         );
 
         let user = res.rows[0]; // Lấy người dùng nếu tồn tại
