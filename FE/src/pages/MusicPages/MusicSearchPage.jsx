@@ -42,16 +42,23 @@ export const MusicSearchPage = () => {
       setAlbums(albumsResponse.data.albums);
       setSingles(singlesResponse.data.singles);
     } else if (type === "Single") {
-      const singlesResponse = await singleApi.getAllSingles({
-        filter,
-        search: searchTerm,
-        typeUser: "user",
-      });
-      setSingles(singlesResponse.data.singles);
-      setArtists([]);
-      setAlbums([]);
+      try {
+        console.log(searchTerm);
+        const singlesResponse = await singleApi.getAllSingle({
+          filter,
+          search: searchTerm,
+          typeUser: "user",
+        });
+        console.log(singlesResponse);
+
+        setSingles(singlesResponse.data.singles);
+        setArtists([]);
+        setAlbums([]);
+      } catch (error) {
+        console.log("Error fetching singles:", error);
+      }
     } else if (type === "Album") {
-      const albumsResponse = await albumApi.getAllAlbums({
+      const albumsResponse = await albumApi.getAllAlbum({
         filter,
         search: searchTerm,
         typeUser: "user",
@@ -60,7 +67,7 @@ export const MusicSearchPage = () => {
       setArtists([]);
       setSingles([]);
     } else if (type === "Artist") {
-      const artistsResponse = await artistApi.getAllArtists({
+      const artistsResponse = await artistApi.getAllArtist({
         filter,
         search: searchTerm,
         typeUser: "user",
@@ -87,6 +94,7 @@ export const MusicSearchPage = () => {
 
   useEffect(() => {
     fetchMusic();
+    console.log(searchTerm, type, filter);
   }, [type, searchTerm, filter]);
 
   // Hàm render cho grid card, tùy thuộc vào heading sẽ hiển thị khác nhau

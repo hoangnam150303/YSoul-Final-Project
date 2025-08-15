@@ -96,7 +96,7 @@ exports.loginLocal = async (req, res) => {
       email,
       password
     );
-    console.log(respone);
+
 
     if (!respone.success) {
       const statusMap = {
@@ -109,7 +109,6 @@ exports.loginLocal = async (req, res) => {
 
     return res.status(200).json(respone);
   } catch (error) {
-    console.error("LoginLocal Error:", error);
     return res
       .status(500)
       .json({ success: false, error: "Internal server error" });

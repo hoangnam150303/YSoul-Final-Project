@@ -1,6 +1,7 @@
 const { conectPostgresDb } = require("../../configs/database");
 const FavouriteEntertainment = require("../../models/DashBoardsModel/FavoriteEntertainment");
 const Invoice = require("../../models/PaymentModel/invoice");
+
 // this function is to get the number of users by type (normal and VIP)
 exports.getNumberOfTypeUserService = async () => {
   try {
@@ -22,8 +23,6 @@ exports.getNumberOfTypeUserService = async () => {
       ],
     };
   } catch (error) {
-    console.log("Error in getNumberOfTypeUserService:", error);
-
     return {
       success: false,
       message: error.toString(),
@@ -37,7 +36,6 @@ exports.increaseFavouriteCountService = async (type) => {
     if (!["film", "music", "market", "social"].includes(type)) {
       throw new Error("Invalid type");
     }
-    console.log(type);
 
     const update = { $inc: { [type]: 1 } };
 
@@ -93,8 +91,6 @@ exports.getRevenuesService = async () => {
       data: payments,
     };
   } catch (error) {
-    console.log("Error in getRevenuesService:", error);
-
     return {
       // return error message
       success: false,
