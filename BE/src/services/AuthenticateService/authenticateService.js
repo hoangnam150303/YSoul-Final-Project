@@ -130,8 +130,6 @@ exports.loginLocalService = async (email, password) => {
     );
     return { success: true, access_token }; // Return access token
   } catch (error) {
-    console.log(error);
-
     return { success: false, error }; // Return error
   }
 };
