@@ -1,7 +1,7 @@
 const allowedOrigins = [
   process.env.CLIENT_URL, // Web dev
   "exp://192.168.1.103:8081", // Mobile Expo Go
-  "http://10.25.203.162:8081", // Mobile dùng fetch, axios
+  "http://192.168.1.103:8081", // Mobile dùng fetch, axios
 ];
 
 const corsConfig = {
