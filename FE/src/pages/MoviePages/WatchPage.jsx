@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MovieSideBar } from "../../components/SideBar/MovieSideBar";
 import {
-  CaretLeftFilled,
   CaretRightOutlined,
   CommentOutlined,
   HeartFilled,
@@ -9,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
-import { message, Pagination, Rate } from "antd";
+import { message, Rate } from "antd";
 import filmApi from "../../hooks/filmApi";
 import { useSelector } from "react-redux";
 import wishListApi from "../../hooks/wishListApi";
@@ -19,13 +18,10 @@ export const WatchPage = () => {
   const navigate = useNavigate();
   const [film, setFilm] = useState({});
   const [isMovie, setIsMovie] = useState(true);
-  const [episodes, setEpisodes] = useState([]);
   const [video, setVideo] = useState([]);
   const movieId = useParams().movieId;
   const [page, setPage] = useState(1);
-  const [totalPage, setTotalPage] = useState(1);
   const [relatedFilm, setRelatedFilm] = useState([]);
-  const [videoSelected, setVideoSelected] = useState("");
   const [category, setCategory] = useState("");
   const isVip = useSelector((state) => state.user.vip);
   const userId = useSelector((state) => state.user.id);
@@ -89,7 +85,6 @@ export const WatchPage = () => {
   useEffect(() => {
     if (video.length > 1) {
       setIsMovie(false);
-      setTotalPage(video?.length);
     }
     if (film) {
       console.log(isVip, film.isForAllUsers);

@@ -15,7 +15,6 @@ export default function index() {
   const [trending, setTrending] = useState<any[]>([]);
   const fetchFilms = async (category: string, setData: React.Dispatch<React.SetStateAction<any[]>>) => {
     try {
-      console.log("🟡 Fetching films...");
       const response = await filmApi.getAllFilm({
         typeUser: "user",
         category: "",

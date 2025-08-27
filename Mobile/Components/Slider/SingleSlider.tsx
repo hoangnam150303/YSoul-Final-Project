@@ -22,6 +22,7 @@ export const SingleSlider = ({ category,search }: Props) => {
             })
 
             setData(response.data.singles);
+            
         } catch (error) {
             console.log("Fetch single error:", error);
         }
