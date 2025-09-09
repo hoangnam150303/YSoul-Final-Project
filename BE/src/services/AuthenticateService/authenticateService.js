@@ -164,7 +164,6 @@ exports.forgotPasswordService = async (email) => {
 exports.resetPasswordService = async (password, verifyToken, otp) => {
   try {
     const decoded = jwt.verify(verifyToken, process.env.VERIFY_TOKEN); // Verify token
-    console.log(decoded);
 
     if (decoded.otp.toString !== otp.toString) {
       // Check OTP
@@ -179,8 +178,6 @@ exports.resetPasswordService = async (password, verifyToken, otp) => {
     if (updateUser.rowCount === 0) {
       return { success: false, error: "User not found." };
     }
-    console.log("Password reset successfully for user:", decoded.email);
-
     return { success: true }; // Return success
   } catch (error) {
     return { success: false, error }; // Return error
