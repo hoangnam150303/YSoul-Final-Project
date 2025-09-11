@@ -81,7 +81,6 @@ exports.createVNPayInvoiceService = async (id, totalPrice, IpAddr) => {
     let createDate = moment(date).format("YYYYMMDDHHmmss");
 
     let ipAddr = IpAddr;
-
     let tmnCode = process.env.TMN_CODE;
     let secretKey = process.env.VNPAY_SECRETKEY;
     let vnpUrl = process.env.VNP_URL;
@@ -116,7 +115,9 @@ exports.createVNPayInvoiceService = async (id, totalPrice, IpAddr) => {
     vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
     return { success: true, url: vnpUrl, invoiceId: invoiceId };
-  } catch (error) {}
+  } catch (error) {
+    return { success: false, message: error.toString() };
+  }
 };
 
 exports.createMomoInvoiceService = async (id, totalPrice) => {
