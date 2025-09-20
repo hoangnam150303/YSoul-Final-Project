@@ -3,6 +3,7 @@ dotenv.config(); // Load environment variables
 
 const { Pool } = require("pg"); // PostgreSQL library
 const mongoose = require("mongoose");
+const { createClient } = require("redis");
 
 // PostgreSQL Connection
 const conectPostgresDb = new Pool({
@@ -13,7 +14,21 @@ const conectPostgresDb = new Pool({
   database: process.env.PG_DB,
   max: 1000, // max connections in pool
 });
+const redisClient = createClient({
+  url: process.env.REDIS_URL, // redis://default:password@host:port
+  socket: { tls: false, family: 4 }, // ép IPv4, không dùng TLS
+});
 
+redisClient.on("error", (err) => console.error("Redis error:", err));
+redisClient.on("connect", () => console.log("Connected to Redis!"));
+
+const connectRedisDb = async () => {
+  try {
+    await redisClient.connect();
+  } catch (error) {
+    console.error("Error connecting to Redis:", error);
+  }
+};
 
 // MongoDB Connection
 const connectMongoDb = async () => {
@@ -34,4 +49,6 @@ const connectMongoDb = async () => {
 module.exports = {
   connectMongoDb,
   conectPostgresDb,
+  connectRedisDb,
+  redisClient,
 };

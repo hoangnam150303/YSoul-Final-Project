@@ -86,8 +86,6 @@ exports.updateUserProfile = async (req, res) => {
 exports.getUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log(userId);
-
     const response = await userService.getUserProfileService(userId);
     if (!response.success) {
       return res

@@ -1,4 +1,4 @@
-const { conectPostgresDb } = require("../../configs/database");
+const { conectPostgresDb, redisClient } = require("../../configs/database");
 const passwordHelpers = require("../../helpers/passWordHelpers");
 const Post = require("../../models/SocialModel/post");
 const userStore = require("../../models/UserModel/userStore");
@@ -184,6 +184,7 @@ exports.updateUserProfileService = async (
 
 exports.getUserProfileService = async (id) => {
   try {
+    // redisClient.set("userId", id);
     const user = await conectPostgresDb.query(
       "SELECT * FROM users WHERE id = $1",
       [id]

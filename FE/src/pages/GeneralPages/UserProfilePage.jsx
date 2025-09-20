@@ -27,6 +27,8 @@ const UserProfilePage = () => {
   const fetchProfile = async () => {
     try {
       const response = await userApi.getUserProfile();
+      console.log(response.data.user);
+      
       const userData = response.data.user;
       setUser(userData);
       // Khởi tạo giá trị cho form update

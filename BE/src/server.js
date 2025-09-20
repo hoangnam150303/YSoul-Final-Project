@@ -1,12 +1,16 @@
 const express = require("express");
 const passport = require("passport");
 const dotenv = require("dotenv");
-const { conectPostgresDb, connectMongoDb } = require("./configs/database");
+const {
+  conectPostgresDb,
+  connectMongoDb,
+  connectRedisDb,
+} = require("./configs/database");
 dotenv.config();
 const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
-
+const cookieParser = require("cookie-parser");
 // Import routes
 const userRoute = require("./routes/UserRoute/userRoutes");
 const filmRoute = require("./routes/FilmRoute/filmRoutes");
@@ -47,6 +51,7 @@ app.use((req, res, next) => {
 app.use(cors(corsConfig));
 // config body-parser
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // use routes
@@ -70,6 +75,7 @@ app.use("/api/v1/dashBoards", dashBoardsRoute);
 server.listen(port, () => {
   console.log(`Server is working on port: ${port}`);
   connectMongoDb();
+  connectRedisDb();
   conectPostgresDb.connect((err, client, release) => {
     if (err) {
       console.error("Error connecting to PostgreSQL:", err.stack);

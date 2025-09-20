@@ -28,5 +28,9 @@ const authApi = {
     const url = `${AUTH_API_ENDPOINT}/resetPassword`;
     return axiosClient.put(url, value);
   },
+  refreshToken: () => {
+    const url = `${AUTH_API_ENDPOINT}/refreshToken`;
+    return axiosClient.put(url);
+  },
 };
 export default authApi;
