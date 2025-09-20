@@ -14,6 +14,12 @@ exports.loginGoogle = async (req, res) => {
         .status(401)
         .json({ message: "Error! Please try again.", error });
     }
+    res.cookie("sessionId", respone.sessionId, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 1000 * 60 * 60 * 24, // 15 phút
+    });
     return res.status(200).json(respone);
   } catch (error) {
     return res.status(401).json({ message: "Lỗi! Vui lòng thử lại.", error });
@@ -97,7 +103,6 @@ exports.loginLocal = async (req, res) => {
       password
     );
 
-
     if (!respone.success) {
       const statusMap = {
         "User not found": 404,
@@ -106,7 +111,12 @@ exports.loginLocal = async (req, res) => {
       };
       return res.status(statusMap[respone.error] || 400).json(respone); // ✅ trả nguyên response từ service
     }
-
+    res.cookie("sessionId", respone.sessionId, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 1000 * 60 * 60 * 24, // 15 phút
+    });
     return res.status(200).json(respone);
   } catch (error) {
     return res
@@ -156,6 +166,26 @@ exports.resetPassword = async (req, res) => {
       verifyToken,
       otp
     );
+    if (!respone.success) {
+      return res.status(400).json(respone);
+    }
+    return res.status(200).json(respone);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const sessionId = req.cookies.sessionId;
+    if (!sessionId) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Session ID is required." });
+    }
+    const respone = await authenticateService.refreshTokenService(sessionId);
     if (!respone.success) {
       return res.status(400).json(respone);
     }

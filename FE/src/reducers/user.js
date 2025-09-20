@@ -32,7 +32,7 @@ const getUser = (user) => {
 const initialState = {
   is_admin: false,
   name: "",
-  id: 0,
+  id: null,
   vip: false,
   avatar: "",
 };

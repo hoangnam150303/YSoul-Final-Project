@@ -26,7 +26,7 @@ exports.isAdmin = async (req, res, next) => {
     req.user = adminResult.rows[0];
     next(); // Nếu hợp lệ, chuyển tiếp sang middleware tiếp theo
   } catch (error) {
-    res.status(500).json({
+    res.status(401).json({
       message: error.message,
       status: "ERROR",
     });
@@ -37,7 +37,7 @@ exports.isAdmin = async (req, res, next) => {
 exports.isVip = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // Trích xuất token từ headers
-    
+
     if (!token) {
       return res.status(401).json({
         message: "Token not provided",
@@ -47,7 +47,6 @@ exports.isVip = async (req, res, next) => {
 
     const decode = jwt.verify(token, process.env.ACCESS_TOKEN); // Giải mã token
 
-    
     const vipUser = await conectPostgresDb.query(
       "SELECT * FROM users WHERE id = $1 AND vip = $2",
       [decode.id, true]
@@ -65,11 +64,11 @@ exports.isVip = async (req, res, next) => {
         status: "ERROR",
       });
     }
-    
+
     req.user = vipUser.rows[0];
     next(); // Nếu hợp lệ, chuyển tiếp sang middleware tiếp theo
   } catch (error) {
-    res.status(500).json({
+    res.status(401).json({
       message: error.message,
       status: "ERROR",
     });
@@ -109,7 +108,7 @@ exports.isAuth = async (req, res, next) => {
     req.user = userResult.rows[0];
     next();
   } catch (error) {
-    res.status(500).json({
+    res.status(401).json({
       message: error.message,
       status: "ERROR",
     });

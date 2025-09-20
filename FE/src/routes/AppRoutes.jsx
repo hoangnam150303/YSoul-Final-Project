@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { LoginPage } from "../pages/GeneralPages/LoginPage";
 import { MovieHomePage } from "../pages/MoviePages/MovieHomePage";
 import { SignUpPage } from "../pages/GeneralPages/SignUpPage";
@@ -32,22 +32,58 @@ import NFTsPage from "../pages/NFTMarketPlacePage/NFTsPage";
 import { ArtistNFTsPage } from "../pages/NFTMarketPlacePage/ArtistNFTsPage";
 import SinglePage from "../pages/MusicPages/SinglePage";
 import FavouritePage from "../pages/GeneralPages/FavouritePage";
-
+import constants from "../constants/contants";
 import { getUserRequest } from "../reducers/user";
 import SendCodePage from "../pages/GeneralPages/SendCodePage";
 import { ForgotPasswordPage } from "../pages/GeneralPages/ForgotPasswordPage";
+import authApi from "../hooks/authApi";
 function AppRoutes() {
   const dispatch = useDispatch();
-
   const [hasFetchedUser, setHasFetchedUser] = useState(false);
-
+  const navigate = useNavigate();
   const userId = useSelector((state) => state.user.id);
   const isVip = useSelector((state) => state.user.vip);
   const is_admin = useSelector((state) => state.user.is_admin);
 
   const isLoggedIn = userId !== null && userId !== undefined && userId !== 0;
+  // const refreshToken = async () => {
+  //   try {
+  //     const response = await authApi.refreshToken();
+  //     if (response.data.success) {
+  //       // Lưu token mới
+  //       localStorage.setItem(
+  //         constants.ACCESS_TOKEN,
+  //         response.data.access_token
+  //       );
 
-  // ✅ Sau khi redux-persist khôi phục xong, ta fetch lại user (1 lần duy nhất)
+  //       // Cập nhật thông tin user từ token mới
+  //       await dispatch(getUserRequest());
+
+  //       // Đợi một chút để Redux store được cập nhật
+  //       setTimeout(() => {
+  //         // Có thể thêm logic kiểm tra thêm ở đây nếu cần
+  //       }, 100);
+  //     } else {
+  //       // Xóa token cũ và chuyển về login
+  //       localStorage.removeItem(constants.ACCESS_TOKEN);
+  //       dispatch(logoutUser());
+  //       navigate("/login");
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     // Xóa token cũ khi refresh thất bại
+  //     localStorage.removeItem(constants.ACCESS_TOKEN);
+  //     dispatch(logoutUser());
+  //     navigate("/login");
+  //   }
+  // };
+  // useEffect(() => {
+  //   if (!isLoggedIn && userId === 0) {
+  //     console.log(isLoggedIn, userId);
+  //     refreshToken();
+  //   }
+  // }, [isLoggedIn, userId]);
+
   useEffect(() => {
     const fetchUserOnce = async () => {
       try {
@@ -60,7 +96,6 @@ function AppRoutes() {
     fetchUserOnce();
   }, [dispatch]);
 
-  // ⏳ Trong lúc chưa fetch xong user, render loading
   if (!hasFetchedUser) return <LoadingPage />;
 
   return (

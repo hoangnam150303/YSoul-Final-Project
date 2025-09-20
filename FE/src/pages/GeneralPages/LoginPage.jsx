@@ -14,7 +14,6 @@ export const LoginPage = () => {
   const [loginComplete, setLoginComplete] = useState(false);
   const user_id = useSelector((state) => state.user.id);
   const is_admin = useSelector((state) => state.user.is_admin);
-
   const navigate = useNavigate();
 
   const onLoginSuccess = async (data) => {

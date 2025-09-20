@@ -1,4 +1,4 @@
-const { conectPostgresDb } = require("../../configs/database");
+const { conectPostgresDb, redisClient } = require("../../configs/database");
 const passwordHelpers = require("../../helpers/passWordHelpers");
 const mailHelpers = require("../../helpers/mailHelpers");
 const jwt = require("jsonwebtoken");
@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 exports.loginGoogleService = async (user) => {
   // this function is login with google account
   try {
+    const { v4: uuidv4 } = await import("uuid");
+    const sessionId = uuidv4();
     const userIsValid = await conectPostgresDb.query(
       "SELECT * FROM users WHERE authprovider = $1 AND email = $2",
       ["google", user.email]
@@ -26,7 +28,25 @@ exports.loginGoogleService = async (user) => {
         expiresIn: process.env.TOKEN_EXPIRED,
       }
     );
-    return { success: true, access_token }; // Return access token
+    const refresh_token = jwt.sign(
+      // Generate access token
+      {
+        id: userIsValid.rows[0].id,
+      },
+      process.env.REFRESH_TOKEN,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRED,
+      }
+    );
+    await conectPostgresDb.query(
+      // Update last login
+      "UPDATE users SET lastlogin = $1 WHERE id = $2",
+      [new Date(), user.rows[0].id]
+    );
+    await redisClient.set(sessionId, refresh_token, {
+      EX: 86400,
+    }); // Store session in Redis
+    return { success: true, access_token, sessionId }; // Return access token
   } catch (error) {
     return { success: false, error }; // Return error
   }
@@ -86,6 +106,8 @@ exports.sendCodeService = async (email, name) => {
 // this function is login account with email and password
 exports.loginLocalService = async (email, password) => {
   try {
+    const { v4: uuidv4 } = await import("uuid");
+    const sessionId = uuidv4();
     const user = await conectPostgresDb.query(
       // Check if user is exist
       "SELECT * FROM users WHERE email = $1 AND authprovider = $2",
@@ -109,13 +131,6 @@ exports.loginLocalService = async (email, password) => {
     if (!isMatch) {
       return { success: false, error: "Password is incorrect." };
     }
-
-    await conectPostgresDb.query(
-      // Update last login
-      "UPDATE users SET lastlogin = $1 WHERE id = $2",
-      [new Date(), user.rows[0].id]
-    );
-
     const access_token = jwt.sign(
       // Generate access token
       {
@@ -128,7 +143,25 @@ exports.loginLocalService = async (email, password) => {
         expiresIn: process.env.TOKEN_EXPIRED,
       }
     );
-    return { success: true, access_token }; // Return access token
+    const refresh_token = jwt.sign(
+      // Generate access token
+      {
+        id: user.rows[0].id,
+      },
+      process.env.REFRESH_TOKEN,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRED,
+      }
+    );
+    await conectPostgresDb.query(
+      // Update last login
+      "UPDATE users SET lastlogin = $1 WHERE id = $2",
+      [new Date(), user.rows[0].id]
+    );
+    await redisClient.set(sessionId, refresh_token, {
+      EX: 86400,
+    }); // Store session in Redis // Store session in Redis
+    return { success: true, access_token, sessionId }; // Return access token
   } catch (error) {
     return { success: false, error }; // Return error
   }
@@ -181,5 +214,57 @@ exports.resetPasswordService = async (password, verifyToken, otp) => {
     return { success: true }; // Return success
   } catch (error) {
     return { success: false, error }; // Return error
+  }
+};
+
+exports.refreshTokenService = async (sessionId) => {
+  try {
+    const refreshToken = await redisClient.get(sessionId);
+    if (!refreshToken) {
+      return { success: false, error: "Invalid session" };
+    }
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN); // Verify token
+    const user = await conectPostgresDb.query(
+      // Check if user is exist
+      "SELECT * FROM users WHERE id = $1",
+      [decoded.id]
+    );
+    if (user.rows.length === 0) {
+      // If user is not exist
+      return { success: false, error: "User not found" };
+    }
+    const access_token = jwt.sign(
+      // Generate access token
+      {
+        id: user.rows[0].id,
+        is_admin: user.rows[0].is_admin,
+        name: user.rows[0].name,
+      },
+      process.env.ACCESS_TOKEN,
+      {
+        expiresIn: process.env.TOKEN_EXPIRED,
+      }
+    );
+    const refresh_token = jwt.sign(
+      {
+        id: user.rows[0].id,
+      },
+      process.env.REFRESH_TOKEN,
+      {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRED,
+      }
+    );
+    await conectPostgresDb.query(
+      // Update last login
+      "UPDATE users SET lastlogin = $1 WHERE id = $2",
+      [new Date(), user.rows[0].id]
+    );
+    redisClient.del(sessionId); // Delete old session
+    redisClient.set(sessionId, refresh_token, {
+      EX: 86400,
+    }); // Store session in Redis
+    return { success: true, access_token };
+  } catch (error) {
+    return { success: false, error };
   }
 };
