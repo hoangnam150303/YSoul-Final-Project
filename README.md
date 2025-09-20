@@ -15,7 +15,7 @@ YSoul is developed using modern technologies:
 Frontend: ReactJS, Ant Design, TailwindCSS, Bootstrap Icons, Axios
 Backend: Node.js, Express.js, Socket.io
 Blockchain: Solidity, Hardhat, OpenZeppelin
-Databases: MongoDB, PostgreSQL
+Databases: MongoDB, PostgreSQL, Redis
 Media & Storage: Cloudinary
 YSoul is more than just an entertainment platform—it’s a dynamic community where users can connect, share, and enjoy digital content like never before.
 
