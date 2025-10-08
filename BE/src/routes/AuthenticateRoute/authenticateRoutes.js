@@ -15,4 +15,5 @@ authRoute.post("/loginLocal", authController.loginLocal);
 authRoute.post("/forgotPassword", authController.forgotPassword);
 authRoute.put("/resetPassword", authController.resetPassword);
 authRoute.put("/refreshToken", authController.refreshToken);
+authRoute.post("/logout", authController.logout);
 module.exports = authRoute;

@@ -1,5 +1,5 @@
 import userApi from "../hooks/userApi";
-
+import authApi from "../hooks/authApi";
 const GET_USER = "GET_USER";
 const LOGOUT_USER = "LOGOUT_USER";
 const getUserRequest = () => {
@@ -14,12 +14,16 @@ const getUserRequest = () => {
   };
 };
 
-const logoutUser = () => {
-  // Xóa thông tin người dùng trong localStorage
-  localStorage.clear();
-  return {
-    type: LOGOUT_USER,
-  };
+const logoutUser = async () => {
+  try {
+    await localStorage.clear();
+    await authApi.logout();
+    getUserRequest();
+
+    window.location.href = "/login";
+  } catch (error) {
+    throw error;
+  }
 };
 
 const getUser = (user) => {

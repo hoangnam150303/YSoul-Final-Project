@@ -74,7 +74,7 @@ exports.updateSingleService = async (
   try {
     let validSingle = await conectPostgresDb.query(
       // get single by id
-      `SELECT * FROM singles WHERE id = ${id}`
+      `SELECT * FROM singles WHERE id = $1`,[id]
     );
     if (validSingle.rows.length === 0) {
       // if single not exists, return error message
@@ -119,6 +119,7 @@ exports.updateSingleService = async (
 
     return { success: true }; // if single created, return success message
   } catch (error) {
+    console.log(error)
     return { success: false, message: error.message };
   }
 };
