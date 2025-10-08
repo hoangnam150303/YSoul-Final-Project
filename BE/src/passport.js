@@ -23,10 +23,12 @@ passport.use(
         const avatar = profile._json.picture || "";
         // Kiểm tra người dùng có tồn tại không
         const res = await conectPostgresDb.query(
-          "SELECT * FROM users WHERE  email = $1",
+          "SELECT * FROM users WHERE  email = $1 AND authprovider = $2",
           [email]
         );
-
+        if (res.rows.length > 0) {
+          throw new Error("Emal already exists");
+        }
         let user = res.rows[0]; // Lấy người dùng nếu tồn tại
 
         if (!user) {

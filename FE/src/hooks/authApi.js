@@ -32,5 +32,9 @@ const authApi = {
     const url = `${AUTH_API_ENDPOINT}/refreshToken`;
     return axiosClient.put(url);
   },
+  logout: () => {
+    const url = `${AUTH_API_ENDPOINT}/logout`;
+    return axiosClient.post(url);
+  },
 };
 export default authApi;

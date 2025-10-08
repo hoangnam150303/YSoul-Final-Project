@@ -12,6 +12,7 @@ exports.loginGoogleService = async (user) => {
       "SELECT * FROM users WHERE authprovider = $1 AND email = $2",
       ["google", user.email]
     );
+
     if (userIsValid.status === false) {
       return res.status(401).json({ message: "Your account is not active" });
     }
@@ -41,13 +42,15 @@ exports.loginGoogleService = async (user) => {
     await conectPostgresDb.query(
       // Update last login
       "UPDATE users SET lastlogin = $1 WHERE id = $2",
-      [new Date(), user.rows[0].id]
+      [new Date(), userIsValid.rows[0].id]
     );
+
     await redisClient.set(sessionId, refresh_token, {
       EX: 86400,
     }); // Store session in Redis
     return { success: true, access_token, sessionId }; // Return access token
   } catch (error) {
+    console.log(error);
     return { success: false, error }; // Return error
   }
 };
@@ -245,24 +248,6 @@ exports.refreshTokenService = async (sessionId) => {
         expiresIn: process.env.TOKEN_EXPIRED,
       }
     );
-    const refresh_token = jwt.sign(
-      {
-        id: user.rows[0].id,
-      },
-      process.env.REFRESH_TOKEN,
-      {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRED,
-      }
-    );
-    await conectPostgresDb.query(
-      // Update last login
-      "UPDATE users SET lastlogin = $1 WHERE id = $2",
-      [new Date(), user.rows[0].id]
-    );
-    redisClient.del(sessionId); // Delete old session
-    redisClient.set(sessionId, refresh_token, {
-      EX: 86400,
-    }); // Store session in Redis
     return { success: true, access_token };
   } catch (error) {
     return { success: false, error };
