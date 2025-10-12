@@ -84,7 +84,9 @@ exports.sendCode = async (req, res) => {
         .json({ message: "Error! Please try again.", error });
     }
     return res.status(200).json(respone);
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ mesage: "Error!.", error });
+  }
 };
 
 // this function is login account with email and password

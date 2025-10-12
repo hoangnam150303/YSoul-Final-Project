@@ -1,6 +1,7 @@
 const { createTransport } = require("nodemailer");
 
 const sendApproveAccount = async (email, name, OTP) => {
+  console.log(email,name,OTP)
   const transport = createTransport({
     host: "smtp.gmail.com",
     port: 465,

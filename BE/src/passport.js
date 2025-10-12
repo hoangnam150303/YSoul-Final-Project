@@ -23,14 +23,13 @@ passport.use(
         const avatar = profile._json.picture || "";
         // Kiểm tra người dùng có tồn tại không
         const res = await conectPostgresDb.query(
-          "SELECT * FROM users WHERE  email = $1 AND authprovider = $2",
+          "SELECT * FROM users WHERE  email = $1",
           [email]
         );
-        if (res.rows.length > 0) {
-          throw new Error("Emal already exists");
-        }
         let user = res.rows[0]; // Lấy người dùng nếu tồn tại
-
+        if (user.authprovider !== "google") {
+          throw new Error("This email is already registered");
+        }
         if (!user) {
           // Tạo người dùng mới nếu chưa có
           const insertRes = await conectPostgresDb.query(
@@ -47,6 +46,7 @@ passport.use(
             ]
           );
           user = insertRes.rows[0];
+          console.log(user)
         }
 
         // Cập nhật thời gian đăng nhập của người dùng

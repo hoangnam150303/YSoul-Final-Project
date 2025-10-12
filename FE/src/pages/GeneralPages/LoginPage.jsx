@@ -70,7 +70,7 @@ export const LoginPage = () => {
         }
       } catch (error) {
         if (error.response) {
-          message.error(error.response.data.message);
+          message.error("This email is exist, Please try login with password!");
         } else {
           message.error("Đăng nhập thất bại, thử lại");
         }

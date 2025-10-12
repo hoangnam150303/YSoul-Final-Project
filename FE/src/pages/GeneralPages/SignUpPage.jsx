@@ -57,12 +57,15 @@ export const SignUpPage = () => {
     try {
       const respone = await authApi.postSendCode(value);
       const token = respone.data.verifyToken;
-
+      if (respone.status === 500) {
+        console.log(1111);
+      }
       if (respone.status === 200) {
         message.success("Send code success.");
         localStorage.setItem(constants.VERIFY_TOKEN, token);
       }
     } catch (error) {
+      message.error("This email is already exist!");
       console.error("Error during sign-up:", error);
     }
   };
