@@ -14,8 +14,8 @@ const createUserTableQuery = `
     avatar VARCHAR(200),
     vip BOOLEAN,
     is_admin BOOLEAN DEFAULT FALSE,
-    user_follow INTEGER[] DEFAULT '{}',
-    user_followed INTEGER[] DEFAULT '{}',
+    user_follow UUID[] DEFAULT '{}',
+    user_followed UUID[] DEFAULT '{}',
     is_online BOOLEAN DEFAULT FALSE
 )
 `;

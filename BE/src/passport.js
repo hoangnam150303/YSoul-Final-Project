@@ -26,10 +26,9 @@ passport.use(
           "SELECT * FROM users WHERE  email = $1",
           [email]
         );
+        console.log(res);
         let user = res.rows[0]; // Lấy người dùng nếu tồn tại
-        if (user.authprovider !== "google") {
-          throw new Error("This email is already registered");
-        }
+
         if (!user) {
           // Tạo người dùng mới nếu chưa có
           const insertRes = await conectPostgresDb.query(
@@ -46,9 +45,10 @@ passport.use(
             ]
           );
           user = insertRes.rows[0];
-          console.log(user)
         }
-
+        if (user.authprovider !== "google") {
+          throw new Error("This email is already registered");
+        }
         // Cập nhật thời gian đăng nhập của người dùng
         await conectPostgresDb.query(
           "UPDATE users SET lastlogin = $1 WHERE id = $2",
