@@ -11,6 +11,7 @@ exports.followUser = async(req,res)=>{
       }
      return res.status(200).json(response); // return response
     }catch(error){
+      
       return res.status(401).json({ message: "Error! Please try again.", error }); // return error
     }
   }
