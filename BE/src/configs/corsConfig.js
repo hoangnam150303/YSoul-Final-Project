@@ -2,6 +2,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL, // Web dev
   process.env.MOBILE_URL, // Mobile dev
   process.env.MOBILE_EXPO_URL, // Mobile expo dev
+  "https://ysoul.onrender.com"
 ];
 
 const corsConfig = {

@@ -13,7 +13,7 @@ const conectPostgresDb = new Pool({
   password: process.env.PG_PASSWORD,
   database: process.env.PG_DB,
   max: 1000, // max connections in pool
-  ssl: { rejectUnauthorized: false },
+  // ssl: { rejectUnauthorized: false },
 });
 const redisClient = createClient({
   url: process.env.REDIS_URL, // redis://default:password@host:port

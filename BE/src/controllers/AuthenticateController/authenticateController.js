@@ -150,7 +150,7 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword, verifyToken, otp } = req.body;
-    console.log(req.body);
+    
 
     if (!password || !confirmPassword || !verifyToken || !otp) {
       return res
