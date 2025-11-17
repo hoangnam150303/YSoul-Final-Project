@@ -8,7 +8,7 @@ import { SearchPage } from "../pages/MoviePages/SearchPage";
 import { NotFoundPage } from "../pages/GeneralPages/404";
 import { AdminHomePage } from "../pages/AdminPages/AdminHomePage";
 import { CRUDFilmPage } from "../pages/AdminPages/CRUDFilmPage";
-import PaymentPage from "../pages/GeneralPages/PaymentPage";
+import PaymentPage from "../pages/GeneralPages/paymentPage";
 import PaymentSuccess from "../pages/GeneralPages/PaymentSuccessPage";
 import { MusicHomePage } from "../pages/MusicPages/MusicHomePage";
 import { AlbumPage } from "../pages/MusicPages/AlbumPage";
