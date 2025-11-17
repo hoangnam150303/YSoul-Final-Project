@@ -8,7 +8,7 @@ export const ForgotPasswordPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!otp || !password || !confirmPassword) {
       message.error("Please fill in all fields.");
       return;
@@ -30,7 +30,7 @@ export const ForgotPasswordPage = () => {
       confirmPassword,
       verifyToken,
     };
-    const response = authApi.resetPassword(value);
+    const response = await authApi.resetPassword(value);
     if (response.status === 200) {
       message.success("Password has been reset successfully.");
       navigate("/login");
@@ -38,7 +38,6 @@ export const ForgotPasswordPage = () => {
     } else {
       message.error("Failed to reset password. Please try again.");
     }
-    // Giả lập thành công
   };
 
   return (
