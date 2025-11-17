@@ -10,7 +10,7 @@ const createAlbumTableQuery = `
     artist_id UUID REFERENCES artists(id) ON DELETE CASCADE,
     likes INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_id_like INTEGER[] DEFAULT '{}'
+    user_id_like UUID[] DEFAULT '{}'
 )
 `;
 

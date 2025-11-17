@@ -13,7 +13,7 @@ const createSingleTableQuery = `
     album_id UUID REFERENCES albums(id) ON DELETE CASCADE,
     likes INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_id_like INTEGER[] DEFAULT '{}';
+    user_id_like UUID[] DEFAULT '{}';
 )
 `;
 
