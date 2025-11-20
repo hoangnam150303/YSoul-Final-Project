@@ -20,7 +20,7 @@ exports.createFilmService = async (
     let resultVideo = [];
     let parsedTitle = [];
 
-    // Parse title nếu có
+
     if (title) {
       try {
         parsedTitle = JSON.parse(title);
@@ -29,11 +29,11 @@ exports.createFilmService = async (
       }
     }
 
-    // Nếu parsedTitle có phần tử (không rỗng) thì xử lý tạo Episode có title
+
     if (parsedTitle && parsedTitle.length > 0) {
       const videoUrls = video.split(",").map((v) => v.trim());
 
-      // Nếu số lượng video không khớp với số lượng title, có thể ném lỗi hoặc xử lý khác
+
       if (videoUrls.length !== parsedTitle.length) {
         throw new Error("Số lượng video và title không khớp");
       }
@@ -46,14 +46,13 @@ exports.createFilmService = async (
         resultVideo.push(result._id);
       }
     } else {
-      // Nếu title rỗng hoặc không hợp lệ, chỉ tạo Episode với trường urlVideo
+   
       let result = await Episode.create({
         urlVideo: video,
       });
       resultVideo.push(result._id);
     }
 
-    // Tạo film với các thông tin nhận được, bao gồm cả danh sách Episode vừa tạo
     const film = await Film.create({
       name,
       description,
@@ -317,10 +316,10 @@ exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
       let userFeedback = film.feedback.find((item) => item.user_id === userId);
 
       if (userFeedback) {
-        // Nếu user đã đánh giá trước đó, cập nhật rating
+     
         userFeedback.rating = data;
       } else {
-        // Nếu user chưa đánh giá, thêm mới
+     
         film.feedback.push({
           user_id: userId,
           rating: (film.feedback.rating || 0) + data,
