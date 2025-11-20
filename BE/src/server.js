@@ -30,17 +30,17 @@ const wishListRoute = require("./routes/WishListRoute/WishListRoute");
 const dashBoardsRoute = require("./routes/DashBoardsRoute/DashBoardsRoute");
 const corsConfig = require("./configs/corsConfig");
 const { app, server } = require("./utils/socket");
-const { limiter } = require("./middlewares/rate_limit");
+const limiter = require("./middlewares/rate_limit");
 const port = process.env.PORT || 8080;
 
 // Middleware
 app.use(passport.initialize());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Khóa bí mật cho session, thêm vào file .env
+    secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Nếu bạn dùng HTTPS, hãy set `secure: true`
+    cookie: { secure: false }, 
   })
 );
 // Middleware để sử dụng passport-local
@@ -48,7 +48,7 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
-app.use(limiter);
+// app.use(limiter);
 // config CORS
 app.use(cors(corsConfig));
 // config body-parser
