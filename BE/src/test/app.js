@@ -32,5 +32,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // mount routes
 app.use("/api/v1/auth", authRoute);
 // mount thêm nếu có
-
+app.use((req, res, next) => {
+  console.log(`⚠️ 404 DETECTED: ${req.method} ${req.originalUrl}`);
+  console.log("Available Routes:");
+  app._router.stack.forEach((r) => {
+    if (r.route && r.route.path) {
+      console.log(r.route.path);
+    } else if (r.name === "router") {
+      console.log("Router mounted at:", r.regexp);
+    }
+  });
+  res.status(404).json({ error: "Route not found", path: req.originalUrl });
+});
 module.exports = app;

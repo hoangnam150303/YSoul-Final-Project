@@ -65,7 +65,7 @@ const PlayPage = () => {
                 return;
             }
 
-            // Nếu chưa có sound
+
             const { sound: newSound } = await Audio.Sound.createAsync(
                 { uri: song.data.mp3 },
                 { shouldPlay: true },
