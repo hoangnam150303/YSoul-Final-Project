@@ -15,9 +15,10 @@ const conectPostgresDb = new Pool({
   max: 1000, // max connections in pool
   // ssl: { rejectUnauthorized: false },
 });
+
 const redisClient = createClient({
-  url: process.env.REDIS_URL, // redis://default:password@host:port
-  socket: { tls: false, family: 4 }, // ép IPv4, không dùng TLS
+  url: process.env.REDIS_URL, 
+  socket: { tls: false, family: 4 }, 
 });
 
 redisClient.on("error", (err) => console.error("Redis error:", err));

@@ -111,7 +111,7 @@ exports.loginLocal = async (req, res) => {
         "Password is incorrect.": 401,
         "Your account is not active": 403,
       };
-      return res.status(statusMap[respone.error] || 400).json(respone); // ✅ trả nguyên response từ service
+      return res.status(statusMap[respone.error] || 400).json(respone);
     }
     res.cookie("sessionId", respone.sessionId, {
       httpOnly: true,
@@ -150,7 +150,6 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { password, confirmPassword, verifyToken, otp } = req.body;
-    
 
     if (!password || !confirmPassword || !verifyToken || !otp) {
       return res

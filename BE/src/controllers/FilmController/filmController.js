@@ -15,11 +15,20 @@ exports.createFilm = async (req, res) => {
       isForAll,
       age,
     } = req.body;
-
-    const movieFiles = req.files?.movie.map((file) => file.path).join(", ");
-    const smallImage = req.files?.small_image?.[0]?.path; // Lấy path của small_image
+    if (!req.files || !req.files.movie) {
+      return res
+        .status(400)
+        .json({ message: "Please upload a movie file" });
+    }
+    const movieFiles = req.files.movie.map((file) => file.path).join(", ");
+    const smallImage = req.files?.small_image?.[0]?.path;
     const largeImage = req.files?.large_image?.[0]?.path;
-
+    let parsedCast = [];
+    try {
+      parsedCast = typeof cast === "string" ? JSON.parse(cast) : cast;
+    } catch (e) {
+      parsedCast = [cast];
+    }
     const response = await filmService.createFilmService(
       name,
       description,
@@ -27,7 +36,7 @@ exports.createFilm = async (req, res) => {
       largeImage,
       isForAll,
       trailer,
-      cast,
+      parsedCast,
       director,
       genre,
       releaseYear,
@@ -128,16 +137,27 @@ exports.updateFilmById = async (req, res) => {
       age,
       isSeries,
     } = req.body;
-
     const { id } = req.params;
 
-    const smallImage = req.files?.small_image?.[0]?.path;
-    const largeImage = req.files?.large_image?.[0]?.path;
-    console.log(isSeries);
-    
-    const movieFiles = req.files?.movie?.map((file) => file.path) || [];
+    // 1. Lấy ảnh (ưu tiên file mới, fallback về body cũ)
+    const smallImage =
+      req.files?.small_image?.[0]?.path || req.body.small_image;
+    const largeImage =
+      req.files?.large_image?.[0]?.path || req.body.large_image;
+
+    // 2. FIX LỖI: Lấy video
+    // Mặc định lấy chuỗi cũ từ body (ví dụ: "http://..." hoặc ID cũ)
+    let movieFiles = req.body.movie;
+
+    // Nếu có file upload mới thì ghi đè
+    if (req.files?.movie && req.files.movie.length > 0) {
+      movieFiles = req.files.movie.map((file) => file.path);
+    }
+
+    // Ép kiểu isSeries
     const isSeriesBool =
       req.body.isSeries === "true" || req.body.isSeries === true;
+
     const response = await filmService.updateFilmByIdService(
       id,
       name,
@@ -151,22 +171,19 @@ exports.updateFilmById = async (req, res) => {
       releaseYear,
       title,
       isForAll,
-      movieFiles,
+      movieFiles, // Biến này giờ đã chứa đúng dữ liệu (File Path hoặc String cũ)
       age,
       isSeriesBool
     );
 
     if (!response.success) {
-      return res.status(400).json({
-        message: "Error updating film",
-        error: response.error,
-      });
+      return res
+        .status(400)
+        .json({ message: "Error updating film", error: response.error });
     }
-
-    return res.status(200).json({
-      message: "Film updated successfully",
-      data: response.data,
-    });
+    return res
+      .status(200)
+      .json({ message: "Film updated successfully", data: response.data });
   } catch (err) {
     console.error("Error in updateFilm controller:", err.message);
     return res.status(500).json({ message: "Internal server error" });

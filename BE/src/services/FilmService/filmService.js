@@ -192,87 +192,78 @@ exports.activeOrDeactiveFilmByIdService = async (filmId) => {
   }
 };
 
+
+
 exports.updateFilmByIdService = async (
-  id,
-  name,
-  description,
-  smallImage,
-  largeImage,
-  trailer,
-  cast,
-  director,
-  genre,
-  releaseYear,
-  title,
-  isForAll,
-  video,
-  age,
-  isSeries
+  id, name, description, smallImage, largeImage, trailer, cast,
+  director, genre, releaseYear, title, isForAll, video, age, isSeries
 ) => {
   try {
     const film = await Film.findById(id);
     if (!film) throw new Error("Film not found");
 
+    // Chuẩn hóa input thành mảng
     let videoUrls = [];
     if (Array.isArray(video)) {
       videoUrls = video;
     } else if (typeof video === "string") {
-      videoUrls = video.split(",").map((v) => v.trim());
-    } else if (video) {
-      throw new Error("Video must be a string or an array of URLs.");
+      videoUrls = [video]; 
     }
 
     let newEpisodeIds = [];
 
-    // ===== XỬ LÝ TV SERIES =====
+
     if (isSeries) {
-      let parsedTitle;
-      try {
-        parsedTitle = JSON.parse(title || "[]");
-      } catch (err) {
-        throw new Error("Title must be a valid JSON array.");
-      }
-
-      if (!Array.isArray(parsedTitle)) {
-        throw new Error("Title must be an array for series.");
-      }
-
-      if (parsedTitle.length !== videoUrls.length) {
-        throw new Error("Số lượng video và tiêu đề không khớp.");
-      }
-
-      for (let i = 0; i < parsedTitle.length; i++) {
-        const episode = await Episode.create({
-          title: parsedTitle[i],
-          urlVideo: videoUrls[i],
-        });
-        newEpisodeIds.push(episode._id);
-      }
-
-      film.video = [...(film.video || []), ...newEpisodeIds];
+       let parsedTitle;
+       try { parsedTitle = JSON.parse(title || "[]"); } catch (err) { throw new Error("Title error"); }
+       
+       if (videoUrls.length > 0 && parsedTitle.length === videoUrls.length) {
+          // Logic cũ của bạn push thêm tập mới
+          for (let i = 0; i < parsedTitle.length; i++) {
+             const ep = await Episode.create({ title: parsedTitle[i], urlVideo: videoUrls[i] });
+             newEpisodeIds.push(ep._id);
+          }
+          film.video = [...(film.video || []), ...newEpisodeIds];
+       }
     }
-
-    // ===== XỬ LÝ MOVIE =====
     else {
-      if (!videoUrls[0]) throw new Error("Phim lẻ cần ít nhất một video.");
+      const inputData = videoUrls[0]; // Có thể là File Path mới HOẶC ID cũ
+      if (!inputData) throw new Error("Phim lẻ cần ít nhất một video.");
 
-      // Xoá toàn bộ episode cũ nếu có
+
+      let needUpdate = true;
+
       if (film.video && film.video.length > 0) {
-        await Episode.deleteMany({ _id: { $in: film.video } });
+        const currentEpId = film.video[0];
+        
+
+        if (inputData === currentEpId.toString()) {
+            needUpdate = false; // Không làm gì cả
+        } 
+
+        else {
+            const currentEp = await Episode.findById(currentEpId);
+            if (currentEp && currentEp.urlVideo === inputData) {
+                needUpdate = false;
+            }
+        }
       }
 
-      const episode = await Episode.create({
-        urlVideo: videoUrls[0],
-      });
+      if (needUpdate) {
 
-      film.video = [episode._id];
+         if (film.video && film.video.length > 0) {
+            await Episode.deleteMany({ _id: { $in: film.video } });
+         }
+
+         const episode = await Episode.create({ urlVideo: inputData });
+         film.video = [episode._id];
+      }
     }
 
-    // ===== CẬP NHẬT THÔNG TIN PHIM =====
     film.name = name;
     film.description = description;
     film.trailer = trailer;
-    film.cast = cast;
+    film.cast = cast; 
     film.director = director;
     film.genre = genre;
     film.releaseYear = releaseYear;
@@ -280,27 +271,15 @@ exports.updateFilmByIdService = async (
     film.age = age;
     film.isSeries = isSeries;
 
-    // ===== ẢNH NHỎ =====
-    if (smallImage) {
-      if (film.small_image) {
-        await cloudinaryHelpers.removeFile(film.small_image);
-      }
-      film.small_image = smallImage;
-    }
 
-    // ===== ẢNH LỚN =====
-    if (largeImage) {
-      if (film.large_image) {
-        await cloudinaryHelpers.removeFile(film.large_image);
-      }
-      film.large_image = largeImage;
-    }
+    if (smallImage) film.small_image = smallImage;
+    if (largeImage) film.large_image = largeImage;
 
     await film.save();
-
     return { success: true, data: film };
+
   } catch (error) {
-    console.error("Error updating film:", error.message);
+    console.error("Update Error:", error.message);
     return { success: false, error: error.message };
   }
 };

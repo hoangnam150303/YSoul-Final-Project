@@ -4,7 +4,7 @@ const { conectPostgresDb } = require("../configs/database");
 // Check role, only admin can use function belong in admin
 exports.isAdmin = async (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1]; // Trích xuất token từ headers
+    const token = req.headers.authorization.split(" ")[1]; 
 
     if (!token) {
       return res.status(401).json({
@@ -24,7 +24,7 @@ exports.isAdmin = async (req, res, next) => {
       });
     }
     req.user = adminResult.rows[0];
-    next(); // Nếu hợp lệ, chuyển tiếp sang middleware tiếp theo
+    next(); 
   } catch (error) {
     res.status(401).json({
       message: error.message,

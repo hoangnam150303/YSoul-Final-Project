@@ -7,6 +7,7 @@ exports.createArtist = async (req, res) => {
     const { name } = req.body;
     const avatar = req.file.path;
     if (!name || !avatar) {
+      
       // check if name or avatar is empty return status 401
       return res
         .status(401)
@@ -23,6 +24,7 @@ exports.createArtist = async (req, res) => {
     // if response is success return status 200
     res.status(200).json(response);
   } catch (error) {
+    console.log(error)
     // catch error and return it
     return res.status(401).json({ message: "Error! Please try again.", error });
   }
