@@ -1,65 +1,99 @@
+import re # 👈 Nhớ import regex
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from agno.agent import Agent
 from agno.models.ollama import Ollama
+from agno.models.google import Gemini
+from agno.db.mongo import MongoDb
 from dotenv import load_dotenv
 import os
+
 from prompts import CHAT_AGENT_PROMPT
+from data import get_film_data
+
 load_dotenv()
 
-# ⚠️ Lưu ý: Đảm bảo bạn đã định nghĩa MASTER_PROMPT và các Agent con (ChatAgent, DataAgent...) ở bên trên hoặc import vào.
+app = FastAPI(title="YSoul Agent API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+MONGO_CONNECTION_STRING = os.getenv("MONGO_DB_URL")
+storage = MongoDb(
+    db_url=MONGO_CONNECTION_STRING,
+    db_name="ysoul_agent_memory", 
+    session_collection="chat_history"
+)
+
+# --- AGENT ---
 class MasterAgent(Agent):
-    """
-    The Master Agent orchestrates other specialized agents (tools)
-    and delegates the task automatically based on the user's request.
-    """
-
-    name = "MasterAgent"
-    description = "Delegates tasks to the appropriate specialized tool based on the user's input."
-
+    name = "YSoulAssistant"
+    
     def __init__(self, **kwargs):
-
-        model_id = os.getenv("OLLAMA_MODEL", "llama3.2:1b")
-
+        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        
         super().__init__(
-            model=Ollama(id=model_id), 
-            
-            instructions=[CHAT_AGENT_PROMPT], 
+            model=Gemini(
+                id=model_id,
+                api_key=os.getenv("GEMINI_API_KEY"),
+                temperature=0.1,
+            ),
+            instructions=CHAT_AGENT_PROMPT, 
+            tools=[get_film_data],
+            db=storage, 
+            add_history_to_context=True,    
+            debug_mode=True, 
             markdown=True,
             **kwargs
         )
 
-    def run(self, prompt: str) -> str:
-        """
-        Receives a user prompt and lets Ollama decide which tool to call.
-        """
-        
+    def run_chat(self, prompt: str, session_id: str) -> str:
         try:
-            # Gọi hàm run của lớp cha
-            response = super().run(prompt)
-            
-            # Kiểm tra nếu response là stream hoặc object, xử lý để lấy content
+            # ⚠️ KHÔNG CỘNG CHUỖI SYSTEM NOTE Ở ĐÂY NỮA
+            response = super().run(prompt, session_id=session_id, stream=False)
             if hasattr(response, 'content'):
-                print("✅ Task delegated successfully.")
                 return response.content
             return str(response)
-            
         except Exception as e:
-            print(f"⚠️ MasterAgent error: {e}")
-            return f"Error: {e}"
+            print(f"❌ Agent Error: {e}")
+            return f"Lỗi xử lý: {str(e)}"
 
-# Phần main để test (uncomment để chạy)
-if __name__ == "__main__":
-    # Đảm bảo server ollama đang chạy (`ollama serve`)
-    agent = MasterAgent()
-    print("🤖 MasterAgent (Ollama Local) is ready! Type 'exit' to quit.\n")
+# --- 👇 HÀM DỌN RÁC (VỆ SĨ CHO MODEL NHỎ) ---
+def clean_response(text: str) -> str:
+    # 1. Xóa các dòng System Note bị leak (Dòng gây lỗi của bạn)
+    # Regex này tìm mọi chuỗi bắt đầu bằng -(System Note và kết thúc bằng )
+    text = re.sub(r'-\(System Note:.*?\)', '', text, flags=re.IGNORECASE)
+    
+    # 2. Xóa các dòng Instruction bị leak khác (nếu có)
+    text = re.sub(r'\(Instruction:.*?\)', '', text, flags=re.IGNORECASE)
+    
+    # 3. Xóa dòng trống thừa do regex tạo ra
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    return '\n'.join(lines)
 
-    while True:
-        user_input = input("You: ")
-        if user_input.lower().strip() in ["exit", "quit"]:
-            print("👋 Goodbye!")
-            break
-        try:
-            reply = agent.run(user_input)
-            print(f"YSOUL: {reply}\n")
-        except Exception as e:
-            print(f"⚠️ Error: {e}\n")
+ysoul_agent = MasterAgent()
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: str
+
+@app.post("/api/chat")
+def chat_endpoint(req: ChatRequest):
+    if not ysoul_agent:
+        raise HTTPException(status_code=500, detail="Agent chưa được khởi tạo.")
+    
+    print(f"📩 Session: {req.session_id} | User: {req.message}")
+    
+    # ❌ TUYỆT ĐỐI KHÔNG CỘNG: req.message + "System Note..." TẠI ĐÂY
+    raw_reply = ysoul_agent.run_chat(req.message, session_id=req.session_id)
+    
+    # ✅ Làm sạch trước khi trả về Frontend
+    clean_reply = clean_response(raw_reply)
+    
+    return {"reply": clean_reply}

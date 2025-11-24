@@ -8,6 +8,7 @@ import configStore, { persistor } from "./configs/configureStore";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import PlayerContextProvider from "./context/PlayerContext";
+import ChatPopup from "./components/Popup/ChatPopup";
 import { TransactionProvider } from "./context/TransactionContext";
 import { ArtistNFTProvier } from "./context/ArtistNFTContext";
 import { SocketProvider } from "./context/SocketContext";
@@ -29,6 +30,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 <TransactionProvider>
                   <ArtistNFTProvier>
                     <AppRoutes />
+                    <ChatPopup />
                   </ArtistNFTProvier>
                 </TransactionProvider>
               </PlayerContextProvider>
