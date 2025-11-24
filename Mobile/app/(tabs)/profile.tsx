@@ -10,11 +10,11 @@ const Profile = () => {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [nfts] = useState<string[]>([
-    'https://cdn-icons-png.flaticon.com/512/2922/2922510.png',
-    'https://cdn-icons-png.flaticon.com/512/2922/2922656.png',
-    'https://cdn-icons-png.flaticon.com/512/2922/2922688.png'
-  ]);
+  // const [nfts] = useState<string[]>([
+  //   'https://cdn-icons-png.flaticon.com/512/2922/2922510.png',
+  //   'https://cdn-icons-png.flaticon.com/512/2922/2922656.png',
+  //   'https://cdn-icons-png.flaticon.com/512/2922/2922688.png'
+  // ]);
 
   useEffect(() => {
     const loadAccessToken = async () => {
@@ -114,7 +114,7 @@ const Profile = () => {
       </View>
 
       {/* NFT Collection */}
-      {nfts.length > 0 && (
+      {/* {nfts.length > 0 && (
         <View className="w-full mt-6">
           <Text className="text-white text-base font-semibold mb-3">Your NFTs</Text>
           <FlatList
@@ -134,7 +134,7 @@ const Profile = () => {
             )}
           />
         </View>
-      )}
+      )} */}
     </View>
   );
 };
