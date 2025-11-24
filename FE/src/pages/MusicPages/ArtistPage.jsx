@@ -80,7 +80,7 @@ export const ArtistPage = () => {
 
   return (
     <>
-      <div className="relative min-h-screen gradient-bg-hero text-white flex">
+      <div className="relative min-h-screen bg-black text-white flex">
         <div className="z-50">
           <MusicSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />
         </div>

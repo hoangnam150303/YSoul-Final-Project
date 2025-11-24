@@ -10,27 +10,26 @@ export const MovieHomePage = () => {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [films, setFilms] = useState([]);
   const category = [
-    { id: 1, name: "Newest" },
-    { id: 2, name: "Top Rated" },
-    { id: 3, name: "Popular" },
-    { id: 4, name: "Trending" },
+    { id: 1, name: "Your History" },
+    { id: 2, name: "Newest" },
+    { id: 3, name: "Top Rated" },
+    { id: 4, name: "Popular" },
+    { id: 5, name: "Trending" },
   ];
   const fetchNewestFilm = async () => {
     try {
       const response = await filmApi.getAllFilm({
         sort: "Newest",
-        typeUser: "user"
-      })
+        typeUser: "user",
+      });
       setFilms(response.data.data.data);
     } catch (error) {
       console.log(error);
-      
     }
   };
   useEffect(() => {
     fetchNewestFilm();
   }, []);
- 
 
   const handleToggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev); // Đổi trạng thái open

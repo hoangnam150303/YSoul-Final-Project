@@ -1,6 +1,7 @@
 const Film = require("../../models/FilmModel/film");
 const Episode = require("../../models/FilmModel/episode");
 const cloudinaryHelpers = require("../../helpers/cloudinaryHelpers");
+const HistoryFilm = require("../../models/FilmModel/historyFilm");
 exports.createFilmService = async (
   name,
   description,
@@ -20,7 +21,6 @@ exports.createFilmService = async (
     let resultVideo = [];
     let parsedTitle = [];
 
-
     if (title) {
       try {
         parsedTitle = JSON.parse(title);
@@ -29,10 +29,8 @@ exports.createFilmService = async (
       }
     }
 
-
     if (parsedTitle && parsedTitle.length > 0) {
       const videoUrls = video.split(",").map((v) => v.trim());
-
 
       if (videoUrls.length !== parsedTitle.length) {
         throw new Error("Số lượng video và title không khớp");
@@ -46,7 +44,6 @@ exports.createFilmService = async (
         resultVideo.push(result._id);
       }
     } else {
-   
       let result = await Episode.create({
         urlVideo: video,
       });
@@ -148,7 +145,6 @@ exports.getAllFilmService = async (type, category, sort, search, typeUser) => {
         .where({ isDeleted: false });
     }
 
-    
     return {
       success: true,
       data: films,
@@ -192,11 +188,22 @@ exports.activeOrDeactiveFilmByIdService = async (filmId) => {
   }
 };
 
-
-
 exports.updateFilmByIdService = async (
-  id, name, description, smallImage, largeImage, trailer, cast,
-  director, genre, releaseYear, title, isForAll, video, age, isSeries
+  id,
+  name,
+  description,
+  smallImage,
+  largeImage,
+  trailer,
+  cast,
+  director,
+  genre,
+  releaseYear,
+  title,
+  isForAll,
+  video,
+  age,
+  isSeries
 ) => {
   try {
     const film = await Film.findById(id);
@@ -207,63 +214,63 @@ exports.updateFilmByIdService = async (
     if (Array.isArray(video)) {
       videoUrls = video;
     } else if (typeof video === "string") {
-      videoUrls = [video]; 
+      videoUrls = [video];
     }
 
     let newEpisodeIds = [];
 
-
     if (isSeries) {
-       let parsedTitle;
-       try { parsedTitle = JSON.parse(title || "[]"); } catch (err) { throw new Error("Title error"); }
-       
-       if (videoUrls.length > 0 && parsedTitle.length === videoUrls.length) {
-          // Logic cũ của bạn push thêm tập mới
-          for (let i = 0; i < parsedTitle.length; i++) {
-             const ep = await Episode.create({ title: parsedTitle[i], urlVideo: videoUrls[i] });
-             newEpisodeIds.push(ep._id);
-          }
-          film.video = [...(film.video || []), ...newEpisodeIds];
-       }
-    }
-    else {
+      let parsedTitle;
+      try {
+        parsedTitle = JSON.parse(title || "[]");
+      } catch (err) {
+        throw new Error("Title error");
+      }
+
+      if (videoUrls.length > 0 && parsedTitle.length === videoUrls.length) {
+        // Logic cũ của bạn push thêm tập mới
+        for (let i = 0; i < parsedTitle.length; i++) {
+          const ep = await Episode.create({
+            title: parsedTitle[i],
+            urlVideo: videoUrls[i],
+          });
+          newEpisodeIds.push(ep._id);
+        }
+        film.video = [...(film.video || []), ...newEpisodeIds];
+      }
+    } else {
       const inputData = videoUrls[0]; // Có thể là File Path mới HOẶC ID cũ
       if (!inputData) throw new Error("Phim lẻ cần ít nhất một video.");
-
 
       let needUpdate = true;
 
       if (film.video && film.video.length > 0) {
         const currentEpId = film.video[0];
-        
 
         if (inputData === currentEpId.toString()) {
-            needUpdate = false; // Không làm gì cả
-        } 
-
-        else {
-            const currentEp = await Episode.findById(currentEpId);
-            if (currentEp && currentEp.urlVideo === inputData) {
-                needUpdate = false;
-            }
+          needUpdate = false; // Không làm gì cả
+        } else {
+          const currentEp = await Episode.findById(currentEpId);
+          if (currentEp && currentEp.urlVideo === inputData) {
+            needUpdate = false;
+          }
         }
       }
 
       if (needUpdate) {
+        if (film.video && film.video.length > 0) {
+          await Episode.deleteMany({ _id: { $in: film.video } });
+        }
 
-         if (film.video && film.video.length > 0) {
-            await Episode.deleteMany({ _id: { $in: film.video } });
-         }
-
-         const episode = await Episode.create({ urlVideo: inputData });
-         film.video = [episode._id];
+        const episode = await Episode.create({ urlVideo: inputData });
+        film.video = [episode._id];
       }
     }
 
     film.name = name;
     film.description = description;
     film.trailer = trailer;
-    film.cast = cast; 
+    film.cast = cast;
     film.director = director;
     film.genre = genre;
     film.releaseYear = releaseYear;
@@ -271,13 +278,11 @@ exports.updateFilmByIdService = async (
     film.age = age;
     film.isSeries = isSeries;
 
-
     if (smallImage) film.small_image = smallImage;
     if (largeImage) film.large_image = largeImage;
 
     await film.save();
     return { success: true, data: film };
-
   } catch (error) {
     console.error("Update Error:", error.message);
     return { success: false, error: error.message };
@@ -295,10 +300,8 @@ exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
       let userFeedback = film.feedback.find((item) => item.user_id === userId);
 
       if (userFeedback) {
-     
         userFeedback.rating = data;
       } else {
-     
         film.feedback.push({
           user_id: userId,
           rating: (film.feedback.rating || 0) + data,
@@ -317,6 +320,34 @@ exports.updateStatusFilmByIdService = async (filmId, type, data, userId) => {
     return { success: true };
   } catch (error) {
     console.error("Error updating film status:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+exports.addHistoryFilmService = async (filmId, userId) => {
+  try {
+    const history = await HistoryFilm.findOne({
+      user_id: userId,
+      film_id: filmId,
+    });
+    if (history) {
+      return { success: true };
+    }
+    await HistoryFilm.create({ user_id: userId, film_id: filmId });
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+};
+
+exports.getHistoryFilmService = async (userId) => {
+  try {
+    const historyFilms = await HistoryFilm.find({ user_id: userId }).populate({
+      path: "film_id",
+      select: "name small_image",
+    });
+    return { success: true, data: historyFilms };
+  } catch (error) {
     return { success: false, message: error.message };
   }
 };

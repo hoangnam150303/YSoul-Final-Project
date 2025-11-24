@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-// 👇 1. MUST IMPORT LINK
 import { Link } from "react-router-dom";
 import {
   MessageOutlined,
@@ -8,8 +7,12 @@ import {
   RobotOutlined,
   LoadingOutlined,
   PlayCircleOutlined,
+  SoundOutlined,
 } from "@ant-design/icons";
 import ReactMarkdown from "react-markdown";
+
+
+import agentApi from "../../hooks/agentApi";
 
 const ChatPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -43,16 +46,12 @@ const ChatPopup = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMessage.text,
-          session_id: sessionIdRef.current,
-        }),
-      });
 
-      const data = await response.json();
+      const response = await agentApi.postMessage({
+        message: userMessage.text,
+        session_id: sessionIdRef.current,
+      });
+      const data = response.data; // Lấy data từ axios response
 
       const botMessage = {
         id: Date.now() + 1,
@@ -79,24 +78,23 @@ const ChatPopup = () => {
     }
   };
 
-  // 👇 2. LOGIC: Extract ID and create "Watch Now" button
+  // 👇 Logic Regex xử lý link (đã bao gồm fix dấu gạch ngang UUID)
   const renderWithLink = (children) => {
     return React.Children.map(children, (child) => {
       if (typeof child === "string") {
-        // Regex to catch pattern: (ID: abc...)
-        const parts = child.split(/(\(ID:\s*[a-zA-Z0-9]+\))/g);
+        // Regex split: Tìm pattern (ID:...) hoặc (MusicID:...)
+        const parts = child.split(/(\((?:ID|MusicID):\s*[a-zA-Z0-9-]+\))/g);
 
         return parts.map((part, index) => {
-          const match = part.match(/\(ID:\s*([a-zA-Z0-9]+)\)/);
-
-          if (match) {
-            const id = match[1];
+          // 🎬 Case 1: Phim
+          const movieMatch = part.match(/\(ID:\s*([a-zA-Z0-9-]+)\)/);
+          if (movieMatch) {
+            const id = movieMatch[1];
             return (
               <Link
                 key={index}
                 to={`/watchPage/${id}`}
                 onClick={() => setIsOpen(false)}
-                // 👇 Button style
                 className="ml-2 inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded-full transition-all duration-200 no-underline shadow-sm transform hover:scale-105"
               >
                 <PlayCircleOutlined style={{ fontSize: "10px" }} />
@@ -104,6 +102,24 @@ const ChatPopup = () => {
               </Link>
             );
           }
+
+          // 🎵 Case 2: Nhạc
+          const musicMatch = part.match(/\(MusicID:\s*([a-zA-Z0-9-]+)\)/);
+          if (musicMatch) {
+            const id = musicMatch[1];
+            return (
+              <Link
+                key={index}
+                to={`/singlePage/${id}`}
+                onClick={() => setIsOpen(false)}
+                className="ml-2 inline-flex items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1 rounded-full transition-all duration-200 no-underline shadow-sm transform hover:scale-105"
+              >
+                <SoundOutlined style={{ fontSize: "10px" }} />
+                Listen Now
+              </Link>
+            );
+          }
+
           return part;
         });
       }
@@ -206,7 +222,7 @@ const ChatPopup = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
+              placeholder="Ask about movies or music..."
               className="flex-1 bg-[#2a2a2a] text-white text-sm rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-red-600 transition border border-gray-700 placeholder-gray-500"
               disabled={isLoading}
             />

@@ -23,15 +23,15 @@ export const MusicHomePage = () => {
 
   return (
     <>
-      <div className="relative min-h-screen gradient-bg-hero text-white flex">
-        {/* Sidebar */}
+      <div className="relative min-h-screen bg-black text-white flex">
+       
         <div className="z-50">
           <MusicSideBar onToggle={handleToggleSidebar} isOpen={isSidebarOpen} />
         </div>
 
         {/* Phần chính */}
         <div className="flex flex-col w-full px-10 overflow-auto">
-          {/* Navbar - truyền state và setter xuống Navbar */}
+          
           <div className="w-full">
             <NavbarMusic
               selectedType={selectedType}
