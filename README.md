@@ -1,3 +1,4 @@
+
 # 🌟 YSoul - The Ultimate Integrated Entertainment Ecosystem
 
 ![YSoul Banner](https://via.placeholder.com/1200x400?text=YSoul+Entertainment+Platform)
@@ -174,4 +175,4 @@ YSoul-Final-Project/
 │   │   └── redux/
 ├── Mobile/
 └── README.md
-```
+
