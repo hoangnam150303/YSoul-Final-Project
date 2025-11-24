@@ -54,7 +54,13 @@ export const WatchPage = () => {
       console.error(error);
     }
   };
-
+  const addHistoryFilm = async (id) => {
+    try {
+      await filmApi.postAddFilmToHistory(id);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const fetchAllFilm = async () => {
     try {
       const response = await filmApi.getAllFilm({ category: category });
@@ -118,7 +124,9 @@ export const WatchPage = () => {
       setShowTrailer(true);
     }
   }, [movieId]);
-
+  setTimeout(() => {
+    addHistoryFilm(movieId);
+  }, 10000);
   useEffect(() => {
     if (category) fetchAllFilm();
   }, [category]);

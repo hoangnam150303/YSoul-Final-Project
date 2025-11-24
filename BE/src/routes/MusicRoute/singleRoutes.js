@@ -28,8 +28,16 @@ singleRoute.put(
   auth.isAdmin,
   singleController.activeOrDeactiveSingle
 );
-singleRoute.put("/interactSingle/:id",auth.isVip,singleController.interactSingle)
-singleRoute.get("/getSngleById/:id",auth.isVip, singleController.getSingleById);
-singleRoute.get("/getAllSingle", auth.isVip, singleController.getAllSingle);
-singleRoute.get("/nextSingle/:id",auth.isVip, singleController.nextSingle)
+singleRoute.put(
+  "/interactSingle/:id",
+  auth.isVip,
+  singleController.interactSingle
+);
+singleRoute.get(
+  "/getSngleById/:id",
+  auth.isVip,
+  singleController.getSingleById
+);
+singleRoute.get("/getAllSingle", singleController.getAllSingle);
+singleRoute.get("/nextSingle/:id", auth.isVip, singleController.nextSingle);
 module.exports = singleRoute;

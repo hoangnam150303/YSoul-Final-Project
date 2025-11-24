@@ -213,3 +213,38 @@ exports.updateStatusFilmById = async (req, res) => {
     });
   }
 };
+
+exports.addHistoryFilm = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const response = await filmService.addHistoryFilmService(id, userId);
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error add history film",
+      });
+    }
+    return res.status(200).json("Update successfully");
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error add history film" + error,
+    });
+  }
+};
+
+exports.getHistoryFilm = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const response = await filmService.getHistoryFilmService(userId);
+    if (!response.success) {
+      return res.status(400).json({
+        message: "Error get history film",
+      });
+    }
+    return res.status(200).json(response.data);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error get history film" + error,
+    });
+  }
+};

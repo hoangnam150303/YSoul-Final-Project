@@ -17,7 +17,10 @@ const filmApi = {
     const url = `${FILM_API_ENDPOINT}/getFilmById/${id}`;
     return axiosClient.get(url);
   },
-
+  getHistoryFilm: () => {
+    const url = `${FILM_API_ENDPOINT}/getHistoryFilm`;
+    return axiosClient.get(url);
+  },
   postCreateFilm: (formData) => {
     const url = `${FILM_API_ENDPOINT}/createFilm`;
     return axiosClient.post(url, formData, {
@@ -25,6 +28,10 @@ const filmApi = {
         "Content-Type": "multipart/form-data",
       },
     });
+  },
+  postAddFilmToHistory: (id) => {
+    const url = `${FILM_API_ENDPOINT}/addFilmToHistory/${id}`;
+    return axiosClient.post(url);
   },
   postDeleteFilm: (id) => {
     const url = `${FILM_API_ENDPOINT}/activeOrDeactiveFilmById/${id}`;

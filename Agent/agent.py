@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 
 from prompts import CHAT_AGENT_PROMPT
-from data import get_film_data
+from data import get_film_data,get_music_data
 
 load_dotenv()
 
@@ -31,12 +31,12 @@ storage = MongoDb(
     session_collection="chat_history"
 )
 
-# --- AGENT ---
+
 class MasterAgent(Agent):
     name = "YSoulAssistant"
     
     def __init__(self, **kwargs):
-        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        model_id = os.getenv("GEMINI_MODEL")
         
         super().__init__(
             model=Gemini(
@@ -45,7 +45,7 @@ class MasterAgent(Agent):
                 temperature=0.1,
             ),
             instructions=CHAT_AGENT_PROMPT, 
-            tools=[get_film_data],
+            tools=[get_film_data,get_music_data],
             db=storage, 
             add_history_to_context=True,    
             debug_mode=True, 
@@ -55,7 +55,7 @@ class MasterAgent(Agent):
 
     def run_chat(self, prompt: str, session_id: str) -> str:
         try:
-            # ⚠️ KHÔNG CỘNG CHUỖI SYSTEM NOTE Ở ĐÂY NỮA
+     
             response = super().run(prompt, session_id=session_id, stream=False)
             if hasattr(response, 'content'):
                 return response.content
@@ -64,16 +64,10 @@ class MasterAgent(Agent):
             print(f"❌ Agent Error: {e}")
             return f"Lỗi xử lý: {str(e)}"
 
-# --- 👇 HÀM DỌN RÁC (VỆ SĨ CHO MODEL NHỎ) ---
+
 def clean_response(text: str) -> str:
-    # 1. Xóa các dòng System Note bị leak (Dòng gây lỗi của bạn)
-    # Regex này tìm mọi chuỗi bắt đầu bằng -(System Note và kết thúc bằng )
     text = re.sub(r'-\(System Note:.*?\)', '', text, flags=re.IGNORECASE)
-    
-    # 2. Xóa các dòng Instruction bị leak khác (nếu có)
     text = re.sub(r'\(Instruction:.*?\)', '', text, flags=re.IGNORECASE)
-    
-    # 3. Xóa dòng trống thừa do regex tạo ra
     lines = [line.strip() for line in text.split('\n') if line.strip()]
     return '\n'.join(lines)
 
@@ -90,10 +84,9 @@ def chat_endpoint(req: ChatRequest):
     
     print(f"📩 Session: {req.session_id} | User: {req.message}")
     
-    # ❌ TUYỆT ĐỐI KHÔNG CỘNG: req.message + "System Note..." TẠI ĐÂY
+
     raw_reply = ysoul_agent.run_chat(req.message, session_id=req.session_id)
-    
-    # ✅ Làm sạch trước khi trả về Frontend
+
     clean_reply = clean_response(raw_reply)
     
     return {"reply": clean_reply}
