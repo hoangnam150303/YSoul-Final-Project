@@ -16,9 +16,7 @@ exports.createFilm = async (req, res) => {
       age,
     } = req.body;
     if (!req.files || !req.files.movie) {
-      return res
-        .status(400)
-        .json({ message: "Please upload a movie file" });
+      return res.status(400).json({ message: "Please upload a movie file" });
     }
     const movieFiles = req.files.movie.map((file) => file.path).join(", ");
     const smallImage = req.files?.small_image?.[0]?.path;
