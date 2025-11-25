@@ -10,19 +10,14 @@ export const SocialHomePage = () => {
     <>
       <SocialHeader />
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
-        <div className="hidden lg:block lg:col-span-1">
+        <div className="hidden lg:block lg:col-span-1 space-y-6">
           <SocialSideBar />
-          <div className="col-span-1 lg:col-span-1 hidden lg:block mt-5">
-            <div className="bg-gray-200 rounded-lg shadow p-4">
-              <h2 className="font-semibold mb-4">Top reviewers</h2>
-              <RecommendedSideBar />
-            </div>
-          </div>
+          <RecommendedSideBar />
         </div>
-        <div className="lg:col-span-3 p-6 bg-gray-50 rounded-lg shadow">
-          {/* Main Content Here */}
+
+        <div className="lg:col-span-3 p-6 bg-[#0f0f0f] rounded-xl shadow-inner border border-[#2a2a2a]">
           <PostCreation />
-          <ListPost type={"homepage"}/>
+          <ListPost type={"homepage"} />
         </div>
       </div>
     </>

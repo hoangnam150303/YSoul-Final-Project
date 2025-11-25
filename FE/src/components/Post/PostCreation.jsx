@@ -5,6 +5,7 @@ import singleApi from "../../hooks/singleApi";
 import postApi from "../../hooks/postApi";
 import { message } from "antd";
 import { useSelector } from "react-redux";
+
 export const PostCreation = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [contentType, setContentType] = useState(null);
@@ -14,6 +15,7 @@ export const PostCreation = () => {
   const [musics, setMusics] = useState([]);
   const [file, setFile] = useState(null);
   const userAvatar = useSelector((state) => state.user.avatar);
+
   const fetchFilms = async () => {
     try {
       const response = await filmApi.getAllFilm({
@@ -24,6 +26,7 @@ export const PostCreation = () => {
       console.log(error);
     }
   };
+
   const fetchMusics = async () => {
     try {
       const response = await singleApi.getAllSingle({
@@ -36,6 +39,7 @@ export const PostCreation = () => {
       console.log(error);
     }
   };
+
   const handleFileChange = (e) => {
     try {
       const file = e.target.files[0];
@@ -59,13 +63,14 @@ export const PostCreation = () => {
         formData.append("single_id", selectedItem);
       if (file) formData.append("image", file);
 
-      console.log("[createPost] sending..."); // thấy log này mà Network vẫn trống => lỗi axios instance
-      const res = await postApi.postCreatePost(formData); // đảm bảo đây là Promise từ axios
+      console.log("[createPost] sending...");
+      const res = await postApi.postCreatePost(formData);
       if (res?.status === 200) {
         message.success("Post created successfully!");
         document.getElementById("content").value = "";
         setFile(null);
         setSelectedItem(null);
+        setContentType(null); // Reset content type
       }
     } catch (err) {
       console.error("Error creating post", err);
@@ -81,27 +86,47 @@ export const PostCreation = () => {
   }, []);
 
   return (
-    <div className="gradient-bg-hero rounded-lg shadow mb-4 p-4">
+    // ✨ Container Dark Theme
+    <div className="bg-[#1f1f1f] rounded-xl shadow-lg border border-[#2a2a2a] mb-6 p-4">
       <div className="flex space-x-3">
-        <img className="size-12 rounded-full" src={userAvatar} alt="avatar" />
+        {/* Avatar với viền gradient nhẹ */}
+        <div className="p-[2px] rounded-full bg-gradient-to-tr from-gray-700 to-gray-900 h-fit">
+          <img
+            className="size-10 rounded-full border border-[#1f1f1f]"
+            src={userAvatar}
+            alt="avatar"
+          />
+        </div>
+
+        {/* Input Area */}
         <textarea
           name="content"
           id="content"
           placeholder="What's on your mind?"
-          className="w-full p-3 rounded-lg bg-base-100 hover:bg-base-200 focus:outline-none resize-none transition-colors duration-200 min-h-[100px]"
+          className="w-full p-3 rounded-lg bg-[#141414] text-white placeholder-gray-500 border border-[#333] focus:border-gray-500 focus:outline-none resize-none transition-all duration-200 min-h-[100px]"
         />
       </div>
+
+      {/* Preview Image */}
       {file && (
-        <div className="mt-4">
+        <div className="mt-4 relative group">
           <img
             src={URL.createObjectURL(file)}
             alt="Uploaded file"
-            className="w-full rounded-lg"
+            className="w-full h-64 object-cover rounded-lg border border-[#333]"
           />
+          <button
+            onClick={() => setFile(null)}
+            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
+          >
+            <i className="bi bi-x text-xl"></i>
+          </button>
         </div>
       )}
+
+      {/* Selected Item Preview (Film/Music) */}
       {selectedItem && (
-        <div className="mt-4 flex items-center p-3 border rounded-lg bg-gray-100">
+        <div className="mt-4 flex items-center p-3 border border-[#333] rounded-lg bg-[#141414] relative">
           {(() => {
             const isFilm = contentType === "films";
             const selectedContent = (isFilm ? films : musics).find(
@@ -110,108 +135,160 @@ export const PostCreation = () => {
 
             return (
               <>
-                <span className="font-semibold mr-2">
-                  {isFilm ? "Film:" : "Music:"}
+                <span className="font-bold text-gray-400 mr-3 text-xs uppercase tracking-wider">
+                  {isFilm ? "Watching:" : "Listening to:"}
                 </span>
                 <img
                   src={
                     selectedContent?.small_image || selectedContent?.image || ""
                   }
                   alt="Selected"
-                  className="w-12 h-12 rounded-full object-cover mx-3"
+                  className="w-10 h-10 rounded object-cover mr-3 border border-[#333]"
                 />
-                <span>
+                <span className="text-white font-medium text-sm">
                   {selectedContent?.name || selectedContent?.title || "Unknown"}
                 </span>
+                <button
+                  onClick={() => {
+                    setSelectedItem(null);
+                    setContentType(null);
+                  }}
+                  className="absolute top-2 right-2 text-gray-500 hover:text-red-500 transition-colors"
+                >
+                  <i className="bi bi-x-circle-fill"></i>
+                </button>
               </>
             );
           })()}
         </div>
       )}
 
-      <div className="flex justify-between items-center mt-4">
-        <label className="flex items-center  transition-colors duration-200 cursor-pointer text-white">
-          <i className="bi bi-card-image mr-2" style={{ fontSize: "20px" }}></i>
-          <span>Photo</span>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleFileChange(e)}
-          />
-        </label>
+      {/* Action Bar */}
+      <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#2a2a2a]">
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-green-400 transition-colors duration-200 group">
+            <div className="bg-[#2a2a2a] p-2 rounded-full group-hover:bg-[#1a1a1a] transition-colors">
+              <i className="bi bi-card-image text-green-500"></i>
+            </div>
+            <span className="text-sm font-medium">Photo</span>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleFileChange(e)}
+            />
+          </label>
 
-        <button
-          className="flex items-center  transition-colors duration-200 cursor-pointer text-white"
-          onClick={() => setShowPopup(true)}
-        >
-          <i className="bi bi-film mr-2" style={{ fontSize: "20px" }}></i>
-          <span>Film/Music</span>
-        </button>
+          <button
+            className="flex items-center gap-2 cursor-pointer text-gray-400 hover:text-blue-400 transition-colors duration-200 group"
+            onClick={() => setShowPopup(true)}
+          >
+            <div className="bg-[#2a2a2a] p-2 rounded-full group-hover:bg-[#1a1a1a] transition-colors">
+              <i className="bi bi-film text-blue-500"></i>
+            </div>
+            <span className="text-sm font-medium">Film/Music</span>
+          </button>
+        </div>
 
         <button
           type="button"
-          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="bg-blue-600 text-white rounded-full px-6 py-2 hover:bg-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg shadow-blue-900/30 flex items-center gap-2"
           onClick={handleSubmit}
           disabled={isPending}
         >
           {isPending ? (
-            <LoadingOutlined className="size-5" />
+            <LoadingOutlined className="text-lg" />
           ) : (
             <>
-              Share <ShareAltOutlined />
+              Post <ShareAltOutlined />
             </>
           )}
         </button>
       </div>
 
+      {/* ✨ Dark Modal Popup */}
       {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-          <div className="bg-white p-4 rounded-lg w-96 shadow-lg relative z-[10000]">
-            <h2 className="text-lg font-semibold mb-4">Share Film or Music</h2>
-            <div className="flex justify-around">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-[9999]">
+          <div className="bg-[#1f1f1f] rounded-xl w-96 shadow-2xl border border-[#333] relative z-[10000] overflow-hidden animate-fade-in-up">
+            <div className="p-4 border-b border-[#333] flex justify-between items-center bg-[#1a1a1a]">
+              <h2 className="text-white font-semibold m-0">Add to your post</h2>
               <button
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                onClick={() => setContentType("films")}
+                onClick={() => setShowPopup(false)}
+                className="text-gray-400 hover:text-white transition-colors"
               >
-                Share Film
-              </button>
-              <button
-                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                onClick={() => setContentType("musics")}
-              >
-                Share Music
+                <i className="bi bi-x-lg"></i>
               </button>
             </div>
-            {contentType && (
-              <div className="mt-4">
-                <h3 className="text-md font-semibold">
-                  Select {contentType === "films" ? "a Film" : "a Music"}
-                </h3>
-                <ul className="mt-2 overflow-y-scroll max-h-48">
-                  {(contentType === "films" ? films : musics).map((item) => (
-                    <li
-                      key={item._id || item.id}
-                      className="cursor-pointer hover:bg-gray-200 p-2 rounded-md flex items-center gap-3"
-                      onClick={() => setSelectedItem(item._id || item.id)}
-                    >
-                      <img
-                        src={item.small_image || item.image}
-                        alt=""
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <span>{item.name || item.title}</span>
-                    </li>
-                  ))}
-                </ul>
+
+            <div className="p-4">
+              <div className="flex gap-2 mb-4 bg-[#141414] p-1 rounded-lg">
+                <button
+                  className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
+                    contentType === "films"
+                      ? "bg-[#2a2a2a] text-white shadow"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                  onClick={() => setContentType("films")}
+                >
+                  <i className="bi bi-film mr-2"></i> Film
+                </button>
+                <button
+                  className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
+                    contentType === "musics"
+                      ? "bg-[#2a2a2a] text-white shadow"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                  onClick={() => setContentType("musics")}
+                >
+                  <i className="bi bi-music-note-beamed mr-2"></i> Music
+                </button>
               </div>
-            )}
-            <button
-              className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-              onClick={() => setShowPopup(false)}
-            >
-              Close
-            </button>
+
+              {contentType && (
+                <div className="animate-fade-in">
+                  <h3 className="text-gray-400 text-xs uppercase tracking-wider mb-2 font-bold">
+                    Select {contentType === "films" ? "Movie" : "Song"}
+                  </h3>
+                  <ul className="overflow-y-auto max-h-60 scrollbar-thin scrollbar-thumb-[#333] space-y-1">
+                    {(contentType === "films" ? films : musics).map((item) => (
+                      <li
+                        key={item._id || item.id}
+                        className="cursor-pointer hover:bg-[#2a2a2a] p-2 rounded-lg flex items-center gap-3 transition-colors group"
+                        onClick={() => {
+                          setSelectedItem(item._id || item.id);
+                          setShowPopup(false);
+                        }}
+                      >
+                        <img
+                          src={item.small_image || item.image}
+                          alt=""
+                          className="w-10 h-10 rounded object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <span className="text-gray-300 group-hover:text-white text-sm font-medium truncate">
+                          {item.name || item.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {!contentType && (
+                <div className="text-center py-8 text-gray-500">
+                  <i className="bi bi-collection-play text-4xl mb-2 block opacity-50"></i>
+                  Select a category above
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-[#333] bg-[#1a1a1a] flex justify-end">
+              <button
+                className="px-4 py-2 text-gray-300 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm font-medium"
+                onClick={() => setShowPopup(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
