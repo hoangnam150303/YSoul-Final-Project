@@ -13,12 +13,12 @@ def get_film_data(category: str = None, sort: str = "Newest", search: str = None
     
     Args:
         category (str): Genre name (e.g., 'Animation', 'Action').
-        sort (str): 'Newest' or 'Trending'.
+        sort (str): Options: 'Newest', 'Trending', 'Top Rated', 'Popular'. Default is 'Newest'.
         search (str): Keywords to search for a movie.
+        type_film (str): Options: 'All', 'Movie', 'TV Shows', 'Person'.
     """
     
     
-    # Endpoint cho phim
     api_endpoint = f"{base_url}/film/getAllFilm"
     
     params = {}
@@ -66,12 +66,12 @@ def get_music_data(filter: str = "newest", search: str = None) -> str:
         search (str): Song title keyword to search.
     """
     
-    # Endpoint cho nhạc (Dựa trên route Node.js bạn cung cấp)
+    
     api_endpoint = f"{base_url}/single/getAllSingle"
     
-    # Mapping tham số cho đúng với backend Node.js
+
     params = {
-        "typeUser": "user", # Mặc định là user để lấy nhạc active
+        "typeUser": "user",
         "filter": filter,
         "search": search
     }
@@ -89,7 +89,7 @@ def get_music_data(filter: str = "newest", search: str = None) -> str:
             
             clean_music = []
             for s in raw_singles:
-                # Map các trường từ Postgres (thường là chữ thường)
+        
                 clean_music.append({
                     "Id": s.get("id"),
                     "Title": s.get("title"),

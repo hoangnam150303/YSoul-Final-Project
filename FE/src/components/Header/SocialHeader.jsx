@@ -34,90 +34,159 @@ export const SocialHeader = () => {
   }, [newNotification]);
 
   return (
-    <nav className="gradient-bg-hero shadow-md sticky top-0 z-50 w-full">
+    // ✨ BACKGROUND DARK THEME: Màu nền tối #0f0f0f + border dưới
+    <nav className="bg-[#0f0f0f] border-b border-[#2a2a2a] sticky top-0 z-50 w-full backdrop-blur-md bg-opacity-95">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center py-3">
-          {/* Logo */}
-          <Link to="/" className="w-24 md:w-36">
-            <img
-              className="h-12 md:h-16 w-auto object-contain rounded"
-              src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
-              alt="logo"
-            />
+          {/* --- LOGO --- */}
+          <Link to="/" className="w-24 md:w-36 group">
+            <div className="p-1 rounded-lg transition-all duration-300">
+              <img
+                className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                src="https://res.cloudinary.com/dnv7bjvth/image/upload/v1736842897/fancyai_1736839648739_gfhqk9.png"
+                alt="logo"
+              />
+            </div>
           </Link>
 
-          {/* Navigation Icons */}
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 items-center text-white text-sm">
-            <Link to="/socialHomePage" className="flex flex-col items-center">
-              <HomeOutlined style={{ fontSize: "20px" }} />
-              <span className="hidden md:block text-xs">Home</span>
+          {/* --- NAVIGATION ICONS --- */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10 items-center text-gray-400 text-sm">
+            {/* Home */}
+            <Link
+              to="/socialHomePage"
+              className="flex flex-col items-center hover:text-white transition-colors duration-300 group"
+            >
+              <HomeOutlined
+                style={{ fontSize: "22px" }}
+                className="group-hover:scale-110 transition-transform duration-300"
+              />
+              <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                Home
+              </span>
             </Link>
 
-            <Link to="/network" className="flex flex-col items-center relative">
-              <i className="bi bi-people text-lg"></i>
-              <span className="hidden md:block text-xs">Network</span>
+            {/* Network */}
+            <Link
+              to="/network"
+              className="flex flex-col items-center hover:text-white transition-colors duration-300 group"
+            >
+              <i className="bi bi-people text-xl group-hover:scale-110 transition-transform duration-300"></i>
+              <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                Network
+              </span>
             </Link>
 
-            <Link to="/chat" className="flex flex-col items-center relative">
-              <i className="bi bi-chat-dots text-lg"></i>
-              <span className="hidden md:block text-xs">Chat</span>
+            {/* Chat */}
+            <Link
+              to="/chat"
+              className="flex flex-col items-center hover:text-white transition-colors duration-300 group"
+            >
+              <i className="bi bi-chat-dots text-xl group-hover:scale-110 transition-transform duration-300"></i>
+              <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                Chat
+              </span>
             </Link>
 
-            {/* Notification */}
+            {/* Notification Dropdown */}
             <div
-              className="relative"
+              className="relative group cursor-pointer"
               onMouseEnter={() => setShowNotifications(true)}
               onMouseLeave={() => setShowNotifications(false)}
             >
-              <Link to="/notification" className="flex flex-col items-center relative">
-                <BellOutlined style={{ fontSize: "20px" }} />
-                <span className="hidden md:block text-xs">Notification</span>
-                {notification.length > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {notification.length}
-                  </span>
-                )}
+              <Link
+                to="/notification"
+                className="flex flex-col items-center hover:text-white transition-colors duration-300"
+              >
+                <div className="relative group-hover:scale-110 transition-transform duration-300">
+                  <BellOutlined style={{ fontSize: "22px" }} />
+                  {notification.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-lg shadow-red-500/50">
+                      {notification.length}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                  Activity
+                </span>
               </Link>
 
-              {/* Dropdown */}
+              {/* ✨ DARK DROPDOWN */}
               {showNotifications && notification.length > 0 && (
-                <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg p-2 z-50 max-h-96 overflow-y-auto">
-                  <ul className="text-gray-700 text-sm">
+                <div className="absolute right-0 mt-3 w-80 bg-[#1a1a1a] border border-[#333] shadow-2xl rounded-xl overflow-hidden z-50 animate-fade-in-up">
+                  <div className="px-4 py-3 border-b border-[#333] bg-[#1f1f1f]">
+                    <h3 className="text-sm font-semibold text-white m-0">
+                      Notifications
+                    </h3>
+                  </div>
+                  <ul className="text-gray-300 text-sm max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#333]">
                     {notification.slice(0, 5).map((item) => (
                       <li
                         key={item._id}
-                        className="p-2 border-b hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        className="p-3 border-b border-[#2a2a2a] hover:bg-[#252525] cursor-pointer flex items-start gap-3 transition-colors"
                       >
                         <img
                           src={item.content.avatar}
                           alt="avatar"
-                          className="w-8 h-8 rounded-full"
+                          className="w-10 h-10 rounded-full border border-[#333] object-cover"
                         />
-                        <span className="text-sm">
-                          {item.type === "follow" &&
-                            `${item.content.username} is now following you.`}
-                          {item.type === "reply" &&
-                            `${item.content.username} replied to your comment.`}
-                          {item.type === "comment" &&
-                            `${item.content.username} commented on your post.`}
-                          {item.type === "like" &&
-                            `${item.content.username} liked your post.`}
-                        </span>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-400 mb-0.5 leading-snug">
+                            <span className="font-bold text-white mr-1">
+                              {item.content.username}
+                            </span>
+                            {item.type === "follow" && "started following you."}
+                            {item.type === "reply" &&
+                              "replied to your comment."}
+                            {item.type === "comment" &&
+                              "commented on your post."}
+                            {item.type === "like" && "liked your post."}
+                          </p>
+                          <span className="text-[10px] text-gray-500">
+                            Just now
+                          </span>
+                        </div>
+                        <div className="pt-1">
+                          {item.type === "follow" ? (
+                            <i className="bi bi-person-plus-fill text-blue-500"></i>
+                          ) : (
+                            <i className="bi bi-heart-fill text-red-500"></i>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>
+                  <div className="p-2 text-center bg-[#1f1f1f] border-t border-[#333]">
+                    <Link
+                      to="/notification"
+                      className="text-xs text-gray-400 hover:text-white transition-colors font-medium"
+                    >
+                      View All Notifications
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
 
-            <Link to={`/profile/${userId}`} className="flex flex-col items-center">
-              <UserOutlined style={{ fontSize: "20px" }} />
-              <span className="hidden md:block text-xs">Me</span>
+            {/* Profile (Me) */}
+            <Link
+              to={`/profile/${userId}`}
+              className="flex flex-col items-center hover:text-white transition-colors duration-300 group"
+            >
+              <UserOutlined
+                style={{ fontSize: "22px" }}
+                className="group-hover:scale-110 transition-transform duration-300"
+              />
+              <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                Me
+              </span>
             </Link>
 
-            <button className="flex flex-col items-center">
-              <i className="bi bi-box-arrow-in-right text-lg"></i>
-              <span className="hidden md:block text-xs">Logout</span>
+            {/* Logout */}
+            <button className="flex flex-col items-center hover:text-white transition-colors duration-300 group bg-transparent border-none cursor-pointer">
+              <i className="bi bi-box-arrow-in-right text-xl group-hover:scale-110 transition-transform duration-300"></i>
+              <span className="hidden md:block text-[10px] mt-1 font-medium tracking-wide uppercase group-hover:text-red-500 transition-colors">
+                Logout
+              </span>
             </button>
           </div>
         </div>

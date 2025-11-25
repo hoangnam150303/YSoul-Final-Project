@@ -57,10 +57,7 @@ const ChatSideBar = () => {
   useEffect(() => {
     if (socket) {
       socket.on("delete-conversation", (conversation) => {
-        // Nếu cuộc trò chuyện bị xóa, gọi lại fetch
         fetchConversations();
-        console.log(conversation._id, idConversation);
-
         if (conversation._id === idConversation) {
           setMessageSelected(null);
           message.error("This conversation was deleted by another user!");
@@ -81,7 +78,6 @@ const ChatSideBar = () => {
       });
     }
 
-    // Cleanup để tránh double event khi component unmount
     return () => {
       if (socket) {
         socket.off("delete-conversation");
@@ -102,68 +98,71 @@ const ChatSideBar = () => {
   useEffect(() => {
     fetchReviewers();
   }, []);
-  // Khi searchTerm thay đổi thì gọi API phù hợp
   useEffect(() => {
     if (searchTerm.trim()) {
       fetchReviewers();
     } else {
-      fetchConversations(); // Gọi lại API conversation thay vì dùng dữ liệu cũ
+      fetchConversations();
     }
   }, [searchTerm]);
 
-  // Chạy lần đầu lấy danh sách conversation
-
   return (
-    <aside className="h-full w-20 lg:w-72 border-r border-base-300 flex flex-col transition-all duration-200">
-      <div className="border-b border-base-300 w-full p-5">
+    <aside className="h-full w-20 lg:w-72 border-r border-[#2a2a2a] bg-[#1a1a1a] flex flex-col transition-all duration-200">
+      <div className="border-b border-[#2a2a2a] w-full p-5">
         <div className="flex items-center gap-2 mb-4">
           <i
-            className="bi bi-people"
-            style={{ fontSize: "2rem", color: "white" }}
+            className="bi bi-chat-dots-fill text-red-500"
+            style={{ fontSize: "2rem" }}
           ></i>
+
           <span className="font-bold text-2xl hidden lg:inline text-white">
             Chat
           </span>
         </div>
         {/* Search Input */}
         <div className="relative w-full">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
             <i className="bi bi-search"></i>
           </span>
+
           <input
             type="text"
             placeholder="Tìm kiếm..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full rounded-xl bg-base-200 text-black placeholder-gray-400 border border-base-300 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-150"
+            className="pl-10 pr-4 py-2 w-full rounded-xl bg-[#2a2a2a] text-white placeholder-gray-500 border border-[#333] focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-150"
           />
         </div>
       </div>
 
       {searchTerm ? (
-        <div className="overflow-y-auto w-full py-3">
+        <div className="overflow-y-auto w-full py-3 space-y-1 scrollbar-thin scrollbar-thumb-[#333]">
           {users
             .filter((user) => user.id !== userId)
             .map((user) => (
               <button
                 key={user.id}
                 onClick={() => handleCreateConversation(user.id)}
-                className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-color 
-             ${userSelected?.id === user.id ? "bg-slate-400 text-black" : ""}`}
+                className={`w-full p-3 flex items-center gap-3 transition-color duration-200 
+ ${
+   userSelected?.id === user.id
+     ? "bg-red-900/40 text-white"
+     : "hover:bg-[#2a2a2a]"
+ } text-white`}
               >
                 {/* Avatar + online status */}
                 <div className="relative">
                   <img
                     src={user.avatar || "https://via.placeholder.com/150"}
                     alt={user.name}
-                    className="w-12 h-12 object-cover rounded-full"
+                    className="w-12 h-12 object-cover rounded-full border border-[#333]"
                   />
+
                   <span
-                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white 
-          ${user.is_online ? "bg-green-500" : "bg-gray-400"}`}
+                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#1a1a1a] 
+     ${user.is_online ? "bg-green-500" : "bg-gray-500"}`}
                   ></span>
                 </div>
-
                 {/* Name */}
                 <div className="flex-1 text-left text-white">
                   <div className="font-medium truncate">{user.name}</div>
@@ -172,7 +171,7 @@ const ChatSideBar = () => {
             ))}
         </div>
       ) : (
-        <div className="overflow-y-auto w-full py-3">
+        <div className="overflow-y-auto w-full py-3 space-y-1 scrollbar-thin scrollbar-thumb-[#333]">
           {conversations.map((conversation) => {
             const lastMessage = conversation.messages.at(-1);
 
@@ -190,39 +189,47 @@ const ChatSideBar = () => {
               (u) => u.id.toString() === otherUserId
             )?.is_online;
 
+            const isActiveConversation = conversation._id === idConversation;
+
             return (
               <div key={conversation._id} className="relative group">
                 <button
                   onClick={() => setIdConversation(conversation._id)}
-                  className="w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors"
+                  className={`w-full p-3 flex items-center gap-3 transition-colors duration-200 
+   ${
+     isActiveConversation
+       ? "bg-red-900/50 text-white border-l-4 border-red-500"
+       : "hover:bg-[#2a2a2a]"
+   } text-white`}
                 >
                   {/* Avatar */}
                   <div className="relative">
                     <img
                       src={otherUserAvatar || "https://via.placeholder.com/150"}
                       alt={otherUserName}
-                      className="w-12 h-12 object-cover rounded-full"
+                      className="w-12 h-12 object-cover rounded-full border border-[#333]"
                     />
+
                     {isOnline && (
                       <span
-                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white 
-                      bg-green-500`}
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#1a1a1a] 
+     bg-green-500`}
                       ></span>
                     )}
                   </div>
-
                   {/* Info */}
                   <div className="flex-1 text-left">
                     <div className="text-white font-semibold truncate">
                       {otherUserName}
                     </div>
-                    <div className="text-sm text-gray-300 truncate max-w-[180px]">
+
+                    <div className="text-sm text-gray-400 truncate max-w-[180px]">
                       {lastMessage ? (
                         lastMessage.user_id === userId.toString() ? (
                           <>you: {lastMessage.content}</>
                         ) : (
                           <>
-                            {otherUserName?.split(" ").slice(-1)[0]}:{" "}
+                            {otherUserName?.split(" ").slice(-1)[0]}:
                             {lastMessage.content}
                           </>
                         )
@@ -232,27 +239,28 @@ const ChatSideBar = () => {
                     </div>
                   </div>
                 </button>
-
                 {/* Dropdown menu - Hiện khi hover */}
+
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Dropdown
                     overlay={
-                      <Menu>
+                      <Menu className="bg-[#2a2a2a] border border-[#333] rounded-lg">
                         <Menu.Item
                           key="delete"
-                          icon={<DeleteOutlined />}
+                          icon={<DeleteOutlined className="text-red-500" />}
                           onClick={() =>
                             handleDeleteConversation(conversation._id)
                           }
+                          className="text-gray-300 hover:bg-[#333] hover:text-white"
                         >
-                          Xóa cuộc trò chuyện
+                          Delete Conversation
                         </Menu.Item>
                       </Menu>
                     }
                     trigger={["click"]}
                   >
                     <EllipsisOutlined
-                      className="text-white cursor-pointer text-xl"
+                      className="text-gray-400 hover:text-white cursor-pointer text-xl"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </Dropdown>
