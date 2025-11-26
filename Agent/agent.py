@@ -1,4 +1,4 @@
-import re # 👈 Nhớ import regex
+import re 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -36,19 +36,6 @@ class MasterAgent(Agent):
     name = "YSoulAssistant"
     
     def __init__(self, **kwargs):
-        # model_id = os.getenv("OLLAMA_MODEL")
-        # super().__init__(
-        #     model=Ollama(
-        #         id=model_id,
-        #         system_prompt=CHAT_AGENT_PROMPT,
-        #     ),
-        #     tool_choice=get_film_data,
-        #     db=storage, 
-        #     add_history_to_context=True,    
-        #     debug_mode=True, 
-        #     markdown=True,
-        #     **kwargs
-        # )
         model_id = os.getenv("GEMINI_MODEL")
         super().__init__(
             model=Gemini(
@@ -73,8 +60,8 @@ class MasterAgent(Agent):
                 return response.content
             return str(response)
         except Exception as e:
-            print(f"❌ Agent Error: {e}")
-            return f"Lỗi xử lý: {str(e)}"
+            print(f" Agent Error: {e}")
+            return f"Error: {str(e)}"
 
 
 def clean_response(text: str) -> str:
@@ -92,9 +79,9 @@ class ChatRequest(BaseModel):
 @app.post("/api/chat")
 def chat_endpoint(req: ChatRequest):
     if not ysoul_agent:
-        raise HTTPException(status_code=500, detail="Agent chưa được khởi tạo.")
+        raise HTTPException(status_code=500, detail="Agent is not initialized.")
     
-    print(f"📩 Session: {req.session_id} | User: {req.message}")
+    print(f"Session: {req.session_id} | User: {req.message}")
     
 
     raw_reply = ysoul_agent.run_chat(req.message, session_id=req.session_id)
