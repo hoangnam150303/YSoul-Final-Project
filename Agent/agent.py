@@ -36,8 +36,20 @@ class MasterAgent(Agent):
     name = "YSoulAssistant"
     
     def __init__(self, **kwargs):
+        # model_id = os.getenv("OLLAMA_MODEL")
+        # super().__init__(
+        #     model=Ollama(
+        #         id=model_id,
+        #         system_prompt=CHAT_AGENT_PROMPT,
+        #     ),
+        #     tool_choice=get_film_data,
+        #     db=storage, 
+        #     add_history_to_context=True,    
+        #     debug_mode=True, 
+        #     markdown=True,
+        #     **kwargs
+        # )
         model_id = os.getenv("GEMINI_MODEL")
-        
         super().__init__(
             model=Gemini(
                 id=model_id,
