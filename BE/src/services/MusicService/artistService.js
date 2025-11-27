@@ -55,6 +55,7 @@ exports.updateArtistService = async (id, name, avatar) => {
     }
     return { success: true };
   } catch (error) {
+    console.log(error);
     return { success: false, message: error.toString() };
   }
 };
@@ -64,24 +65,29 @@ exports.activeOrDeactiveArtistService = async (id) => {
   try {
     const artist = await conectPostgresDb.query(
       // get artist by id
-      `SELECT * FROM artists WHERE id = ${id}`
+      `SELECT * FROM artists WHERE id = $1`,
+      [id]
     );
     if (!artist) {
       // if artist not found, return error message
       throw new Error("Error");
     }
     let query; // create variable query
+    let queryValues;
     if (artist.rows[0].is_deleted === true) {
       // if artist is deleted
-      query = `UPDATE artists SET is_deleted = false WHERE id = ${id}`; // set is_deleted to false
+      query = `UPDATE artists SET is_deleted = false WHERE id = $1`; // set is_deleted to false
+      queryValues = [id];
     } else {
       // if artist is not deleted
-      query = `UPDATE artists SET is_deleted = true WHERE id = ${id}`; // set is_deleted to true
+      query = `UPDATE artists SET is_deleted = true WHERE id = $1`; // set is_deleted to true
+      queryValues = [id];
     }
-    await conectPostgresDb.query(query); // update artist to database
+    await conectPostgresDb.query(query, queryValues); // update artist to database
     return { success: true };
   } catch (error) {
-      return { success: false, message: error.toString() };
+    console.log(error);
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -100,9 +106,9 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
       case "isDeleted":
         filterOptions = "is_deleted = true"; // if filter is isDeleted, set filterOptions to is_deleted = true
         break;
-        case "newest":
-          filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
-          break;
+      case "newest":
+        filterOptions = "created_at"; // if filter is newest, set filterOptions to release_year
+        break;
       case "Active":
         filterOptions = "is_deleted = false"; // if filter is Active, set filterOptions to is_deleted = false
         break;
@@ -117,14 +123,12 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
           `SELECT * FROM artists WHERE name ILIKE  $1 AND is_deleted = true ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
-      }else if(filter === "Active")
-      {
+      } else if (filter === "Active") {
         artists = await conectPostgresDb.query(
           `SELECT * FROM artists WHERE name ILIKE  $1 AND is_deleted = false ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
         );
-      }
-      else{
+      } else {
         artists = await conectPostgresDb.query(
           `SELECT * FROM artists WHERE name ILIKE  $1 ORDER BY ${filterOptions} ${sortOrder}`, // get all artists from database
           [searchValue]
@@ -144,7 +148,7 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
     }
     return { success: true, artists: artists.rows }; // return success message and artists
   } catch (error) {
-       return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };
 
@@ -152,13 +156,16 @@ exports.getAllArtistService = async (filter, search, typeUser) => {
 exports.getArtistByIdService = async (id) => {
   try {
     const artist = await conectPostgresDb.query(
-      `SELECT * FROM artists WHERE id = $1`, [id]
+      `SELECT * FROM artists WHERE id = $1`,
+      [id]
     );
     const singles = await conectPostgresDb.query(
-      `SELECT * FROM singles WHERE artist_id = $1`, [id]
+      `SELECT * FROM singles WHERE artist_id = $1`,
+      [id]
     );
     const albums = await conectPostgresDb.query(
-      `SELECT * FROM albums WHERE artist_id = $1`, [id]
+      `SELECT * FROM albums WHERE artist_id = $1`,
+      [id]
     );
 
     if (!artist.rows.length) {
@@ -176,7 +183,6 @@ exports.getArtistByIdService = async (id) => {
     return { success: false, message: error.toString() };
   }
 };
-
 
 // this function is for user, user can interact with artist
 exports.interactArtistService = async (id, userId, type) => {
@@ -239,7 +245,6 @@ exports.interactArtistService = async (id, userId, type) => {
     }
     return { success: true };
   } catch (error) {
-
-       return { success: false, message: error.toString() };
+    return { success: false, message: error.toString() };
   }
 };

@@ -4,8 +4,16 @@ const singleService = require("../../services/MusicService/singleService");
 exports.createSingle = async (req, res) => {
   try {
     const { title, release_year, artist_id, album_id } = req.body; // get title, release_year, artist_id, album_id from body
+
+    if (!req.files || !req.files["image"] || !req.files["image"][0]) {
+      return res.status(400).send("Image file is required");
+    }
+    if (!req.files || !req.files["mp3"] || !req.files["mp3"][0]) {
+      return res.status(400).send("MP3 file is required");
+    }
     const image = req.files["image"][0].path; // get image from files
     const mp3 = req.files["mp3"][0].path; // get mp3 from files
+    console.log(mp3, image);
     if (!title || !release_year || !artist_id) {
       // if title, mp3, release_year, artist_id is not exist
       return res.status(400).send("Please provide all required fields");
@@ -25,6 +33,10 @@ exports.createSingle = async (req, res) => {
     }
     return res.status(200).send("Single created successfully"); // if create success
   } catch (error) {
+    console.error("Lỗi chi tiết:", error.message);
+
+    // Cách 2: Log ra toàn bộ cấu trúc lỗi (dùng JSON.stringify)
+    console.error("Full Error Stack:", JSON.stringify(error, null, 2));
     return res.status(500).send("Internal Server Error");
   }
 };

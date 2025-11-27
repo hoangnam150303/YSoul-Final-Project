@@ -47,11 +47,11 @@ exports.updateAlbumService = async (
 ) => {
   try {
     let validAlbum = await conectPostgresDb.query(
-      // check if album already exists
-      `SELECT * FROM albums WHERE id = ${id}`
+      `SELECT * FROM albums WHERE id = $1`,
+      [id]
     );
-
     let query;
+    let queryValues;
     if (validAlbum.rows.length === 0) {
       // if album not exists, return error message
       throw new Error("Album not exists");
@@ -64,16 +64,26 @@ exports.updateAlbumService = async (
       if (!result.success) {
         throw new Error("Error removing old image");
       } else {
-        query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, image = '${image}', release_year = '${releaseYear}' WHERE id = ${id}`;
+        query = `UPDATE albums 
+        SET title = $1, artist_id = $2, image = $3, release_year = $4 
+        WHERE id = $5
+      `;
+        queryValues = [title, artistId, image, releaseYear, id];
       }
     } else {
       // if image not exists, update album without image
-      query = `UPDATE albums SET title = '${title}', artist_id = ${artistId}, release_year = '${releaseYear}' WHERE id = ${id}`;
+      query = `
+        UPDATE albums 
+        SET title = $1, artist_id = $2, release_year = $3 
+        WHERE id = $4
+      `;
+      queryValues = [title, artistId, releaseYear, id];
     }
 
     validAlbum = await conectPostgresDb.query(
       // update album to database
-      query
+      query,
+      queryValues
     );
     return { success: true };
   } catch (error) {
@@ -86,26 +96,32 @@ exports.activeOrDeactiveAlbumService = async (id) => {
   try {
     let validAlbum = await conectPostgresDb.query(
       // check if album exists, change is_deleted to true
-      `SELECT * FROM albums WHERE id = ${id}`
+      `SELECT * FROM albums WHERE id = $1`,
+      [id]
     );
     if (!validAlbum.rowCount > 0) {
       // if album not deleted, return error message or if album not exists, return error message
       throw new Error("Album not found");
     }
     let query;
+    let queryValues;
     if (validAlbum.rows[0].is_deleted === true) {
       // if album already deleted, return error message
-      query = `UPDATE albums SET is_deleted = false WHERE id = ${id}`;
+      query = `UPDATE albums SET is_deleted = false WHERE id = $1`;
+      queryValues = [id];
     } else {
       // if album not deleted, return success message
-      query = `UPDATE albums SET is_deleted = true WHERE id = ${id}`;
+      query = `UPDATE albums SET is_deleted = true WHERE id = $1`;
+      queryValues = [id];
     }
     await conectPostgresDb.query(
       // update album to database
-      query
+      query,
+      queryValues
     );
     return { success: true }; // return success message
   } catch (error) {
+    console.log(error);
     return { success: false, message: error.toString() };
   }
 };
@@ -210,7 +226,6 @@ exports.getAlbumByIdService = async (id) => {
       artist: artist.rows[0] || null,
     };
   } catch (error) {
-    console.error("Error in getAlbumByIdService:", error);
     return { success: false, message: error.toString() };
   }
 };
@@ -220,7 +235,8 @@ exports.interactAlbumService = async (id, type, userId) => {
   try {
     const validAlbum = await conectPostgresDb.query(
       // get album by id
-      `SELECT * FROM albums WHERE id = ${id}`
+      `SELECT * FROM albums WHERE id = $1`,
+      [id]
     );
     if (!validAlbum.rows.length > 0) {
       // if album not found, return error message
@@ -229,7 +245,8 @@ exports.interactAlbumService = async (id, type, userId) => {
     const album = validAlbum.rows[0]; // get album from validAlbum
     if (type === "like") {
       // if type is like
-      if (album.user_id_like.includes(userId)) {
+      const currentLikes = album.user_id_like || [];
+      if (currentLikes.includes(userId)) {
         // if user_id_like includes userId
         await conectPostgresDb.query(
           // update album likes and user_id_like, decrease likes and remove userId from user_id_like
@@ -254,6 +271,7 @@ exports.interactAlbumService = async (id, type, userId) => {
 
     return { success: true };
   } catch (error) {
+    console.log(error);
     return { success: false, message: error.toString() };
   }
 };

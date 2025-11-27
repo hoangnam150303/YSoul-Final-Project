@@ -34,7 +34,7 @@ singleRoute.put(
   singleController.interactSingle
 );
 singleRoute.get(
-  "/getSngleById/:id",
+  "/getSingleById/:id",
   auth.isVip,
   singleController.getSingleById
 );

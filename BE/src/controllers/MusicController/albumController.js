@@ -31,7 +31,7 @@ exports.createAlbum = async (req, res) => {
 // this function is for admin, admin can update album
 exports.updateAlbum = async (req, res) => {
   try {
-    const { title,  artist_id, release_year } = req.body; // get title, artistId, releaseYear from request body
+    const { title, artist_id, release_year } = req.body; // get title, artistId, releaseYear from request body
 
     const id = req.params.id; // get id from request params
     if (!id) {

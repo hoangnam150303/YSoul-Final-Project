@@ -10,12 +10,10 @@ exports.createSingleService = async (
   album_id
 ) => {
   try {
-    // ✅ Chuyển "null" string hoặc undefined thành giá trị null thật
     if (!album_id || album_id === "null" || album_id === "") {
       album_id = null;
     }
 
-    // Kiểm tra single đã tồn tại
     const validSingle = await conectPostgresDb.query(
       "SELECT * FROM singles WHERE title = $1 AND artist_id = $2",
       [title, artist_id]
@@ -25,18 +23,15 @@ exports.createSingleService = async (
       throw new Error("Single already exists");
     }
 
-    // Cấu hình câu query và tham số
     let query, values;
 
     if (album_id) {
-      // ✅ Trường hợp có album
       query = `
         INSERT INTO singles (title, image, mp3, release_year, artist_id, album_id)
         VALUES ($1, $2, $3, $4, $5, $6)
       `;
       values = [title, image, mp3, release_year, artist_id, album_id];
     } else {
-      // ✅ Trường hợp không có album
       query = `
         INSERT INTO singles (title, image, mp3, release_year, artist_id)
         VALUES ($1, $2, $3, $4, $5)
@@ -44,7 +39,6 @@ exports.createSingleService = async (
       values = [title, image, mp3, release_year, artist_id];
     }
 
-    // Thực thi câu query
     const result = await conectPostgresDb.query(query, values);
 
     if (result.rowCount <= 0) {
@@ -74,7 +68,8 @@ exports.updateSingleService = async (
   try {
     let validSingle = await conectPostgresDb.query(
       // get single by id
-      `SELECT * FROM singles WHERE id = $1`,[id]
+      `SELECT * FROM singles WHERE id = $1`,
+      [id]
     );
     if (validSingle.rows.length === 0) {
       // if single not exists, return error message
@@ -119,7 +114,7 @@ exports.updateSingleService = async (
 
     return { success: true }; // if single created, return success message
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return { success: false, message: error.message };
   }
 };
@@ -129,7 +124,8 @@ exports.activeOrDeactiveSingleService = async (id) => {
   try {
     let singleValid = await conectPostgresDb.query(
       // get single by id
-      `SELECT * FROM singles WHERE id = ${id}`
+      `SELECT * FROM singles WHERE id = $1`,
+      [id]
     );
 
     if (singleValid.rows.length === 0) {
@@ -137,15 +133,18 @@ exports.activeOrDeactiveSingleService = async (id) => {
       throw new Error("Single not found");
     }
     let query; // create variable query
+    let queryValues;
     if (singleValid.rows[0].is_deleted === true) {
       // if single is deleted, query will equal sql query and set is_deleted to false
-      query = `UPDATE singles SET is_deleted = false WHERE id = ${id}`;
+      query = `UPDATE singles SET is_deleted = false WHERE id = $1`;
+      queryValues = [id];
     } else if (singleValid.rows[0].is_deleted === false) {
       // if single is not deleted, query will equal sql query and set is_deleted to true
-      query = `UPDATE singles SET is_deleted = true WHERE id = ${id} `;
+      query = `UPDATE singles SET is_deleted = true WHERE id = $1 `;
+      queryValues = [id];
     }
 
-    singleValid = await conectPostgresDb.query(query); // update single to database
+    singleValid = await conectPostgresDb.query(query, queryValues); // update single to database
 
     if (singleValid.rowCount === 0) {
       // if single not updated, return error message
@@ -153,6 +152,7 @@ exports.activeOrDeactiveSingleService = async (id) => {
     }
     return { success: true }; // if single updated, return success message
   } catch (error) {
+    console.log(error);
     throw new Error(error.message);
   }
 };
@@ -261,29 +261,35 @@ exports.interactSingleService = async (id, status, userId) => {
   try {
     let validSingle = await conectPostgresDb.query(
       // get validSingle where id = id get from controller
-      `SELECT * FROM singles WHERE id = ${id}`
+      `SELECT * FROM singles WHERE id = $1`,
+      [id]
     );
     if (validSingle.rows.length === 0) {
       // if validSingle is not exist, return error
       throw new Error("Single not found");
     }
     let query; // create query variable
+    let queryValues;
     let single = validSingle.rows[0]; // create single and it equal validSingle
+    const currentLikes = single.user_id_like || [];
     if (status === "listen") {
       // if status is listen
-      query = `UPDATE singles SET count_listen = count_listen + 1 WHERE id = ${id} `; // set query equal sql query, set count_listen of that single increase
+      query = `UPDATE singles SET count_listen = count_listen + 1 WHERE id = $1 `; // set query equal sql query, set count_listen of that single increase
+      queryValues = [id];
     } else if (status === "like") {
-      if (single.user_id_like.includes(userId)) {
+      if (currentLikes.includes(userId)) {
         // if status is like and includes userId, remove userId in array user_id_like and decrease likes
 
-        query = `UPDATE singles SET likes = likes - 1, user_id_like = array_remove(user_id_like, ${userId}) WHERE id = ${id} `;
+        query = `UPDATE singles SET likes = likes - 1, user_id_like = array_remove(user_id_like, $1) WHERE id = $2 `;
+        queryValues = [userId, id];
       } else {
         // if status is like and not includes userId, append userId in array user_id_like and increase likes
-        query = `UPDATE singles SET likes = likes + 1, user_id_like = array_append(user_id_like, ${userId}) WHERE id = ${id} `;
+        query = `UPDATE singles SET likes = likes + 1, user_id_like = array_append(user_id_like, $1) WHERE id = $2 `;
+        queryValues = [userId, id];
       }
     }
 
-    validSingle = await conectPostgresDb.query(query); // set validSingle agian and equal result get from database return
+    validSingle = await conectPostgresDb.query(query, queryValues); // set validSingle agian and equal result get from database return
 
     if (validSingle.rowCount === 0) {
       // if rowcount === 0, return error
@@ -291,6 +297,7 @@ exports.interactSingleService = async (id, status, userId) => {
     }
     return { success: true }; // return success
   } catch (error) {
+    console.log(error);
     return { success: false, message: error.toString() }; // return error
   }
 };

@@ -13,11 +13,15 @@ import {
   message,
 } from "antd";
 import { AdminSideBar } from "../../components/SideBar/AdminSideBar";
-import { ErrorMessage, Field, FieldArray, Form, Formik } from "formik";
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import artistApi from "../../hooks/artistApi";
 import albumApi from "../../hooks/albumApi";
 import singleApi from "../../hooks/singleApi";
+
+// --- QUAN TRỌNG: Lấy Option từ Select ---
+const { Option } = Select;
+
 export const CRUDMusicPage = () => {
   const [artist, setArtist] = useState([]);
   const [album, setAlbum] = useState([]);
@@ -39,25 +43,17 @@ export const CRUDMusicPage = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  // Hàm xử lý nút "Create"
-  const showModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
+  // --- Functions Handle Modal ---
+  const showModal = () => setIsModalVisible(true);
+  const handleCancel = () => setIsModalVisible(false);
+  const showModalEdit = () => setIsModalEditVisible(true);
+  const handleCancelEdit = () => setIsModalEditVisible(false);
 
   const handleTypeFilter = (newType) => {
     setType(newType);
   };
-  const handleCancelEdit = () => {
-    setIsModalEditVisible(false);
-  };
-  const showModalEdit = () => {
-    setIsModalEditVisible(true);
-  };
-  // functions for artist
+
+  // --- API Functions ---
   const fetchArtist = async () => {
     try {
       const response = await artistApi.getAllArtist({
@@ -70,22 +66,7 @@ export const CRUDMusicPage = () => {
       console.log(error);
     }
   };
-  const handleStatusChangeArtist = async (id) => {
-    try {
-      const reponse = await artistApi.changeStatusArtist(id);
-      if (reponse.status === 200) {
-        fetchArtist();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const handleEditArtist = (id) => {
-    const validArtist = artist.find((artist) => artist.id === id);
-    setSelectedArtist(validArtist);
-    showModalEdit();
-  };
-  // functions for album
+
   const fetchAlbum = async () => {
     try {
       const response = await albumApi.getAllAlbum({
@@ -98,23 +79,7 @@ export const CRUDMusicPage = () => {
       console.log(error);
     }
   };
-  const handleStatusChangeAlbum = async (id) => {
-    try {
-      const reponse = await albumApi.changeStatusAlbum(id);
-      if (reponse.status === 200) {
-        fetchAlbum();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
-  const handleEditAlbum = (id) => {
-    const validAlbum = album.find((album) => album.id === id);
-    setSelectedAlbum(validAlbum);
-    showModalEdit();
-  };
-  // functions for single
   const fetchSingle = async () => {
     try {
       const response = await singleApi.getAllSingle({
@@ -123,7 +88,28 @@ export const CRUDMusicPage = () => {
         typeUser: "admin",
       });
       setSingle(response.data.singles);
+      // --- FIX: Load thêm dữ liệu liên quan để hiển thị tên ---
       fetchAlbum();
+      fetchArtist();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // --- Handle Status Changes ---
+  const handleStatusChangeArtist = async (id) => {
+    try {
+      const reponse = await artistApi.changeStatusArtist(id);
+      if (reponse.status === 200) fetchArtist();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleStatusChangeAlbum = async (id) => {
+    try {
+      const reponse = await albumApi.changeStatusAlbum(id);
+      if (reponse.status === 200) fetchAlbum();
     } catch (error) {
       console.log(error);
     }
@@ -132,40 +118,45 @@ export const CRUDMusicPage = () => {
   const handleStatusChangeSingle = async (id) => {
     try {
       const reponse = await singleApi.changeStatusSingle(id);
-      if (reponse.status === 200) {
-        fetchSingle();
-      }
+      if (reponse.status === 200) fetchSingle();
     } catch (error) {
       console.log(error);
     }
   };
 
+  // --- Handle Edit Setup ---
+  const handleEditArtist = (id) => {
+    const validArtist = artist.find((item) => item.id === id);
+    setSelectedArtist(validArtist);
+    showModalEdit();
+  };
+
+  const handleEditAlbum = (id) => {
+    const validAlbum = album.find((item) => item.id === id);
+    setSelectedAlbum(validAlbum);
+    showModalEdit();
+  };
+
   const handleEditSingle = (id) => {
-    const validSingle = single.find((single) => single.id === id);
+    const validSingle = single.find((item) => item.id === id);
     setSelectedSingle(validSingle);
     showModalEdit();
   };
 
-  // useEffect
+  // --- useEffect ---
   useEffect(() => {
-    if (type === "Artist") {
-      fetchArtist();
-    } else if (type === "Album") {
-      fetchAlbum();
-    } else if (type === "Single") {
-      fetchSingle();
-    }
+    if (type === "Artist") fetchArtist();
+    else if (type === "Album") fetchAlbum();
+    else if (type === "Single") fetchSingle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, filters, searchTerm]);
 
-  const alignCenter = {
-    align: "center",
-  };
+  // --- Validation Schemas ---
   const artistValidationSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
     avatar: Yup.mixed().required("Avatar is required"),
   });
 
-  // Schema dành cho Album
   const albumValidationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     artist_id: Yup.string().required("Artist is required"),
@@ -173,7 +164,6 @@ export const CRUDMusicPage = () => {
     image: Yup.mixed().required("Image is required"),
   });
 
-  // Schema dành cho Single
   const singleValidationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     release_year: Yup.string().required("Release Year is required"),
@@ -182,421 +172,512 @@ export const CRUDMusicPage = () => {
     mp3: Yup.mixed().required("MP3 is required"),
   });
 
-  let data;
+  // --- Prepare Table Data ---
+  const alignCenter = { align: "center" };
+  let data = [];
+
   if (type === "Artist") {
-    data = artist.map((artist) => ({
-      key: artist.id,
-      image: artist.avatar,
-      follow: artist.follows,
-      like: artist.likes,
-      status: artist.is_deleted,
-      name: artist.name,
+    data = artist.map((item) => ({
+      key: item.id,
+      image: item.avatar,
+      follow: item.follows,
+      like: item.likes,
+      status: item.is_deleted,
+      name: item.name,
     }));
   } else if (type === "Album") {
-    data = album.map((album) => ({
-      key: album.id,
-      image: album.image,
-      release_year: album.release_year,
-      like: album.likes,
-      status: album.is_deleted,
-      artist: artist.find((a) => a.id === album.artist_id).name || "Unknown",
-      name: album.title,
+    data = album.map((item) => ({
+      key: item.id,
+      image: item.image,
+      release_year: item.release_year,
+      like: item.likes,
+      status: item.is_deleted,
+      artist: artist.find((a) => a.id === item.artist_id)?.name || "Unknown",
+      name: item.title,
     }));
   } else if (type === "Single") {
-    data = single.map((singleItem) => ({
-      key: singleItem.id,
-      image: singleItem.image,
-      release_year: singleItem.release_year,
-      like: singleItem.likes,
-      status: singleItem.is_deleted,
-      // Lấy tên nghệ sĩ từ mảng artist dựa trên singleItem.artist_id
-      artist:
-        artist.find((a) => a.id === singleItem.artist_id)?.name || "Unknown",
-      // Lấy tên album từ mảng album dựa trên singleItem.album_id
-      album:
-        album.find((a) => a.id === singleItem.album_id)?.title || "Unknown",
-      count_listen: singleItem.count_listen,
-      name: singleItem.title,
+    data = single.map((item) => ({
+      key: item.id,
+      image: item.image,
+      release_year: item.release_year,
+      like: item.likes,
+      status: item.is_deleted,
+      artist: artist.find((a) => a.id === item.artist_id)?.name || "Unknown",
+      album: album.find((a) => a.id === item.album_id)?.title || "Unknown",
+      count_listen: item.count_listen,
+      name: item.title,
     }));
   }
 
-  // Giả sử alignCenter được định nghĩa sẵn
-
-  const columns =
-    type === "Artist"
+  // --- Table Columns ---
+  // (Giữ nguyên cấu trúc columns của bạn, chỉ rút gọn để code đỡ dài)
+  const columns = [
+    {
+      title: "Image",
+      dataIndex: "image",
+      key: "image",
+      width: 150,
+      ...alignCenter,
+      render: (src) => (
+        <div className="flex justify-center">
+          <img
+            src={src}
+            alt="img"
+            className="w-16 h-16 object-cover rounded-md shadow-sm"
+          />
+        </div>
+      ),
+    },
+    { title: "Name", dataIndex: "name", key: "name", ...alignCenter },
+    ...(type === "Artist"
       ? [
-          {
-            title: "Image",
-            dataIndex: "image", // sử dụng artist.avatar
-            key: "image",
-            width: 150,
-            ...alignCenter,
-            render: (avatar) => (
-              <div>
-                <img src={avatar} alt="Artist" className="w-full h-auto" />
-              </div>
-            ),
-          },
-          {
-            title: "Name",
-            dataIndex: "name", // sử dụng artist.name
-            key: "name",
-            width: 150,
-            ...alignCenter,
-          },
           {
             title: "Follow",
-            dataIndex: "follow", // sử dụng artist.follows
+            dataIndex: "follow",
             key: "follow",
-            width: 150,
             ...alignCenter,
-          },
-          {
-            title: "Like",
-            dataIndex: "like", // sử dụng artist.likes
-            key: "like",
-            width: 150,
-            ...alignCenter,
-          },
-          {
-            title: "Action",
-            key: "operation",
-            width: 100,
-            ...alignCenter,
-            render: (text, record) => (
-              <div className="flex items-center justify-center">
-                <button
-                  className="text-base bg-blue-600 text-white px-3 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-blue-600"
-                  onClick={() => handleEditArtist(record.key)}
-                >
-                  <EditOutlined />
-                </button>
-                <div className="ml-3">
-                  {record.status ? (
-                    <Popconfirm
-                      title="Active the Artist"
-                      description="Are you sure to active this artist?"
-                      onConfirm={() => handleStatusChangeArtist(record.key)}
-                      cancelText="No"
-                    >
-                      <Button className="text-white bg-green-500 px-2 py-1 rounded-md">
-                        Active
-                      </Button>
-                    </Popconfirm>
-                  ) : (
-                    <Popconfirm
-                      title="Inactive the artist"
-                      description="Are you sure to inactive this artist?"
-                      onConfirm={() => handleStatusChangeArtist(record.key)}
-                      cancelText="No"
-                    >
-                      <button className="text-white bg-red-500 px-2 py-1 rounded-md mb-2">
-                        Inactive
-                      </button>
-                    </Popconfirm>
-                  )}
-                </div>
-              </div>
-            ),
           },
         ]
-      : type === "Album"
+      : []),
+    { title: "Like", dataIndex: "like", key: "like", ...alignCenter },
+    ...(type !== "Artist"
       ? [
           {
-            title: "Image",
-            dataIndex: "image", // sử dụng album.image
-            key: "image",
-            width: 150,
-            ...alignCenter,
-            render: (text) => (
-              <div>
-                <img src={text} alt="Album" className="w-full h-auto" />
-              </div>
-            ),
-          },
-          {
-            title: "Name",
-            dataIndex: "name", // sử dụng album.title
-            key: "name",
-            width: 150,
-            ...alignCenter,
-          },
-          {
             title: "Release Year",
-            dataIndex: "release_year", // sử dụng album.release_year
+            dataIndex: "release_year",
             key: "release_year",
-            width: 150,
-            ...alignCenter,
-          },
-          {
-            title: "Artist Name",
-            dataIndex: "artist", // sử dụng album.release_year
-            key: "artist",
-            width: 150,
-            ...alignCenter,
-          },
-          {
-            title: "Like",
-            dataIndex: "like", // sử dụng album.likes
-            key: "like",
-            width: 150,
-            ...alignCenter,
-          },
-          {
-            title: "Action",
-            key: "operation",
-            width: 100,
-            ...alignCenter,
-            render: (text, record) => (
-              <div className="flex items-center justify-center">
-                <button
-                  className="text-base bg-blue-600 text-white px-3 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-blue-600"
-                  onClick={() => handleEditAlbum(record.key)}
-                >
-                  <EditOutlined />
-                </button>
-                <div className="ml-3">
-                  {record.status ? (
-                    <Popconfirm
-                      title="Active the Album"
-                      description="Are you sure to active this album?"
-                      onConfirm={() => handleStatusChangeAlbum(record.key)}
-                      cancelText="No"
-                    >
-                      <Button className="text-white bg-green-500 px-2 py-1 rounded-md">
-                        Active
-                      </Button>
-                    </Popconfirm>
-                  ) : (
-                    <Popconfirm
-                      title="Inactive the Album"
-                      description="Are you sure to inactive this album?"
-                      onConfirm={() => handleStatusChangeAlbum(record.key)}
-                      cancelText="No"
-                    >
-                      <button className="text-white bg-red-500 px-2 py-1 rounded-md mb-2">
-                        Inactive
-                      </button>
-                    </Popconfirm>
-                  )}
-                </div>
-              </div>
-            ),
-          },
-        ]
-      : [
-          {
-            title: "Image",
-            width: 150,
-            dataIndex: "image",
-            key: "image",
-            ...alignCenter,
-            render: (text) => (
-              <div>
-                <img src={text} alt="Single" className="w-full h-auto" />
-              </div>
-            ),
-          },
-          {
-            title: "Name",
-            width: 150,
-            dataIndex: "name",
-            key: "name",
-            ...alignCenter,
-          },
-          {
-            title: "Release Year",
-            width: 150,
-            dataIndex: "release_year", // Lưu ý: Sử dụng release_year theo mapping
-            key: "release_year",
-            ...alignCenter,
-          },
-          {
-            title: "Like",
-            width: 150,
-            dataIndex: "like",
-            key: "like",
             ...alignCenter,
           },
           {
             title: "Artist",
-            width: 150,
             dataIndex: "artist",
             key: "artist",
             ...alignCenter,
           },
-          {
-            title: "Album",
-            width: 150,
-            dataIndex: "album",
-            key: "album",
-            ...alignCenter,
-          },
+        ]
+      : []),
+    ...(type === "Single"
+      ? [
+          { title: "Album", dataIndex: "album", key: "album", ...alignCenter },
           {
             title: "Listen Count",
-            width: 150,
             dataIndex: "count_listen",
             key: "count_listen",
             ...alignCenter,
           },
-          {
-            title: "Action",
-            key: "operation",
-            width: 100,
-            ...alignCenter,
-            render: (text, record) => (
-              <div className="flex items-center justify-center">
-                <button
-                  className="text-base bg-blue-600 text-white px-3 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-blue-600"
-                  onClick={() => handleEditSingle(record.key)}
-                >
-                  <EditOutlined />
-                </button>
-                <div className="ml-3">
-                  {record.status ? (
-                    <Popconfirm
-                      title="Active the Single"
-                      description="Are you sure to active this single?"
-                      onConfirm={() => handleStatusChangeSingle(record.key)}
-                      cancelText="No"
-                    >
-                      <Button className="text-white bg-green-500 px-2 py-1 rounded-md">
-                        Active
-                      </Button>
-                    </Popconfirm>
-                  ) : (
-                    <Popconfirm
-                      title="Inactive the Single"
-                      description="Are you sure to inactive this single?"
-                      onConfirm={() => handleStatusChangeSingle(record.key)}
-                      cancelText="No"
-                    >
-                      <button className="text-white bg-red-500 px-2 py-1 rounded-md mb-2">
-                        Inactive
-                      </button>
-                    </Popconfirm>
-                  )}
-                </div>
+        ]
+      : []),
+    {
+      title: "Action",
+      key: "operation",
+      width: 150,
+      ...alignCenter,
+      render: (_, record) => (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition"
+            onClick={() =>
+              type === "Artist"
+                ? handleEditArtist(record.key)
+                : type === "Album"
+                ? handleEditAlbum(record.key)
+                : handleEditSingle(record.key)
+            }
+          >
+            <EditOutlined />
+          </button>
+          <Popconfirm
+            title={record.status ? "Active item?" : "Inactive item?"}
+            onConfirm={() =>
+              type === "Artist"
+                ? handleStatusChangeArtist(record.key)
+                : type === "Album"
+                ? handleStatusChangeAlbum(record.key)
+                : handleStatusChangeSingle(record.key)
+            }
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button
+              className={`${
+                record.status
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-red-500 hover:bg-red-600"
+              } text-white border-none`}
+            >
+              {record.status ? "Activate" : "Inactivate"}
+            </Button>
+          </Popconfirm>
+        </div>
+      ),
+    },
+  ];
+
+  // --- Shared Render for Artist/Album Select Options (FIX UI HERE) ---
+  const renderArtistOptions = () =>
+    artist.map((item) => (
+      // label prop dùng để hiển thị text khi đã chọn (tránh hiện cả cục html ảnh)
+      <Option key={item.id} value={item.id} label={item.name}>
+        <div className="flex items-center gap-2">
+          <img
+            src={item.avatar}
+            alt={item.name}
+            className="w-6 h-6 rounded-full object-cover border border-gray-200"
+          />
+          <span className="font-medium text-gray-700">{item.name}</span>
+        </div>
+      </Option>
+    ));
+
+  const renderAlbumOptions = () =>
+    album.map((item) => (
+      <Option key={item.id} value={item.id} label={item.title}>
+        <div className="flex items-center gap-2">
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-6 h-6 rounded-full object-cover border border-gray-200"
+          />
+          <span className="font-medium text-gray-700">{item.title}</span>
+        </div>
+      </Option>
+    ));
+
+  // --- Initial Values Helper ---
+  const getInitialValues = (isEdit) => {
+    if (type === "Artist") {
+      return isEdit
+        ? { name: selectedArtist.name, avatar: selectedArtist.avatar }
+        : { name: "", avatar: null };
+    }
+    if (type === "Album") {
+      return isEdit
+        ? {
+            title: selectedAlbum.title,
+            artist_id: selectedAlbum.artist_id,
+            release_year: selectedAlbum.release_year,
+            image: selectedAlbum.image,
+          }
+        : { title: "", artist_id: null, release_year: "", image: null };
+    }
+    // Single
+    return isEdit
+      ? {
+          title: selectedSingle.title,
+          release_year: selectedSingle.release_year,
+          artist_id: selectedSingle.artist_id,
+          album_id: selectedSingle.album_id,
+          image: selectedSingle.image,
+          mp3: selectedSingle.mp3,
+        }
+      : {
+          title: "",
+          release_year: "",
+          artist_id: null,
+          album_id: null,
+          image: null,
+          mp3: null,
+        };
+  };
+
+  // --- Submit Handler (Create & Update combined logic) ---
+  const handleSubmit = async (values, { setSubmitting, resetForm }, isEdit) => {
+    try {
+      const formData = new FormData();
+      // Append text fields
+      if (values.name) formData.append("name", values.name);
+      if (values.title) formData.append("title", values.title);
+      if (values.release_year)
+        formData.append("release_year", values.release_year);
+      if (values.artist_id) formData.append("artist_id", values.artist_id);
+      if (values.album_id) formData.append("album_id", values.album_id);
+
+      // Append Files (Chỉ append nếu là File object, không append URL string cũ)
+      if (values.avatar && typeof values.avatar !== "string") {
+        formData.append("avatar", values.avatar);
+      }
+      if (values.image && typeof values.image !== "string") {
+        formData.append("image", values.image);
+      }
+      if (values.mp3 && typeof values.mp3 !== "string") {
+        formData.append("mp3", values.mp3);
+      }
+
+      let response;
+      if (!isEdit) {
+        // --- CREATE ---
+        if (type === "Artist")
+          response = await artistApi.postCreateArtist(formData);
+        else if (type === "Album")
+          response = await albumApi.postCreateAlbum(formData);
+        else response = await singleApi.postCreateSingle(formData);
+      } else {
+        // --- UPDATE ---
+        if (type === "Artist")
+          response = await artistApi.upateArtist(selectedArtist.id, formData);
+        else if (type === "Album")
+          response = await albumApi.updateAlbum(selectedAlbum.id, formData);
+        else
+          response = await singleApi.updateSingle(selectedSingle.id, formData);
+      }
+
+      if (response && response.status === 200) {
+        message.success(
+          `${type} ${isEdit ? "updated" : "created"} successfully!`
+        );
+        if (isEdit) handleCancelEdit();
+        else handleCancel();
+
+        // Refresh Data
+        if (type === "Artist") fetchArtist();
+        else if (type === "Album") fetchAlbum();
+        else fetchSingle();
+
+        resetForm();
+      }
+    } catch (error) {
+      console.error(error);
+      message.error("An error occurred.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // --- Common Form Content Render ---
+  const renderFormContent = (values, setFieldValue, isEdit) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      {/* Cột Trái: Các trường nhập liệu text & select */}
+      <div className="flex flex-col space-y-4">
+        {type === "Artist" && (
+          <div className="flex flex-col text-left">
+            <label className="font-semibold mb-1">Name:</label>
+            <Field name="name" as={Input} placeholder="Artist Name" />
+            <ErrorMessage
+              name="name"
+              component="div"
+              className="text-red-500 text-sm mt-1"
+            />
+          </div>
+        )}
+
+        {type !== "Artist" && (
+          <>
+            <div className="flex flex-col text-left">
+              <label className="font-semibold mb-1">Title:</label>
+              <Field name="title" as={Input} placeholder="Title" />
+              <ErrorMessage
+                name="title"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+            <div className="flex flex-col text-left">
+              <label className="font-semibold mb-1">Release Year:</label>
+              <Field name="release_year" as={Input} placeholder="2025" />
+              <ErrorMessage
+                name="release_year"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+
+            {/* SELECT ARTIST - FIX UI HERE */}
+            <div className="flex flex-col text-left">
+              <label className="font-semibold mb-1">Artist:</label>
+              <Select
+                placeholder="Choose Artist"
+                value={values.artist_id}
+                onChange={(val) => setFieldValue("artist_id", val)}
+                className="w-full"
+                optionLabelProp="label" // Hiển thị text label thay vì html option
+              >
+                {renderArtistOptions()}
+              </Select>
+              <ErrorMessage
+                name="artist_id"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
+          </>
+        )}
+
+        {/* SELECT ALBUM (Cho Single) */}
+        {type === "Single" && (
+          <div className="flex flex-col text-left">
+            <label className="font-semibold mb-1">Album:</label>
+            <Select
+              placeholder="Choose Album (Optional)"
+              value={values.album_id}
+              onChange={(val) => setFieldValue("album_id", val)}
+              className="w-full"
+              optionLabelProp="label"
+              allowClear
+            >
+              {renderAlbumOptions()}
+            </Select>
+          </div>
+        )}
+      </div>
+
+      {/* Cột Phải: Upload File */}
+      <div className="flex flex-col space-y-4">
+        {/* Upload Image/Avatar */}
+        <div className="flex flex-col text-left">
+          <label className="font-semibold mb-1">
+            {type === "Artist" ? "Avatar:" : "Cover Image:"}
+          </label>
+          <Upload
+            listType="picture-card"
+            maxCount={1}
+            fileList={
+              values.avatar || values.image
+                ? [
+                    {
+                      uid: "-1",
+                      name: "image",
+                      status: "done",
+                      url:
+                        typeof (values.avatar || values.image) === "string"
+                          ? values.avatar || values.image
+                          : URL.createObjectURL(values.avatar || values.image),
+                    },
+                  ]
+                : []
+            }
+            beforeUpload={(file) => {
+              setFieldValue(type === "Artist" ? "avatar" : "image", file);
+              return false;
+            }}
+            onRemove={() =>
+              setFieldValue(type === "Artist" ? "avatar" : "image", null)
+            }
+            showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
+          >
+            {!(values.avatar || values.image) && (
+              <div className="flex flex-col items-center">
+                <PlusOutlined />
+                <div className="mt-2">Upload</div>
               </div>
-            ),
-          },
-        ];
+            )}
+          </Upload>
+          <ErrorMessage
+            name={type === "Artist" ? "avatar" : "image"}
+            component="div"
+            className="text-red-500 text-sm mt-1"
+          />
+        </div>
+
+        {/* Upload MP3 (Cho Single) */}
+        {type === "Single" && (
+          <div className="flex flex-col text-left">
+            <label className="font-semibold mb-1">MP3 File:</label>
+            <Upload
+              accept=".mp3"
+              maxCount={1}
+              fileList={
+                values.mp3
+                  ? [
+                      {
+                        uid: "-2",
+                        name: values.mp3.name || "audio.mp3",
+                        status: "done",
+                        url: typeof values.mp3 === "string" ? values.mp3 : "",
+                      },
+                    ]
+                  : []
+              }
+              beforeUpload={(file) => {
+                setFieldValue("mp3", file);
+                return false;
+              }}
+              onRemove={() => setFieldValue("mp3", null)}
+            >
+              <Button icon={<UploadOutlined />}>Click to Upload MP3</Button>
+            </Upload>
+            <ErrorMessage
+              name="mp3"
+              component="div"
+              className="text-red-500 text-sm mt-1"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <>
-      <Layout>
-        <AdminSideBar />
-        <div
-          style={{
-            margin: "24px 16px",
-            padding: 24,
-            minHeight: "85vh",
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
+    <Layout>
+      <AdminSideBar />
+      <div
+        style={{
+          margin: "24px 16px",
+          padding: 24,
+          minHeight: "85vh",
+          background: colorBgContainer,
+          borderRadius: borderRadiusLG,
+        }}
+      >
+        {/* Header Controls */}
+        <div className="flex flex-wrap items-center gap-4 mb-4">
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            style={{ marginBottom: "16px" }}
             onClick={showModal}
+            className="bg-[#f18966] hover:bg-[#d97957] border-none"
           >
-            {type === "Artist"
-              ? "Create Artist"
-              : type === "Album"
-              ? "Create Album"
-              : "Create Single"}
+            Create {type}
           </Button>
-
-          {/* Bọc 2 Select và Input trong một div với display: flex */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px", // Tạo khoảng cách giữa các phần tử
-              marginBottom: "16px",
-            }}
+          <Select
+            value={type}
+            onChange={handleTypeFilter}
+            style={{ width: 120 }}
           >
-            <Select
-              value={type}
-              className="pl-2"
-              onChange={handleTypeFilter}
-              style={{ width: 150 }}
-            >
-              <Option value="Artist">Artist</Option>
-              <Option value="Album">Album</Option>
-              <Option value="Single">Single</Option>
-            </Select>
-            <Select
-              value={filters[type]}
-              onChange={(value) =>
-                setFilters((prev) => ({ ...prev, [type]: value }))
-              }
-              style={{ width: 150 }}
-            >
-              <Option value="All">All</Option>
-              <Option value="popular">Popular</Option>
-              {type === "Single" && (
-                <Option value="favourite">Favourite</Option>
-              )}
-              <Option value="newest">Newest</Option>
-              <Option value="isDeleted">Deleted</Option>
-              <Option value="Active">Active</Option>
-            </Select>
-
-            <Input
-              placeholder="Search..."
-              variant="borderless"
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                color: "black",
-                flex: 1,
-              }}
-              className="bg-white border border-gray-300 rounded-lg py-2 px-4 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          <Table
-            columns={columns}
-            dataSource={data}
-            pagination={{ pageSize: 5 }}
+            <Option value="Artist">Artist</Option>
+            <Option value="Album">Album</Option>
+            <Option value="Single">Single</Option>
+          </Select>
+          <Select
+            value={filters[type]}
+            onChange={(val) => setFilters({ ...filters, [type]: val })}
+            style={{ width: 120 }}
+          >
+            <Option value="All">All</Option>
+            <Option value="popular">Popular</Option>
+            <Option value="newest">Newest</Option>
+            <Option value="Active">Active</Option>
+            <Option value="isDeleted">Deleted</Option>
+          </Select>
+          <Input
+            placeholder="Search..."
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 rounded-md"
           />
         </div>
-      </Layout>
 
-      {/* Modal Create Album, Artist, Single */}
+        <Table
+          columns={columns}
+          dataSource={data}
+          pagination={{ pageSize: 5 }}
+          rowClassName="align-middle"
+        />
+      </div>
+
+      {/* --- CREATE MODAL --- */}
       <Modal
         open={isModalVisible}
-        className="text-center"
         title={
-          <h2 className="text-2xl font-bold text-[#f18966] animate-slideIn">
-            {type === "Artist"
-              ? "Create New Artist"
-              : type === "Album"
-              ? "Create New Album"
-              : "Create New Single"}
-          </h2>
+          <div className="text-center text-2xl font-bold text-[#f18966] mb-4">
+            Create New {type}
+          </div>
         }
         onCancel={handleCancel}
         footer={null}
+        width={800} // Tăng độ rộng modal cho thoáng
       >
         <Formik
-          enableReinitialize={true}
-          initialValues={
-            type === "Artist"
-              ? { name: "", avatar: null }
-              : type === "Album"
-              ? { title: "", artist_id: null, release_year: "", image: null }
-              : {
-                  title: "",
-                  release_year: "",
-                  artist_id: null,
-                  album_id: null,
-                  image: null,
-                  mp3: null,
-                }
-          }
-          // Lưu ý: validationSchema cũng nên được cấu hình lại theo từng type nếu cần
+          enableReinitialize
+          initialValues={getInitialValues(false)}
           validationSchema={
             type === "Artist"
               ? artistValidationSchema
@@ -604,432 +685,40 @@ export const CRUDMusicPage = () => {
               ? albumValidationSchema
               : singleValidationSchema
           }
-          onSubmit={async (values, { setSubmitting, resetForm }) => {
-            try {
-              const formData = new FormData();
-              if (type === "Artist") {
-                // Dữ liệu của Artist: name và avatar
-                formData.append("name", values.name);
-                formData.append("avatar", values.avatar);
-                const response = await artistApi.postCreateArtist(formData);
-                if (response.status === 200) {
-                  message.success("Artist created successfully!");
-                  handleCancel(); // Đóng modal
-                  fetchArtist();
-                  resetForm();
-                }
-              } else if (type === "Album") {
-                // Dữ liệu của Album: title, artist_id, release_year và image
-                formData.append("title", values.title);
-                formData.append("artist_id", values.artist_id);
-                formData.append("release_year", values.release_year);
-                formData.append("image", values.image);
-                const response = await albumApi.postCreateAlbum(formData);
-                if (response.status === 200) {
-                  message.success("Album created successfully!");
-                  handleCancel(); // Đóng modal
-                  fetchAlbum();
-                  resetForm();
-                }
-              } else {
-                // Single: giữ nguyên code cũ
-                formData.append("title", values.title);
-                formData.append("release_year", values.release_year);
-                formData.append("artist_id", values.artist_id);
-                formData.append("album_id", values.album_id);
-                formData.append("image", values.image);
-                formData.append("mp3", values.mp3);
-                const response = await singleApi.postCreateSingle(formData);
-                if (response.status === 200) {
-                  message.success("Single created successfully!");
-                  handleCancel(); // Đóng modal
-                  fetchSingle();
-                  resetForm();
-                }
-              }
-            } catch (error) {
-              console.error("Error creating entity:", error);
-              message.error("An error occurred while adding the entity.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={(values, helpers) => handleSubmit(values, helpers, false)}
         >
-          {({ values, setFieldValue, errors, touched, isSubmitting }) => (
-            <Form className="mt-5">
-              {type === "Artist" ? (
-                // Form của Artist: chỉ có Name và Avatar Upload
-                <>
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex-input-tnvd">
-                      <label className="label-input-tnvd">Name:</label>
-                      <Field name="name" as={Input} className="w-full py-2" />
-                      <ErrorMessage
-                        name="name"
-                        component="div"
-                        className="error text-red-500 ml-1"
-                      />
-                    </div>
-                    <div className="flex-input-tnvd">
-                      <label className="label-input-tnvd">Avatar:</label>
-                      <Upload
-                        name="avatar"
-                        listType="picture"
-                        beforeUpload={(file) => {
-                          setFieldValue("avatar", file);
-                          return false; // Ngăn chặn upload tự động
-                        }}
-                      >
-                        <Button icon={<UploadOutlined />}>
-                          Click to upload
-                        </Button>
-                      </Upload>
-                      <ErrorMessage
-                        name="avatar"
-                        component="div"
-                        className="error text-red-500 ml-1"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Create Artist
-                  </button>
-                </>
-              ) : type === "Album" ? (
-                // Form của Album: Title, Release Year, Artist và Image Upload
-                <>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Title:</label>
-                        <Field
-                          name="title"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="title"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">
-                          Release Year:
-                        </label>
-                        <Field
-                          name="release_year"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="release_year"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                    {/* Right Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Artist:</label>
-                        <Select
-                          className="w-full"
-                          value={values.artist_id}
-                          placeholder="Choose Artist"
-                          onChange={(value) =>
-                            setFieldValue("artist_id", value)
-                          }
-                        >
-                          {artist.map((artist) => (
-                            <Option key={artist.id} value={artist.id}>
-                              <img
-                                src={artist.avatar}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {artist.name}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="artist_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Image:</label>
-                        <Upload
-                          name="image"
-                          listType="picture"
-                          fileList={
-                            values.image
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: values.image.name,
-                                    status: "done",
-                                  },
-                                ]
-                              : []
-                          }
-                          beforeUpload={(file) => {
-                            setFieldValue("image", file);
-                            return false; // Ngăn upload tự động
-                          }}
-                        >
-                          <Button icon={<UploadOutlined />}>
-                            Click to upload
-                          </Button>
-                        </Upload>
-                        <ErrorMessage
-                          name="image"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Create Album
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Title:</label>
-                        <Field
-                          name="title"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="title"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">
-                          Release Year:
-                        </label>
-                        <Field
-                          name="release_year"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="release_year"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Image:</label>
-                        <Upload
-                          name="image"
-                          listType="picture-card"
-                          fileList={
-                            values.image
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: values.image.name,
-                                    status: "done",
-                                    url: URL.createObjectURL(values.image), // Tạo URL preview từ file
-                                  },
-                                ]
-                              : []
-                          }
-                          beforeUpload={(file) => {
-                            setFieldValue("image", file);
-                            return false; // Ngăn upload tự động
-                          }}
-                          onPreview={async (file) => {
-                            let src = file.url;
-                            if (!src) {
-                              src = await new Promise((resolve) => {
-                                const reader = new FileReader();
-                                reader.readAsDataURL(file.originFileObj);
-                                reader.onload = () => resolve(reader.result);
-                              });
-                            }
-                            // Mở ảnh preview trong một cửa sổ mới
-                            const image = new Image();
-                            image.src = src;
-                            const imgWindow = window.open(src);
-                            imgWindow.document.write(image.outerHTML);
-                          }}
-                        >
-                          {values.image ? null : <div>Click to upload</div>}
-                        </Upload>
-
-                        <ErrorMessage
-                          name="image"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                    {/* Right Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Artist:</label>
-                        <Select
-                          className="w-full"
-                          placeholder="Choose Artist"
-                          value={values.artist_id}
-                          onChange={(value) =>
-                            setFieldValue("artist_id", value)
-                          }
-                        >
-                          {artist.map((artist) => (
-                            <Option key={artist.id} value={artist.id}>
-                              <img
-                                src={artist.avatar}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {artist.name}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="artist_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Album:</label>
-                        <Select
-                          className="w-full"
-                          placeholder="Choose Album"
-                          value={values.album_id}
-                          onChange={(value) => setFieldValue("album_id", value)}
-                        >
-                          {album.map((album) => (
-                            <Option key={album.id} value={album.id}>
-                              <img
-                                src={album.image}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {album.title}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="album_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">MP3:</label>
-                        <Upload
-                          accept=".mp3"
-                          fileList={
-                            values.mp3
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: values.mp3.name,
-                                    status: "done",
-                                  },
-                                ]
-                              : []
-                          }
-                          onChange={(info) => {
-                            if (info.fileList.length > 0) {
-                              const file = info.fileList[0];
-                              setFieldValue("mp3", file.originFileObj);
-                            } else {
-                              setFieldValue("mp3", null);
-                            }
-                          }}
-                        >
-                          <Button
-                            type="button"
-                            style={{ border: 0, background: "none" }}
-                          >
-                            <PlusOutlined />
-                            <div>Upload</div>
-                          </Button>
-                        </Upload>
-
-                        <ErrorMessage
-                          name="mp3"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Create Single
-                  </button>
-                </>
-              )}
+          {({ values, setFieldValue, isSubmitting }) => (
+            <Form>
+              {renderFormContent(values, setFieldValue, false)}
+              <div className="flex justify-end mt-6">
+                <Button
+                  htmlType="submit"
+                  loading={isSubmitting}
+                  className="bg-[#679089] text-white hover:bg-[#557a73] px-8 h-10 rounded-full"
+                >
+                  Create {type}
+                </Button>
+              </div>
             </Form>
           )}
         </Formik>
       </Modal>
 
-      {/* Edit Album, Artist, Single */}
+      {/* --- EDIT MODAL --- */}
       <Modal
         open={isModalEditVisible}
-        className="text-center"
         title={
-          <h2 className="text-2xl font-bold text-[#f18966] animate-slideIn">
-            {type === "Artist"
-              ? "Update Artist"
-              : type === "Album"
-              ? "Update Album"
-              : "Update Single"}
-          </h2>
+          <div className="text-center text-2xl font-bold text-[#f18966] mb-4">
+            Update {type}
+          </div>
         }
         onCancel={handleCancelEdit}
         footer={null}
+        width={800}
       >
         <Formik
-          enableReinitialize={true}
-          initialValues={
-            type === "Artist"
-              ? {
-                  name: selectedArtist.name,
-                  avatar: selectedArtist.avatar, // URL string (update mode)
-                }
-              : type === "Album"
-              ? {
-                  title: selectedAlbum.title,
-                  artist_id: selectedAlbum.artist_id,
-                  release_year: selectedAlbum.release_year,
-                  image: selectedAlbum.image, // URL string
-                }
-              : {
-                  title: selectedSingle.title,
-                  release_year: selectedSingle.release_year,
-                  artist_id: selectedSingle.artist_id,
-                  album_id: selectedSingle.album_id,
-                  image: selectedSingle.image, // URL string
-                  mp3: selectedSingle.mp3, // URL string
-                }
-          }
+          enableReinitialize
+          initialValues={getInitialValues(true)}
           validationSchema={
             type === "Artist"
               ? artistValidationSchema
@@ -1037,434 +726,24 @@ export const CRUDMusicPage = () => {
               ? albumValidationSchema
               : singleValidationSchema
           }
-          onSubmit={async (values, { setSubmitting }) => {
-            try {
-              const formData = new FormData();
-              if (type === "Artist") {
-                formData.append("name", values.name);
-                // Nếu giá trị mới là file (object) thì append file, nếu là URL thì gửi như cũ
-                formData.append(
-                  "avatar",
-                  typeof values.avatar === "string"
-                    ? values.avatar
-                    : values.avatar
-                );
-                const response = await artistApi.upateArtist(
-                  selectedArtist.id,
-                  formData
-                );
-
-                if (response.status === 200) {
-                  message.success("Artist updated successfully!");
-                  handleCancelEdit();
-                  fetchArtist();
-                }
-              } else if (type === "Album") {
-                formData.append("title", values.title);
-                formData.append("artist_id", values.artist_id);
-                formData.append("release_year", values.release_year);
-                formData.append(
-                  "image",
-                  typeof values.image === "string" ? values.image : values.image
-                );
-
-                const response = await albumApi.updateAlbum(
-                  selectedAlbum.id,
-                  formData
-                );
-                if (response.status === 200) {
-                  message.success("Album updated successfully!");
-                  handleCancelEdit();
-                  fetchAlbum();
-                }
-              } else {
-                formData.append("title", values.title);
-                formData.append("release_year", values.release_year);
-                formData.append("artist_id", values.artist_id);
-                formData.append("album_id", values.album_id);
-                formData.append(
-                  "image",
-                  typeof values.image === "string" ? values.image : values.image
-                );
-                formData.append(
-                  "mp3",
-                  typeof values.mp3 === "string" ? values.mp3 : values.mp3
-                );
-                const response = await singleApi.updateSingle(
-                  selectedSingle.id,
-                  formData
-                );
-                if (response.status === 200) {
-                  message.success("Single updated successfully!");
-                  handleCancelEdit();
-                  fetchSingle();
-                }
-              }
-            } catch (error) {
-              console.error("Error updating entity:", error);
-              message.error("An error occurred while updating the entity.");
-            } finally {
-              setSubmitting(false);
-            }
-          }}
+          onSubmit={(values, helpers) => handleSubmit(values, helpers, true)}
         >
           {({ values, setFieldValue, isSubmitting }) => (
-            <Form className="mt-5">
-              {type === "Artist" ? (
-                <>
-                  <div className="flex flex-col space-y-4">
-                    <div className="flex-input-tnvd">
-                      <label className="label-input-tnvd">Name:</label>
-                      <Field name="name" as={Input} className="w-full py-2" />
-                      <ErrorMessage
-                        name="name"
-                        component="div"
-                        className="error text-red-500 ml-1"
-                      />
-                    </div>
-                    <div className="flex-input-tnvd">
-                      <label className="label-input-tnvd">Avatar:</label>
-                      <Upload
-                        name="avatar"
-                        listType="picture"
-                        maxCount={1}
-                        fileList={
-                          values.avatar && typeof values.avatar === "string"
-                            ? [
-                                {
-                                  uid: "-1",
-                                  name: "avatar",
-                                  status: "done",
-                                  url: values.avatar,
-                                },
-                              ]
-                            : values.avatar
-                            ? [values.avatar]
-                            : []
-                        }
-                        beforeUpload={(file) => {
-                          // Tạo URL tạm để hiển thị preview
-                          file.url = URL.createObjectURL(file);
-                          setFieldValue("avatar", file);
-                          return false; // Ngăn upload tự động
-                        }}
-                        onRemove={() => {
-                          setFieldValue("avatar", null);
-                        }}
-                      >
-                        <Button icon={<UploadOutlined />}>
-                          Click to upload
-                        </Button>
-                      </Upload>
-                      <ErrorMessage
-                        name="avatar"
-                        component="div"
-                        className="error text-red-500 ml-1"
-                      />
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Update Artist
-                  </button>
-                </>
-              ) : type === "Album" ? (
-                <>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Title:</label>
-                        <Field
-                          name="title"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="title"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">
-                          Release Year:
-                        </label>
-                        <Field
-                          name="release_year"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="release_year"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                    {/* Right Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Artist:</label>
-                        <Select
-                          className="w-full"
-                          placeholder="Choose Artist"
-                          onChange={(value) =>
-                            setFieldValue("artist_id", value)
-                          }
-                          value={values.artist_id}
-                        >
-                          {artist.map((item) => (
-                            <Option key={item.id} value={item.id}>
-                              <img
-                                src={item.avatar}
-                                alt={item.name}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {item.name}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="artist_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Image:</label>
-                        <Upload
-                          name="image"
-                          listType="picture"
-                          maxCount={1}
-                          fileList={
-                            values.image && typeof values.image === "string"
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: "image",
-                                    status: "done",
-                                    url: values.image,
-                                  },
-                                ]
-                              : values.image && values.image.uid
-                              ? [values.image]
-                              : []
-                          }
-                          beforeUpload={(file) => {
-                            // Tạo URL tạm để hiển thị preview
-                            file.url = URL.createObjectURL(file);
-                            setFieldValue("image", file);
-                            return false; // Ngăn upload tự động
-                          }}
-                          onRemove={() => {
-                            setFieldValue("image", null);
-                          }}
-                        >
-                          <Button icon={<UploadOutlined />}>
-                            Click to upload
-                          </Button>
-                        </Upload>
-                        <ErrorMessage
-                          name="image"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Update Album
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Left Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Title:</label>
-                        <Field
-                          name="title"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="title"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">
-                          Release Year:
-                        </label>
-                        <Field
-                          name="release_year"
-                          as={Input}
-                          className="w-full py-2"
-                        />
-                        <ErrorMessage
-                          name="release_year"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Image:</label>
-                        <Upload
-                          name="image"
-                          listType="picture"
-                          maxCount={1}
-                          fileList={
-                            values.image && typeof values.image === "string"
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: "image",
-                                    status: "done",
-                                    url: values.image,
-                                  },
-                                ]
-                              : values.image && values.image.uid
-                              ? [values.image]
-                              : []
-                          }
-                          beforeUpload={(file) => {
-                            // Tạo URL tạm để hiển thị preview
-                            file.url = URL.createObjectURL(file);
-                            setFieldValue("image", file);
-                            return false; // Ngăn upload tự động
-                          }}
-                          onRemove={() => {
-                            setFieldValue("image", null);
-                          }}
-                        >
-                          <Button icon={<UploadOutlined />}>
-                            Click to upload
-                          </Button>
-                        </Upload>
-                        <ErrorMessage
-                          name="image"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                    {/* Right Column */}
-                    <div className="flex flex-col space-y-4">
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Artist:</label>
-                        <Select
-                          className="w-full"
-                          placeholder="Choose Artist"
-                          onChange={(value) =>
-                            setFieldValue("artist_id", value)
-                          }
-                          value={values.artist_id}
-                        >
-                          {artist.map((item) => (
-                            <Option key={item.id} value={item.id}>
-                              <img
-                                src={item.avatar}
-                                alt={item.name}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {item.name}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="artist_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">Album:</label>
-                        <Select
-                          className="w-full"
-                          placeholder="Choose Album"
-                          onChange={(value) => setFieldValue("album_id", value)}
-                          value={values.album_id}
-                        >
-                          {album.map((item) => (
-                            <Option key={item.id} value={item.id}>
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-8 h-8 rounded-full mr-2"
-                              />
-                              {item.title}
-                            </Option>
-                          ))}
-                        </Select>
-                        <ErrorMessage
-                          name="album_id"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                      <div className="flex-input-tnvd">
-                        <label className="label-input-tnvd">MP3:</label>
-                        <Upload
-                          name="mp3"
-                          accept=".mp3"
-                          maxCount={1}
-                          fileList={
-                            values.mp3 && typeof values.mp3 === "string"
-                              ? [
-                                  {
-                                    uid: "-1",
-                                    name: "mp3",
-                                    status: "done",
-                                    url: values.mp3,
-                                  },
-                                ]
-                              : values.mp3 && values.mp3.uid
-                              ? [values.mp3]
-                              : []
-                          }
-                          beforeUpload={(file) => {
-                            setFieldValue("mp3", file);
-                            return false;
-                          }}
-                          onRemove={() => {
-                            setFieldValue("mp3", null);
-                          }}
-                        >
-                          <Button icon={<UploadOutlined />}>
-                            Click to upload
-                          </Button>
-                        </Upload>
-                        <ErrorMessage
-                          name="mp3"
-                          component="div"
-                          className="error text-red-500 ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="text-end text-base bg-[#679089] text-white px-6 py-2 rounded-full hover:bg-slate-100 duration-300 hover:text-[#679089]"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    Update Single
-                  </button>
-                </>
-              )}
+            <Form>
+              {renderFormContent(values, setFieldValue, true)}
+              <div className="flex justify-end mt-6">
+                <Button
+                  htmlType="submit"
+                  loading={isSubmitting}
+                  className="bg-[#679089] text-white hover:bg-[#557a73] px-8 h-10 rounded-full"
+                >
+                  Update {type}
+                </Button>
+              </div>
             </Form>
           )}
         </Formik>
       </Modal>
-    </>
+    </Layout>
   );
 };
