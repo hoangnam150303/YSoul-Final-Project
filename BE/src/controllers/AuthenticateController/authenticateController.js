@@ -1,4 +1,5 @@
 const authenticateService = require("../../services/AuthenticateService/authenticateService");
+const { redisClient } = require("../../configs/database");
 // this function is  login with google, user can login or register account with google account
 exports.loginGoogle = async (req, res) => {
   try {
@@ -200,6 +201,8 @@ exports.refreshToken = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
+    const sessionId = req.cookies.sessionId;
+    await redisClient.del(sessionId);
     res.clearCookie("sessionId");
     return res.status(200).json({ success: true });
   } catch (error) {

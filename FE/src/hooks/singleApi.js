@@ -30,7 +30,7 @@ const singleApi = {
     });
   },
   getSingleById: (id) => {
-    const url = `${SINGLE_API_ENDPOINT}/getSngleById/${id}`;
+    const url = `${SINGLE_API_ENDPOINT}/getSingleById/${id}`;
     return axiosClient.get(url);
   },
   nextSingle: (id) => {
