@@ -4,7 +4,7 @@ const Notification = require("../../models/SocialModel/notification");
 // follow user
 exports.followUserService = async (userId, userFollowId) => {
   try {
-    console.log(typeof userFollowId)
+    console.log(typeof userFollowId);
     const validUserFollow = await conectPostgresDb.query(
       // find user follow is exist
       "SELECT * FROM users WHERE id = $1",
@@ -14,7 +14,7 @@ exports.followUserService = async (userId, userFollowId) => {
       // If user is not exist
       return { success: false, error: "User not found" }; // Return error
     }
-    console.log(typeof userId)
+    console.log(typeof userId);
     const validUser = await conectPostgresDb.query(
       // find user is exist
       "SELECT * FROM users WHERE id = $1",
@@ -188,6 +188,7 @@ exports.getAllReviewersService = async (
 
     return { success: false, error: "Invalid filter type" };
   } catch (error) {
+    console.log(error);
     return { success: false, error: error.message };
   }
 };

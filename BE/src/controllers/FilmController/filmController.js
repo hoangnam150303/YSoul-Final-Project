@@ -224,7 +224,7 @@ exports.addHistoryFilm = async (req, res) => {
         message: "Error add history film",
       });
     }
-    return res.status(200).json("Update successfully");
+    return res.status(200).json("Add Successfully!");
   } catch (error) {
     return res.status(500).json({
       message: "Error add history film" + error,

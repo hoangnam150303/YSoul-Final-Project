@@ -2,7 +2,7 @@ const postService = require("../../services/SocialMediaService/postService");
 
 // this function is create post
 exports.createPost = async (req, res) => {
-  try {    
+  try {
     const { content, film_id, single_id } = req.body; // film_id and single_id are optional
     const user_id = req.user.id; // get user_id from user
     const image = req.file?.path; //
