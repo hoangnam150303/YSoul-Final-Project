@@ -178,6 +178,7 @@ exports.updateUserProfileService = async (
     }
     return { success: true };
   } catch (error) {
+    console.log(error);
     return { success: false, error: error.message };
   }
 };
