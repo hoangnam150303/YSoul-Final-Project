@@ -19,15 +19,15 @@ export const LoginPage = () => {
   const onLoginSuccess = async (data) => {
     try {
       if (data.success) {
-        message.success("Đăng nhập thành công");
+        message.success("Login Success!");
         localStorage.setItem(constants.ACCESS_TOKEN, data.access_token);
         await dispatch(getUserRequest());
         setLoginComplete(true);
       } else {
-        message.error("login falied");
+        message.error("login failed");
       }
     } catch (error) {
-      message.error("Lỗi đăng nhập.");
+      message.error("Login failed.");
     }
   };
   useEffect(() => {
@@ -42,6 +42,10 @@ export const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (email === "" && password === "") {
+      return message.error("Please fill all fields");
+    }
+
     const value = {
       email,
       password,
@@ -50,6 +54,7 @@ export const LoginPage = () => {
       const respone = await authApi.postLoginLocal(value);
       onLoginSuccess(respone.data);
     } catch (error) {
+      message.error("Email or Password is wrong, try again!");
       console.log(error);
     }
   };
@@ -66,18 +71,18 @@ export const LoginPage = () => {
         if (status === 200) {
           await onLoginSuccess(data);
         } else {
-          message.error("Đăng nhập thất bại, thử lại");
+          message.error("Login faild, try again!");
         }
       } catch (error) {
         if (error.response) {
           message.error("This email is exist, Please try login with password!");
         } else {
-          message.error("Đăng nhập thất bại, thử lại");
+          message.error("Login faild, try again!");
         }
       }
     },
     onError: (error) => {
-      message.error("Đăng nhập thất bại. Vui lòng thử lại.");
+      message.error("Login faild, try again!");
       console.error(error);
     },
   });

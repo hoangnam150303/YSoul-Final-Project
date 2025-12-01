@@ -2,7 +2,7 @@ const allowedOrigins = [
   process.env.CLIENT_URL, // Web dev
   process.env.MOBILE_URL, // Mobile dev
   process.env.MOBILE_EXPO_URL, // Mobile expo dev
-  "http://127.0.0.1:8000",
+  process.env.AI_AGENT_URL,
 ];
 
 const corsConfig = {
