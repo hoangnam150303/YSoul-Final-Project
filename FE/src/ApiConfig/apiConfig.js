@@ -1,5 +1,6 @@
 import axios from "axios";
 import constants from "../constants/contants";
+import { message } from "antd";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -51,7 +52,9 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-
+    if (error.response?.status === 429) {
+      message.error("Too many requests, please try again later!");
+    }
     // check if error is 401 and not retry yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

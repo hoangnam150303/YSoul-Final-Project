@@ -37,10 +37,10 @@ const port = process.env.PORT || 8080;
 app.use(passport.initialize());
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, 
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, 
+    cookie: { secure: false },
   })
 );
 // Middleware để sử dụng passport-local
@@ -48,14 +48,14 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
-// app.use(limiter);
+
 // config CORS
 app.use(cors(corsConfig));
 // config body-parser
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(limiter);
 // use routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/reviewer", reviewerRoute);
