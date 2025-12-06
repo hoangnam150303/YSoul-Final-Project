@@ -6,7 +6,7 @@ import postApi from "../../hooks/postApi";
 import { message } from "antd";
 import { useSelector } from "react-redux";
 
-export const PostCreation = () => {
+export const PostCreation = ({ onPostCreated }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [contentType, setContentType] = useState(null);
   const [isPending, setIsPending] = useState(false);
@@ -71,6 +71,9 @@ export const PostCreation = () => {
         setFile(null);
         setSelectedItem(null);
         setContentType(null); // Reset content type
+        if (onPostCreated) {
+          onPostCreated();
+        }
       }
     } catch (err) {
       console.error("Error creating post", err);

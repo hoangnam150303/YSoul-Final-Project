@@ -28,7 +28,7 @@ import postApi from "../../hooks/postApi";
 import filmApi from "../../hooks/filmApi";
 import singleApi from "../../hooks/singleApi";
 
-export const ListPost = ({ type }) => {
+export const ListPost = ({ type, refreshTrigger }) => {
   const { id } = useParams();
   const [showComments, setShowComments] = useState({});
   const [data, setData] = useState([]);
@@ -175,7 +175,7 @@ export const ListPost = ({ type }) => {
 
   useEffect(() => {
     fetchPosts();
-  }, [search, currentPage]);
+  }, [search, currentPage,refreshTrigger]);
 
   useEffect(() => {
     if (postSelected) {
