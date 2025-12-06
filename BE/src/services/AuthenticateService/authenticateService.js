@@ -193,6 +193,7 @@ exports.forgotPasswordService = async (email) => {
     await mailHelpers.sendForgotPassword(email, user.rows[0].name, otp); // Send email
     return { success: true, verifyToken };
   } catch (error) {
+    console.log(error)
     return { success: false, error };
   }
 };

@@ -138,10 +138,12 @@ exports.forgotPassword = async (req, res) => {
     }
     const respone = await authenticateService.forgotPasswordService(email);
     if (!respone.success) {
+      console.log(respone)
       return res.status(400).json(respone);
     }
     return res.status(200).json(respone);
   } catch (error) {
+    console.log(error)
     return res
       .status(500)
       .json({ success: false, error: "Internal server error" });

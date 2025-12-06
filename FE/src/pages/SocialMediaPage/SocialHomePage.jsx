@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { SocialHeader } from "../../components/Header/SocialHeader";
 import { SocialSideBar } from "../../components/SideBar/SocialSideBar";
 import { PostCreation } from "../../components/Post/PostCreation";
@@ -6,6 +6,10 @@ import { RecommendedSideBar } from "../../components/SideBar/RecommendedSideBar"
 import { ListPost } from "../../components/Post/ListPost";
 
 export const SocialHomePage = () => {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const handlePostCreated = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
   return (
     <>
       <SocialHeader />
@@ -16,8 +20,8 @@ export const SocialHomePage = () => {
         </div>
 
         <div className="lg:col-span-3 p-6 bg-[#0f0f0f] rounded-xl shadow-inner border border-[#2a2a2a]">
-          <PostCreation />
-          <ListPost type={"homepage"} />
+          <PostCreation onPostCreated={handlePostCreated} />
+          <ListPost type={"homepage"} refreshTrigger={refreshTrigger} />
         </div>
       </div>
     </>
